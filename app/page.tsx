@@ -382,6 +382,7 @@ export default function HomePage() {
         <div style={{ display: "flex", gap: 20 }}>
         <a href="/#calculators" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Calculators</a>
           <a href="/about" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>About</a>
+          <a href="/privacy" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Privacy</a>
           <a href="mailto:GuidersNetwork@gmail.com" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Contact</a>
         </div>
       </footer>
