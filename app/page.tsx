@@ -172,6 +172,7 @@ export default function HomePage() {
         <nav style={{ display: "flex", gap: 20 }}>
           <a href="#calculators" className="nav-link">Calculators</a>
           <a href="#how-it-works" className="nav-link">How it works</a>
+          <a href="/about" className="nav-link">About</a>
         </nav>
       </header>
       <div className="amber-bar" />
@@ -376,11 +377,13 @@ export default function HomePage() {
       {/* ── Footer ── */}
       <footer style={{ background: INK, padding: "22px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, borderTop: `3px solid ${AMBER}` }}>
         <div style={{ fontFamily: "'Fraunces', serif", fontSize: 15, fontWeight: 900, color: "#fff" }}>
-          BuildGuiders.com
+        BuildGuiders.com
         </div>
-        <p style={{ fontSize: 11, color: "#57534E", maxWidth: 320, lineHeight: 1.5 }}>
-          Earns from qualifying purchases via Amazon Associates, Home Depot, and Menards affiliate programs. Never affects our calculations.
-        </p>
+        <div style={{ display: "flex", gap: 20 }}>
+        <a href="/#calculators" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Calculators</a>
+          <a href="/about" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>About</a>
+          <a href="mailto:GuidersNetwork@gmail.com" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Contact</a>
+        </div>
       </footer>
     </div>
   );

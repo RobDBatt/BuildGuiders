@@ -4,6 +4,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://buildguiders.com";
 
   const calculators = [
+    { path: "/about", priority: 0.7 },
     { path: "/paint-calculator", priority: 0.9 },
     { path: "/flooring-calculator", priority: 0.9 },
     { path: "/tile-calculator", priority: 0.9 },
