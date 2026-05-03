@@ -394,7 +394,7 @@ export default function DeckCalculator() {
                       note={`${result.deckingBoards} boards — includes 10% waste for end cuts`}
                       tip="Tip: Let PT boards acclimate on-site 48 hours. Composite boards can be installed immediately."
                       amazon={aUrl("B07BFYJ8ZQ")} hd={hdUrl(`${boardType} deck boards 8 ft`)} />
-                    <Item qty={result.screwLbs} name="Deck Screws (3\", coated, 1 lb box)"
+                    <Item qty={result.screwLbs} name={'Deck Screws (3", coated, 1 lb box)'}
                       note={`${result.screwLbs} lb — coated screws resist corrosion and won't stain PT lumber`}
                       tip="Tip: Pre-drill near board ends to prevent splitting."
                       amazon={aUrl("B07J3LZHVH")} hd={hdUrl("deck screws coated 3 inch")} />

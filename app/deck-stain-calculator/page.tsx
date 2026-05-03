@@ -464,7 +464,7 @@ export default function DeckStainCalculator() {
                       note="For spindles and balusters — spraying is 3-4x faster than brushing individual spindles"
                       tip="Tip: Spray spindles first, then back-brush immediately to work stain in and catch drips. One person sprays, one person brushes."
                       amazon={aUrl("B000H9GPKC")} hd={hdUrl("pump garden sprayer 2 gallon")} />
-                    <Item qty={1} name="4\" Chip Brush (3-pack)"
+                    <Item qty={1} name={'4" Chip Brush (3-pack)'}
                       note="For edges, detail work, and back-brushing after spraying spindles"
                       tip="Tip: Chip brushes are cheap and disposable — much easier than cleaning stain out of a good brush."
                       amazon={aUrl("B07BFYQZ1X")} hd={hdUrl("chip brush 4 inch 3 pack stain")} />
