@@ -328,7 +328,7 @@ export default function DeckCalculator() {
               <div className="p-4 space-y-3">
                 <Toggle
                   label="Include railing + baluster materials"
-                  sub={requiresRailing ? "Required by code for decks ≥30\" above grade" : "Optional for low decks — recommended for safety"}
+                  sub={requiresRailing ? 'Required by code for decks ≥30" above grade' : 'Optional for low decks — recommended for safety'}
                   checked={includeRailing}
                   onChange={() => setIncludeRailing(v => !v)}
                 />
@@ -423,7 +423,7 @@ export default function DeckCalculator() {
                     <SectionHeader title="Posts & Foundation" />
                     <Item qty={result.posts} name="4×4 Pressure-Treated Posts"
                       note={`${result.posts} posts — add 2+ ft to deck height for below-grade burial`}
-                      tip="Tip: Burial depth must be below your local frost line — typically 36–42\" in cold climates. Check local code."
+                      tip={'Tip: Burial depth must be below your local frost line — typically 36–42" in cold climates. Check local code.'}
                       amazon={aUrl("B01N3VKDIH")} hd={hdUrl("4x4 pressure treated post 8 ft")} />
                     <Item qty={result.concreteBags} name="Quikrete 80 lb Concrete Bags"
                       note={`${result.concreteBags} bags — 2 bags per post hole`}
@@ -438,7 +438,7 @@ export default function DeckCalculator() {
                           note={`${result.ledgerBoards} boards — bolts to house rim joist, replaces the house-side rim joist`}
                           tip="CRITICAL: Ledger must bolt to house structural rim joist — not siding, sheathing, or trim. Improper ledger attachment is the #1 cause of deck collapses."
                           amazon={aUrl("B01MU3FVZR")} hd={hdUrl("2x8 pressure treated ledger board")} />
-                        <Item qty={result.lagBolts} name="1/2\" × 3\" Lag Bolts + Washers (box)"
+                        <Item qty={result.lagBolts} name={'1/2" × 3" Lag Bolts + Washers (box)'}
                           note={`${result.lagBolts} lag bolts — double-staggered every 16" along ledger length`}
                           tip="Tip: LedgerLOK structural screws are a code-approved alternative — no pre-drilling, faster install."
                           amazon={aUrl("B07B44H5RX")} hd={hdUrl("lag bolts 1/2 inch deck ledger")} />
@@ -455,7 +455,7 @@ export default function DeckCalculator() {
                           amazon={aUrl("B07BFYJ8ZQ")} hd={hdUrl("2x12 pressure treated stair stringer")} />
                         <Item qty={result.stairTreadBoards} name="2×6 Pressure-Treated Tread Boards (8 ft)"
                           note={`${result.stairTreadBoards} boards — 2 boards per tread, ${result.stairSteps} treads total`}
-                          tip="Tip: Leave a 1/4\" gap between tread boards for drainage."
+                          tip={'Tip: Leave a 1/4" gap between tread boards for drainage.'}
                           amazon={aUrl("B01MU3FVZR")} hd={hdUrl("2x6 pressure treated deck boards stair tread")} />
                         <Item qty={1} name="Stair Stringer Bracket Kit"
                           note="Connects stringers to deck frame and to bottom landing — prevents movement"
@@ -471,22 +471,22 @@ export default function DeckCalculator() {
                     {includeRailing && (
                       <>
                         <SectionHeader title={`Railing & Spindles — ${result.railingLinearFt} ft`} />
-                        <Item qty={result.balusters} name="2×2 Pressure-Treated Balusters (36\" or 42\")"
+                        <Item qty={result.balusters} name={'2×2 Pressure-Treated Balusters (36" or 42")'}
                           note={`${result.balusters} balusters — max 4" spacing (IRC code: a 4" sphere cannot pass through)`}
                           tip="Tip: Buy 5–10 extra. Balusters crack during installation and you'll want spares for future repairs."
                           amazon={aUrl("B07N5VXPLD")} hd={hdUrl("2x2 pressure treated baluster spindle 36 inch")} />
                         <Item qty={result.railTopRailBoards} name="2×4 Pressure-Treated Rail Boards (8 ft)"
                           note={`${result.railTopRailBoards} boards — top rail + bottom rail for ${result.railingLinearFt} ft of railing`}
-                          tip="Tip: Top rail height must be 36\" for decks under 6 ft high, 42\" for decks 6 ft and above."
+                          tip={'Tip: Top rail height must be 36" for decks under 6 ft high, 42" for decks 6 ft and above.'}
                           amazon={aUrl("B01MU3FVZR")} hd={hdUrl("2x4 pressure treated railing top rail")} />
-                        <Item qty={result.railPosts} name="4×4 Railing Posts (42\" or 48\")"
+                        <Item qty={result.railPosts} name={'4×4 Railing Posts (42" or 48")'}
                           note={`${result.railPosts} rail posts — one every 6 ft along railing run. Through-bolt to deck frame.`}
                           tip="Tip: Rail posts must bolt through the rim joist with carriage bolts — do not toe-screw or surface-mount only."
                           amazon={aUrl("B01N3VKDIH")} hd={hdUrl("4x4 railing post 42 inch pressure treated")} />
                         <Item qty={result.railPostCaps} name="Post Caps (decorative or flat)"
                           note={`${result.railPostCaps} caps — keeps water out of end grain, extends post life significantly`}
                           amazon={aUrl("B00004RFN0")} hd={hdUrl("post cap railing 4x4 deck")} />
-                        <Item qty={Math.ceil(result.railPosts / 2)} name="Carriage Bolts (1/2\" × 5\", with nuts + washers)"
+                        <Item qty={Math.ceil(result.railPosts / 2)} name={'Carriage Bolts (1/2" × 5", with nuts + washers)'}
                           note="Through-bolt each rail post to rim joist — 2 bolts per post"
                           amazon={aUrl("B07B44H5RW")} hd={hdUrl("carriage bolts 1/2 inch 5 inch deck railing")} />
                       </>

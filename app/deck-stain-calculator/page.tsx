@@ -468,7 +468,7 @@ export default function DeckStainCalculator() {
                       note="For edges, detail work, and back-brushing after spraying spindles"
                       tip="Tip: Chip brushes are cheap and disposable — much easier than cleaning stain out of a good brush."
                       amazon={aUrl("B07BFYQZ1X")} hd={hdUrl("chip brush 4 inch 3 pack stain")} />
-                    <Item qty={1} name="9\" Roller + 3/8\" Nap Cover + Extension Pole"
+                    <Item qty={1} name={'9" Roller + 3/8" Nap Cover + Extension Pole'}
                       note="For flat deck surface — rolling is much faster than brushing the floor"
                       tip="Tip: Roll in the direction of the boards, not across them. Work one board width at a time for consistent penetration."
                       amazon={aUrl("B00004TUTY")} hd={hdUrl("roller 9 inch 3/8 nap extension pole")} />
@@ -482,7 +482,7 @@ export default function DeckStainCalculator() {
                       note="Protect plants, furniture, and concrete below and around the deck"
                       tip="Tip: Move furniture completely off the deck — stain on fabric is permanent."
                       amazon={aUrl("B00000J1EZ")} hd={hdUrl("canvas drop cloth")} />
-                    <Item qty={1} name="Painter's Tape (2\" wide)"
+                    <Item qty={1} name={'Painter\'s Tape (2" wide)'}
                       note="Protect house siding and trim where deck meets the home"
                       amazon={aUrl("B00004Z4CP")} hd={hdUrl("painters tape 2 inch")} />
                     <Item qty={1} name="Nitrile Gloves (box of 100)"
