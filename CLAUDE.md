@@ -2,7 +2,7 @@
 
 BuildGuiders is an Amazon affiliate content site targeting HVAC troubleshooting and buying guides. The niche: mini-splits, smart thermostats, tankless water heaters, window ACs, and portable ACs.
 
-**Affiliate tag:** `buildguiders-20` — CRITICAL: set `NEXT_PUBLIC_AMAZON_TAG=buildguiders-20` in Vercel. Never use `buildguiders-20` or `gearguiders-20`.
+**Affiliate tag:** `buildguiders-20` — CRITICAL: set `NEXT_PUBLIC_AMAZON_TAG=buildguiders-20` in Vercel. Never use `gadgetguiders-20` or `gearguiders-20`.
 
 **Target query pattern:** `[brand] [model] [error code] [symptom]`
 
