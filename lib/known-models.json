@@ -1,0 +1,975 @@
+{
+  "tvs": {
+    "LG-C3": {
+      "brand": "LG",
+      "year": 2023,
+      "lineup": "OLED evo (G3 MLA-less; C3 with MLA on 77\" and above)",
+      "panel": "OLED evo (W-OLED)",
+      "sizes": [
+        "42",
+        "48",
+        "55",
+        "65",
+        "77",
+        "83"
+      ],
+      "hdmiPorts": 4,
+      "hdmiVersion": "HDMI 2.1 (all four ports \u2014 48 Gbps)",
+      "hdmiPortsWith4K120": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "earcPort": 2,
+      "vrr": [
+        "HDMI Forum VRR",
+        "AMD FreeSync Premium",
+        "NVIDIA G-Sync Compatible"
+      ],
+      "allm": true,
+      "hdrFormats": [
+        "HDR10",
+        "Dolby Vision IQ",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "HDR10+"
+      ],
+      "audioFormats": [
+        "Dolby Atmos (via eARC or internal decoder)",
+        "DTS (not natively \u2014 requires AVR decode via eARC)"
+      ],
+      "smartPlatform": "webOS 23",
+      "cecName": "SimpLink",
+      "gamingFeatures": [
+        "4K@120",
+        "VRR",
+        "ALLM",
+        "AMD FreeSync Premium",
+        "G-Sync Compatible"
+      ],
+      "knownIssues": [
+        "Dolby Vision gaming requires VRR to be enabled separately in picture mode",
+        "DTS audio not decoded natively \u2014 pass through to AVR via eARC"
+      ],
+      "modelNumbers": [
+        "OLED55C3PUA",
+        "OLED65C3PUA",
+        "OLED77C3PUA",
+        "OLED48C3PUA"
+      ],
+      "manualUrl": "https://www.lg.com/us/support/product/lg-OLED55C3PUA",
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "LG-C4": {
+      "brand": "LG",
+      "year": 2024,
+      "panel": "OLED evo (MLA on 55\" and above)",
+      "sizes": [
+        "48",
+        "55",
+        "65",
+        "77",
+        "83"
+      ],
+      "hdmiPorts": 4,
+      "hdmiVersion": "HDMI 2.1 (all four ports \u2014 48 Gbps)",
+      "hdmiPortsWith4K120": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "earcPort": 2,
+      "vrr": [
+        "HDMI Forum VRR",
+        "AMD FreeSync Premium Pro",
+        "NVIDIA G-Sync Compatible"
+      ],
+      "allm": true,
+      "hdrFormats": [
+        "HDR10",
+        "Dolby Vision IQ",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "HDR10+"
+      ],
+      "smartPlatform": "webOS 24",
+      "cecName": "SimpLink",
+      "modelNumbers": [
+        "OLED55C4PUA",
+        "OLED65C4PUA",
+        "OLED77C4PUA"
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Sony-A80L": {
+      "brand": "Sony",
+      "year": 2023,
+      "lineup": "BRAVIA XR OLED",
+      "panel": "OLED (QD-OLED on A95L; W-OLED on A80L)",
+      "sizes": [
+        "55",
+        "65",
+        "77"
+      ],
+      "hdmiPorts": 4,
+      "hdmiVersion": "HDMI 2.1 on HDMI 1 and 2; HDMI 2.0 on HDMI 3 and 4",
+      "hdmiPortsWith4K120": [
+        1,
+        2
+      ],
+      "earcPort": 3,
+      "vrr": [
+        "HDMI Forum VRR",
+        "AMD FreeSync Premium"
+      ],
+      "allm": true,
+      "hdrFormats": [
+        "HDR10",
+        "Dolby Vision",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "HDR10+"
+      ],
+      "smartPlatform": "Google TV",
+      "cecName": "Bravia Sync",
+      "knownIssues": [
+        "eARC is on HDMI 3 (NOT port 1 or 2 which have 4K@120)",
+        "VRR requires both TV and source to have VRR enabled"
+      ],
+      "modelNumbers": [
+        "XR55A80L",
+        "XR65A80L",
+        "XR77A80L"
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Samsung-S90C": {
+      "brand": "Samsung",
+      "year": 2023,
+      "lineup": "OLED (QD-OLED)",
+      "panel": "QD-OLED",
+      "sizes": [
+        "55",
+        "65",
+        "77"
+      ],
+      "hdmiPorts": 4,
+      "hdmiVersion": "HDMI 2.1 on HDMI 1 and 2; HDMI 1.4/2.0 on HDMI 3 and 4",
+      "hdmiPortsWith4K120": [
+        1,
+        2
+      ],
+      "earcPort": 1,
+      "vrr": [
+        "HDMI Forum VRR",
+        "AMD FreeSync Premium Pro"
+      ],
+      "allm": true,
+      "hdrFormats": [
+        "HDR10",
+        "HDR10+",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "Dolby Vision"
+      ],
+      "smartPlatform": "Tizen / Samsung Smart Hub",
+      "cecName": "Anynet+",
+      "criticalNote": "Samsung does NOT support Dolby Vision on ANY model. Samsung uses HDR10+ (which is their own HDR format). Any article claiming Samsung + Dolby Vision is factually wrong.",
+      "modelNumbers": [
+        "QN55S90CAFXZA",
+        "QN65S90CAFXZA",
+        "QN77S90CAFXZA"
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Samsung-QN90C": {
+      "brand": "Samsung",
+      "year": 2023,
+      "lineup": "Neo QLED 4K",
+      "panel": "Mini-LED (QLED)",
+      "sizes": [
+        "55",
+        "65",
+        "75",
+        "85"
+      ],
+      "hdmiPorts": 4,
+      "hdmiVersion": "HDMI 2.1 on HDMI 1 and 4; HDMI 2.0 on HDMI 2 and 3",
+      "hdmiPortsWith4K120": [
+        1,
+        4
+      ],
+      "earcPort": 1,
+      "vrr": [
+        "HDMI Forum VRR",
+        "AMD FreeSync Premium Pro"
+      ],
+      "allm": true,
+      "hdrFormats": [
+        "HDR10",
+        "HDR10+",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "Dolby Vision"
+      ],
+      "smartPlatform": "Tizen / Samsung Smart Hub",
+      "cecName": "Anynet+",
+      "criticalNote": "Samsung does NOT support Dolby Vision. QLED is NOT OLED \u2014 it is LCD with a quantum-dot filter.",
+      "modelNumbers": [
+        "QN55QN90CAFXZA",
+        "QN65QN90CAFXZA"
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "TCL-6-Series-R655": {
+      "brand": "TCL",
+      "year": 2023,
+      "lineup": "6-Series (Mini-LED QLED)",
+      "panel": "Mini-LED (QLED)",
+      "sizes": [
+        "55",
+        "65",
+        "75",
+        "85"
+      ],
+      "hdmiPorts": 4,
+      "hdmiVersion": "HDMI 2.1 on HDMI 2; HDMI 2.0 on others",
+      "hdmiPortsWith4K120": [
+        2
+      ],
+      "earcPort": 1,
+      "vrr": [
+        "HDMI Forum VRR",
+        "AMD FreeSync Premium"
+      ],
+      "allm": true,
+      "hdrFormats": [
+        "HDR10",
+        "HDR10+",
+        "Dolby Vision IQ",
+        "HLG"
+      ],
+      "smartPlatform": "Google TV",
+      "modelNumbers": [
+        "55R655",
+        "65R655",
+        "75R655"
+      ],
+      "knownIssues": [
+        "Only HDMI 2 supports 4K@120; connecting PS5/Xbox to HDMI 1 results in 4K@60 only"
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Vizio-P-Series": {
+      "brand": "Vizio",
+      "year": 2023,
+      "lineup": "P-Series Quantum",
+      "panel": "LED (QLED)",
+      "sizes": [
+        "55",
+        "65",
+        "75",
+        "85"
+      ],
+      "hdmiPorts": 4,
+      "hdmiVersion": "HDMI 2.0 on all ports (most models); some newer have HDMI 2.1",
+      "hdmiPortsWith4K120": [],
+      "earcPort": 1,
+      "vrr": [],
+      "allm": false,
+      "hdrFormats": [
+        "HDR10",
+        "Dolby Vision",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "HDR10+"
+      ],
+      "smartPlatform": "SmartCast",
+      "cecName": "CEC (no brand name)",
+      "knownIssues": [
+        "SmartCast remote app required for some features; no built-in app store on older models"
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    }
+  },
+  "avrs": {
+    "Denon-AVR-X3800H": {
+      "brand": "Denon",
+      "year": 2022,
+      "channels": "9.4",
+      "powerPerChannel": "105W (8\u03a9, 2-channel driven, 0.05% THD)",
+      "hdmiInputs": 7,
+      "hdmiOutputs": 3,
+      "hdmiVersion": "HDMI 2.1 (8K/60Hz, 4K/120Hz on all inputs)",
+      "hdmi4K120": true,
+      "earcSupport": "Yes (HDMI Out 1 only)",
+      "audioFormats": [
+        "Dolby Atmos",
+        "DTS:X",
+        "Auro-3D",
+        "IMAX Enhanced"
+      ],
+      "multiroomEcosystem": "HEOS",
+      "vrr": true,
+      "allm": true,
+      "knownIssues": [
+        "8K/60Hz passthrough required firmware update on early units",
+        "ALLM passthrough had known bug on 2022 firmware builds \u2014 update to latest"
+      ],
+      "doNotAttribute": [
+        "MusicCast",
+        "Chromecast Built-in"
+      ],
+      "modelNumbers": [
+        "AVR-X3800H"
+      ],
+      "manualUrl": "https://www.denon.com/en-us/product/av-receivers/avr-x3800h",
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Denon-AVR-S760H": {
+      "brand": "Denon",
+      "year": 2022,
+      "channels": "7.2",
+      "powerPerChannel": "75W (8\u03a9)",
+      "hdmiInputs": 6,
+      "hdmiOutputs": 2,
+      "hdmiVersion": "HDMI 2.1 on 2 inputs (4K/120Hz); HDMI 2.0 on remaining 4",
+      "hdmi4K120": true,
+      "earcSupport": "Yes (HDMI Out 1)",
+      "audioFormats": [
+        "Dolby Atmos",
+        "DTS:X"
+      ],
+      "multiroomEcosystem": "HEOS",
+      "modelNumbers": [
+        "AVR-S760H"
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Marantz-Cinema-60": {
+      "brand": "Marantz",
+      "year": 2022,
+      "channels": "7.2",
+      "powerPerChannel": "100W (8\u03a9)",
+      "hdmiInputs": 6,
+      "hdmiOutputs": 2,
+      "hdmiVersion": "HDMI 2.1 on 2 inputs; HDMI 2.0 on 4",
+      "hdmi4K120": true,
+      "earcSupport": "Yes (HDMI Out 1)",
+      "audioFormats": [
+        "Dolby Atmos",
+        "DTS:X",
+        "IMAX Enhanced"
+      ],
+      "multiroomEcosystem": "HEOS",
+      "note": "Marantz and Denon share parent company Sound United/Masimo; both use HEOS for multi-room.",
+      "modelNumbers": [
+        "NR1710",
+        "Cinema 60"
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Yamaha-RX-V6A": {
+      "brand": "Yamaha",
+      "year": 2021,
+      "channels": "7.2",
+      "powerPerChannel": "100W (8\u03a9)",
+      "hdmiInputs": 7,
+      "hdmiOutputs": 2,
+      "hdmiVersion": "HDMI 2.1 on 2 inputs (4K/120Hz); HDMI 2.0 on 5",
+      "hdmi4K120": true,
+      "earcSupport": "Yes (HDMI Out 1)",
+      "audioFormats": [
+        "Dolby Atmos",
+        "DTS:X"
+      ],
+      "multiroomEcosystem": "MusicCast",
+      "doNotAttribute": [
+        "HEOS",
+        "Denon HEOS"
+      ],
+      "modelNumbers": [
+        "RX-V6A"
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Yamaha-AVENTAGE-RX-A6A": {
+      "brand": "Yamaha",
+      "year": 2021,
+      "channels": "9.2",
+      "powerPerChannel": "150W (8\u03a9)",
+      "hdmiVersion": "HDMI 2.1 (4K/120Hz on all inputs)",
+      "hdmi4K120": true,
+      "earcSupport": "Yes",
+      "audioFormats": [
+        "Dolby Atmos",
+        "DTS:X",
+        "Auro-3D"
+      ],
+      "multiroomEcosystem": "MusicCast",
+      "modelNumbers": [
+        "RX-A6A"
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Onkyo-TX-NR6100": {
+      "brand": "Onkyo",
+      "year": 2021,
+      "channels": "7.2",
+      "powerPerChannel": "100W (8\u03a9)",
+      "hdmiInputs": 6,
+      "hdmiOutputs": 2,
+      "hdmiVersion": "HDMI 2.1 on select inputs (4K/120Hz); HDMI 2.0 on others",
+      "hdmi4K120": true,
+      "earcSupport": "Yes",
+      "audioFormats": [
+        "Dolby Atmos",
+        "DTS:X"
+      ],
+      "multiroomEcosystem": "Chromecast Built-in",
+      "doNotAttribute": [
+        "HEOS",
+        "MusicCast"
+      ],
+      "modelNumbers": [
+        "TX-NR6100"
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    }
+  },
+  "streamers": {
+    "AppleTV-4K-Gen3": {
+      "brand": "Apple TV",
+      "year": 2022,
+      "modelNumbers": [
+        "A2737",
+        "A2843"
+      ],
+      "hdmiVersion": "HDMI 2.1 port (but 4K@120 is NOT enabled by Apple)",
+      "supportedResolutions": [
+        "4K@60 HDR",
+        "1080p"
+      ],
+      "hdrFormats": [
+        "HDR10",
+        "Dolby Vision",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "4K@120Hz (Apple disabled it in tvOS)",
+        "VRR",
+        "DTS:X native output"
+      ],
+      "connectivity": {
+        "wifi": true,
+        "ethernet": "Built-in on A2843 (Wi-Fi + Ethernet model); not on A2737 (Wi-Fi only)"
+      },
+      "audioFormats": [
+        "Dolby Atmos (via Dolby Digital Plus passthrough)",
+        "AAC",
+        "FLAC"
+      ],
+      "operatingSystem": "tvOS",
+      "knownIssues": [
+        "Match Frame Rate / Match Dynamic Range must be enabled in Settings for best HDR",
+        "Does NOT output DTS content natively \u2014 converts to LPCM or Dolby"
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "FireTV-Stick-4K-Max-Gen2": {
+      "brand": "Fire TV",
+      "year": 2023,
+      "modelNumbers": [
+        "Stick 4K Max (2nd Gen)"
+      ],
+      "supportedResolutions": [
+        "4K@60 HDR",
+        "1080p"
+      ],
+      "hdrFormats": [
+        "HDR10",
+        "HDR10+",
+        "Dolby Vision",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "4K@120Hz",
+        "Ethernet (without adapter)"
+      ],
+      "connectivity": {
+        "wifi": "Wi-Fi 6E (802.11ax)",
+        "ethernet": false
+      },
+      "audioFormats": [
+        "Dolby Atmos (compressed via eARC/pass-through)",
+        "DTS passthrough"
+      ],
+      "operatingSystem": "Fire OS",
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "FireTV-Stick-4K-Gen2": {
+      "brand": "Fire TV",
+      "year": 2023,
+      "modelNumbers": [
+        "Fire TV Stick 4K (2nd Gen)"
+      ],
+      "supportedResolutions": [
+        "4K@60 HDR",
+        "1080p"
+      ],
+      "hdrFormats": [
+        "HDR10",
+        "HDR10+",
+        "Dolby Vision",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "4K@120Hz",
+        "Wi-Fi 6E (has Wi-Fi 6)",
+        "Ethernet (without adapter)"
+      ],
+      "connectivity": {
+        "wifi": "Wi-Fi 6 (802.11ax)",
+        "ethernet": false
+      },
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "FireTV-Stick-Lite": {
+      "brand": "Fire TV",
+      "modelNumbers": [
+        "Fire TV Stick Lite"
+      ],
+      "supportedResolutions": [
+        "1080p@60",
+        "720p"
+      ],
+      "hdrFormats": [
+        "HDR10",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "4K (1080p MAX)",
+        "Dolby Vision",
+        "HDR10+",
+        "Ethernet"
+      ],
+      "connectivity": {
+        "wifi": "Wi-Fi 5 (802.11ac)",
+        "ethernet": false
+      },
+      "criticalNote": "Fire TV Stick Lite is 1080p ONLY. Never write that it supports 4K.",
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Roku-Ultra-2022": {
+      "brand": "Roku",
+      "year": 2022,
+      "modelNumbers": [
+        "4802R"
+      ],
+      "supportedResolutions": [
+        "4K@60 HDR",
+        "1080p"
+      ],
+      "hdrFormats": [
+        "HDR10",
+        "HDR10+",
+        "Dolby Vision",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "4K@120Hz"
+      ],
+      "connectivity": {
+        "wifi": "Wi-Fi 5 (802.11ac dual-band)",
+        "ethernet": "Built-in Ethernet port"
+      },
+      "audioFormats": [
+        "Dolby Atmos (via Dolby Digital Plus passthrough)",
+        "DTS passthrough"
+      ],
+      "cecName": "1-Touch Play",
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Roku-StreamingStick-4K": {
+      "brand": "Roku",
+      "year": 2021,
+      "modelNumbers": [
+        "3820R"
+      ],
+      "supportedResolutions": [
+        "4K@60 HDR",
+        "1080p"
+      ],
+      "hdrFormats": [
+        "HDR10",
+        "HDR10+",
+        "Dolby Vision",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "4K@120Hz",
+        "Ethernet"
+      ],
+      "connectivity": {
+        "wifi": "Wi-Fi 5 (802.11ac dual-band)",
+        "ethernet": false
+      },
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Roku-Express": {
+      "brand": "Roku",
+      "modelNumbers": [
+        "3900",
+        "3930",
+        "3960"
+      ],
+      "supportedResolutions": [
+        "1080p@60",
+        "720p"
+      ],
+      "hdrFormats": [],
+      "doesNotSupport": [
+        "4K (1080p MAX)",
+        "HDR",
+        "Ethernet"
+      ],
+      "connectivity": {
+        "wifi": "Wi-Fi 5 (802.11ac)",
+        "ethernet": false
+      },
+      "criticalNote": "Roku Express is 1080p max, no HDR.",
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Google-Chromecast-GoogleTV-4K": {
+      "brand": "Google",
+      "year": 2020,
+      "modelNumbers": [
+        "GA01919-US"
+      ],
+      "supportedResolutions": [
+        "4K@60 HDR",
+        "1080p"
+      ],
+      "hdrFormats": [
+        "HDR10",
+        "Dolby Vision",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "4K@120Hz",
+        "Ethernet (without adapter)"
+      ],
+      "connectivity": {
+        "wifi": "Wi-Fi 5 (802.11ac)",
+        "ethernet": false
+      },
+      "operatingSystem": "Google TV",
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Nvidia-Shield-TV-Pro": {
+      "brand": "Nvidia",
+      "year": 2019,
+      "modelNumbers": [
+        "945-13442-2500-100"
+      ],
+      "supportedResolutions": [
+        "4K@60 HDR (native or upscaled via AI)",
+        "1080p"
+      ],
+      "hdrFormats": [
+        "HDR10",
+        "Dolby Vision",
+        "HLG"
+      ],
+      "doesNotSupport": [
+        "4K@120Hz native",
+        "AV1 decode (older models)"
+      ],
+      "connectivity": {
+        "wifi": "Wi-Fi 5 (802.11ac)",
+        "ethernet": "Built-in Gigabit Ethernet"
+      },
+      "audioFormats": [
+        "Dolby Atmos passthrough",
+        "DTS:X passthrough"
+      ],
+      "operatingSystem": "Android TV / Google TV",
+      "manualVerifiedAt": "2026-04-21"
+    }
+  },
+  "consoles": {
+    "PS5": {
+      "brand": "Sony",
+      "year": 2020,
+      "modelNumbers": [
+        "CFI-1015A",
+        "CFI-1015B",
+        "CFI-1116A",
+        "CFI-1116B"
+      ],
+      "storage": "825GB SSD (approx 667GB usable)",
+      "supportedResolutions": [
+        "4K@120Hz (select games)",
+        "4K@60Hz",
+        "1440p (via patch)",
+        "1080p@120Hz",
+        "1080p@60Hz"
+      ],
+      "hdrFormats": [
+        "HDR10",
+        "Dolby Vision (added 2023)",
+        "HLG"
+      ],
+      "hdmiVersion": "HDMI 2.1",
+      "vrr": true,
+      "allm": true,
+      "controller": "DualSense \u2014 Bluetooth 5.1 + USB-C",
+      "discDrive": "Ultra HD Blu-ray (standard model); Digital Edition has no disc drive",
+      "backwardCompatibility": "Plays most PS4 games; does NOT play PS3, PS2, or PS1 discs",
+      "knownIssues": [
+        "4K@120Hz requires a Certified Ultra High Speed HDMI cable (48Gbps)",
+        "VRR must be enabled in PS5 Settings > Screen and Video > VRR",
+        "1440p output requires a system software update (added 2022)"
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Xbox-Series-X": {
+      "brand": "Xbox",
+      "year": 2020,
+      "modelNumbers": [
+        "1882"
+      ],
+      "storage": "1TB NVMe SSD (approx 802GB usable for games/apps)",
+      "supportedResolutions": [
+        "4K@120Hz (select games)",
+        "4K@60Hz",
+        "1080p@120Hz",
+        "8K (limited titles)"
+      ],
+      "hdrFormats": [
+        "HDR10",
+        "HDR10+",
+        "Dolby Vision (added 2021)",
+        "HLG"
+      ],
+      "hdmiVersion": "HDMI 2.1",
+      "vrr": true,
+      "allm": true,
+      "controller": "Xbox Wireless Controller \u2014 Bluetooth + USB-C (AA batteries also used)",
+      "discDrive": "4K Blu-ray (Series X); Series S has no disc drive",
+      "backwardCompatibility": "Xbox One, Xbox 360, select original Xbox titles",
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Xbox-Series-S": {
+      "brand": "Xbox",
+      "year": 2020,
+      "modelNumbers": [
+        "1883"
+      ],
+      "storage": "512GB NVMe SSD (approx 364GB usable)",
+      "supportedResolutions": [
+        "1440p@120Hz (game rendering)",
+        "1080p@120Hz",
+        "4K (streaming apps only \u2014 upscaled, NOT native game rendering)",
+        "1080p@60Hz"
+      ],
+      "hdrFormats": [
+        "HDR10",
+        "HDR10+",
+        "Dolby Vision",
+        "HLG"
+      ],
+      "hdmiVersion": "HDMI 2.1",
+      "vrr": true,
+      "discDrive": false,
+      "criticalNote": "Xbox Series S renders games at 1440p MAX. It does NOT support 4K@120Hz for game rendering. Streaming apps (Netflix, Disney+) do run at 4K. Never write '4K@120Hz gaming' or '4K gaming' for Series S.",
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Nintendo-Switch": {
+      "brand": "Nintendo",
+      "year": 2017,
+      "modelNumbers": [
+        "HAC-001",
+        "HAC-001(-01)"
+      ],
+      "storage": "32GB internal + microSD",
+      "supportedResolutions": {
+        "docked": "1080p max (some games run at 720p or 900p when docked)",
+        "handheld": "720p",
+        "tabletop": "720p"
+      },
+      "hdmiVersion": "HDMI 1.4",
+      "hdrFormats": [],
+      "doesNotSupport": [
+        "4K at any level",
+        "HDR",
+        "Dolby Atmos",
+        "VRR"
+      ],
+      "criticalNote": "Nintendo Switch outputs 1080p MAX when docked, 720p handheld. NO 4K support. NO HDR. Any claim of 4K or HDR for Switch is factually wrong.",
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Nintendo-Switch-OLED": {
+      "brand": "Nintendo",
+      "year": 2021,
+      "modelNumbers": [
+        "HEG-001"
+      ],
+      "storage": "64GB internal + microSD",
+      "supportedResolutions": {
+        "docked": "1080p max",
+        "handheld": "720p (OLED screen, 7-inch)",
+        "tabletop": "720p"
+      },
+      "hdmiVersion": "HDMI 2.0 (dock upgraded from 1.4 to 2.0 but still only 1080p output)",
+      "hdrFormats": [],
+      "doesNotSupport": [
+        "4K at any level",
+        "HDR through TV",
+        "VRR"
+      ],
+      "criticalNote": "Switch OLED has an OLED screen for handheld mode but outputs the same 1080p docked / 720p handheld as the standard Switch. Still NO 4K, still NO external HDR.",
+      "manualVerifiedAt": "2026-04-21"
+    }
+  },
+  "soundbars": {
+    "Sonos-Arc": {
+      "brand": "Sonos",
+      "year": 2020,
+      "channels": "5.0.2 (built-in Atmos)",
+      "hdmiVersion": "HDMI 2.0 with eARC",
+      "earcSupport": true,
+      "audioFormats": [
+        "Dolby Atmos (TrueHD + Dolby Digital Plus)",
+        "DTS passthrough (not decoded)"
+      ],
+      "doesNotSupport": [
+        "DTS:X decode",
+        "4K passthrough (audio only device \u2014 no video)"
+      ],
+      "connectivity": {
+        "wifi": true,
+        "bluetooth": "Bluetooth LE (for pairing only \u2014 music playback is via WiFi, NOT Bluetooth)",
+        "airplay2": true
+      },
+      "multiroomEcosystem": "Sonos",
+      "criticalNote": "Sonos uses WiFi for music playback, NOT Bluetooth. Do not describe Sonos as a 'Bluetooth speaker.' Music control is via the Sonos app or AirPlay 2.",
+      "manualVerifiedAt": "2026-04-21"
+    },
+    "Sonos-Beam-Gen2": {
+      "brand": "Sonos",
+      "year": 2021,
+      "channels": "3.0.2 (built-in Atmos)",
+      "hdmiVersion": "HDMI ARC (NOT eARC)",
+      "earcSupport": false,
+      "audioFormats": [
+        "Dolby Atmos (via Dolby Digital Plus only \u2014 no TrueHD)",
+        "Dolby Digital",
+        "PCM"
+      ],
+      "doesNotSupport": [
+        "eARC",
+        "DTS decode",
+        "Dolby TrueHD lossless Atmos (requires eARC)"
+      ],
+      "connectivity": {
+        "wifi": true,
+        "bluetooth": "pairing only",
+        "airplay2": true
+      },
+      "multiroomEcosystem": "Sonos",
+      "knownIssues": [
+        "Beam Gen 2 uses standard ARC \u2014 cannot receive lossless TrueHD Atmos. For lossless: use Sonos Arc instead."
+      ],
+      "manualVerifiedAt": "2026-04-21"
+    }
+  },
+  "globalRules": {
+    "hdmiVersionCapabilities": {
+      "1.4": "1080p@60, 4K@30, ARC (no eARC), no HDR",
+      "2.0": "4K@60, HDR10, Dolby Vision, ARC (no eARC), 18 Gbps",
+      "2.0a": "4K@60, HDR (static HDR10/Dolby Vision), 18 Gbps",
+      "2.0b": "4K@60, HDR (includes HLG), 18 Gbps",
+      "2.1": "4K@120Hz, 8K@60Hz, VRR, ALLM, eARC, Dynamic HDR, 48 Gbps \u2014 requires Certified Ultra High Speed cable"
+    },
+    "earcVsArc": {
+      "ARC": "Standard ARC: compressed audio only \u2014 Dolby Digital 5.1 (compressed) or stereo PCM. Cannot carry Dolby Atmos lossless (TrueHD), DTS-HD MA, or DTS:X.",
+      "eARC": "Enhanced ARC (HDMI 2.1): full lossless audio including Dolby TrueHD, Dolby Atmos (via TrueHD), DTS-HD MA, DTS:X. Requires Certified Ultra High Speed HDMI cable (48Gbps) for full bandwidth."
+    },
+    "opticalToslink": {
+      "maxBandwidth": "Limited to Dolby Digital 5.1 (compressed) or stereo PCM",
+      "cannotCarry": [
+        "Dolby Atmos (any form)",
+        "DTS:X",
+        "DTS-HD MA",
+        "lossless audio of any kind"
+      ],
+      "criticalNote": "Optical/TOSLINK cannot carry Dolby Atmos or DTS:X. These require HDMI eARC."
+    },
+    "cableSpeedRatings": {
+      "Standard": "4.95 Gbps \u2014 1080i/720p/480p",
+      "High Speed": "10.2 Gbps \u2014 1080p, 4K@30",
+      "Premium High Speed": "18 Gbps \u2014 4K@60 HDR (HDMI Forum Certified)",
+      "Ultra High Speed": "48 Gbps \u2014 4K@120Hz, 8K@60Hz, eARC lossless (HDMI Forum Certified)",
+      "criticalNote": "Cables do not have HDMI version numbers. Never write 'HDMI 2.1 cable' or 'HDMI 2.0 cable'. Use the speed rating names only."
+    },
+    "cecBrandNames": {
+      "Samsung": "Anynet+",
+      "LG": "SimpLink",
+      "Sony": "Bravia Sync",
+      "Vizio": "CEC (no brand name)",
+      "Roku": "1-Touch Play",
+      "Amazon Fire TV": "HDMI CEC (no brand name)",
+      "Insignia": "INlink"
+    },
+    "multiroomEcosystems": {
+      "Denon": "HEOS",
+      "Marantz": "HEOS (same parent company as Denon, Sound United/Masimo)",
+      "Yamaha": "MusicCast",
+      "Onkyo": "Chromecast Built-in (on Wi-Fi equipped models)",
+      "Sonos": "Sonos ecosystem (WiFi-based \u2014 NOT Bluetooth for music)"
+    },
+    "hdrFormatsByBrand": {
+      "Samsung": [
+        "HDR10",
+        "HDR10+",
+        "HLG"
+      ],
+      "LG": [
+        "HDR10",
+        "Dolby Vision IQ",
+        "HLG"
+      ],
+      "Sony": [
+        "HDR10",
+        "Dolby Vision",
+        "HLG"
+      ],
+      "TCL": [
+        "HDR10",
+        "HDR10+",
+        "Dolby Vision IQ",
+        "HLG"
+      ],
+      "Hisense": [
+        "HDR10",
+        "Dolby Vision",
+        "HLG"
+      ],
+      "Vizio": [
+        "HDR10",
+        "Dolby Vision",
+        "HLG"
+      ],
+      "criticalNote": "Samsung does NOT support Dolby Vision on any TV. Samsung uses HDR10+. All other major TV brands support Dolby Vision."
+    }
+  }
+}

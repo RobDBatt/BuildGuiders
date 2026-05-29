@@ -1,0 +1,47 @@
+# Node/Next
+node_modules
+.next
+out
+dist
+.env*
+!.env.local.example
+npm-debug.log*
+.DS_Store
+.vercel
+
+# Backup / temp files
+*.bak
+*.bak-*
+*.bak.*
+*.backup*
+*.fixbak
+*.corrupt*
+
+# Scripts (one-time migrations)
+*.ps1
+
+# Python
+.venv
+__pycache__
+
+# Logs / reports
+*.log
+*.csv
+validation_*.txt
+health_*.txt
+audit_*.txt
+
+# Local artifacts
+*.zip
+.retrofit-snapshots/
+reports/
+prompts/lane2/
+
+# Stray files (not part of build)
+HeroSection.jsx
+page.tsx
+all_files.txt
+gg_candidates.txt
+links_report*.txt
+.claude/worktrees/
+.gh-token

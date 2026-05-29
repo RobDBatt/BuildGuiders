@@ -1,0 +1,39 @@
+# Build outputs / caches / deps (Vercel will build in the cloud)
+.next/
+out/
+dist/
+.vercel/output/
+.vercel/cache/
+node_modules/
+
+# Local env + logs
+.env*
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+*.log
+
+# Local tools, scripts, and generators not needed at runtime
+scripts/
+tools/
+**/*.ps1
+**/*.sh
+**/*.bat
+
+# Draft or scratch content that shouldn't deploy
+content/drafts/**
+content/notes/**
+content/scratch/**
+
+# Heavy source assets; keep only production-optimized assets in /public
+**/*.psd
+**/*.ai
+**/*.sketch
+**/*.fig
+**/*.zip
+**/*.7z
+**/*.rar
+**/*.mp4
+**/*.mov
+**/*.wav
+**/*.mkv

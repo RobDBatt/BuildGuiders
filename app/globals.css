@@ -1,0 +1,204 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0a0a;
+  /* Neutral 950 (True Charcoal) */
+  --foreground: #f8fafc;
+  --primary: #06b6d4;
+  /* Electric Cyan */
+  --card: #1e293b;
+}
+
+@layer base {
+  body {
+    /* Base Slate/Charcoal color */
+    /* Base Slate/Charcoal color */
+    background-color: #0f172a;
+    color: #e2e8f0;
+    color: #e2e8f0;
+  }
+
+
+}
+
+/* Custom Industrial Step Styling */
+.manual-step {
+  @apply border-l-4 border-brand pl-4 my-6;
+}
+
+.manual-step-number {
+  @apply text-brand font-mono font-bold text-lg;
+}
+
+/* Technical Specification Table */
+.specs-table {
+  @apply w-full text-sm text-left border-collapse;
+}
+
+.specs-table tr {
+  @apply border-b border-slate-700 hover:bg-slate-800/50;
+}
+
+/* Custom utility for the TT Autonomous industrial vibe */
+.tech-wordmark {
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  /* Gives it that wide, authoritative spacing */
+  text-transform: uppercase;
+  font-stretch: expanded;
+  /* Mimics the wide stance of Autonomous */
+}
+
+/* Automatically capitalize all article titles and headings */
+h1,
+h2,
+h3,
+.article-title {
+  text-transform: capitalize;
+  letter-spacing: -0.02em;
+  /* Tighter tracking for large headers */
+}
+
+/* Force the Main Title (H1) to be even more prominent */
+h1 {
+  font-family: 'TT Autonomous', sans-serif;
+  font-weight: 900;
+  font-size: 3rem !important;
+  /* Size or two larger */
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+}
+
+/* Target .prose specifically to override typography plugin defaults */
+.prose p,
+.prose li {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.125rem;
+  /* 18px */
+  line-height: 1.8;
+  color: #cbd5e1;
+  /* Slate-300 */
+  margin-bottom: 1.75rem !important;
+  /* Force spacing */
+}
+
+/* Style for technical lists */
+.prose ul {
+  list-style-type: square;
+  color: #06b6d4;
+  /* Cyan bullets */
+  padding-left: 1.5rem;
+  margin-bottom: 2rem !important;
+}
+
+.prose h2,
+.prose h3 {
+  color: #06b6d4;
+  /* Cyan for section headers */
+  font-weight: 800;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em;
+  margin-top: 3rem !important;
+  margin-bottom: 1.25rem !important;
+}
+
+/* Clean image styling with depth */
+/* Clean image styling with depth & sharpness */
+article img {
+  border: none !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  /* Adds depth without color */
+  border-radius: 12px;
+  background-color: #0f172a;
+  /* Matches your Slate background */
+  image-rendering: -webkit-optimize-contrast;
+  /* For Chrome/Safari */
+  image-rendering: crisp-edges;
+  /* For Firefox */
+  transform: translateZ(0);
+  /* Hardware acceleration for clearer rendering */
+}
+
+/* Adds a subtle 'noise' texture to mask pixelation */
+.bg-texture-overlay {
+  position: fixed;
+  inset: 0;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity: 0.05;
+  /* Keep it very subtle */
+  pointer-events: none;
+  z-index: 10;
+  filter: contrast(120%) brightness(100%);
+}
+
+/* Industrial styling for Related Guides links */
+.related-guides a {
+  display: block;
+  padding: 1rem;
+  background: #1e293b;
+  border-left: 4px solid #06b6d4;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  text-transform: capitalize;
+  transition: all 0.2s;
+}
+
+.related-guides a:hover {
+  background: #334155;
+  padding-left: 1.5rem;
+}
+
+@media print {
+
+  header,
+  footer,
+  .no-print,
+  nav,
+  button {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  article {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: black !important;
+  }
+}
+
+/* --- GEAR GUIDERS: Emerald & Grid Icons --- */
+.site-gear::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98)),
+    url('/images/gearguiders-bg.jpg');
+  /* The Green Grid icons image */
+  background-size: cover;
+  z-index: -1;
+}
+
+/* --- GADGET GUIDERS: Electric Blue & Hardware Pile --- */
+.site-gadget::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: linear-gradient(to bottom, rgba(2, 6, 23, 0.85), rgba(2, 6, 23, 0.98)),
+    url('/images/gadget-guiders-hero.jpg');
+  /* The Blue Remote/Phone image */
+  background-size: cover;
+  z-index: -1;
+}

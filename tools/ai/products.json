@@ -1,0 +1,5 @@
+{
+  "uhs_hdmi": { "name": "Ultra High Speed HDMI cable", "out": "/out/uhs-hdmi" },
+  "4k120_switch": { "name": "HDMI 2.1 4K/120 switch", "out": "/out/4k120-switch" },
+  "apple_tv": { "name": "Apple TV 4K", "out": "/out/apple-tv-4k" }
+}

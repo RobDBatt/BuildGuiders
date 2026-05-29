@@ -1,0 +1,13 @@
+{
+  "slug": "apple-tv-match-range-frame-rate",
+  "title": "Apple TV 4K: Match Dynamic Range & Frame Rate (set it once, forget it)",
+  "brand": "Apple",
+  "device": "Apple TV 4K",
+  "problem": "match-range-frame-rate",
+  "summaryQuick": [
+    "Settings > Video and Audio > Match: enable both options.",
+    "Calibrate a baseline TV picture mode to avoid ugly app-driven mode flips."
+  ],
+  "tags": ["Apple TV","tvOS","HDR"],
+  "draft": true
+}

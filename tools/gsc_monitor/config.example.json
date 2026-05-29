@@ -1,0 +1,12 @@
+{
+  "property_url": "https://www.buildguiders.com/",
+  "client_secrets_file": "client_secret.json",
+  "token_file": "token.json",
+  "sitemap_urls": [
+    "https://www.buildguiders.com/sitemap.xml"
+  ],
+  "focus_urls": [
+    "https://www.buildguiders.com/posts/samsung-tv-hdmi-picture-issues-troubleshooting-guide",
+    "https://www.buildguiders.com/posts/sony-bravia-earc-atmos-not-working"
+  ]
+}

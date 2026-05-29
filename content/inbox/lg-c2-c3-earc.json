@@ -1,0 +1,21 @@
+{
+  "title": "LG C2/C3: eARC not working with soundbars/AVRs (fast fixes)",
+  "brand": "LG",
+  "device": "C2/C3 OLED",
+  "problem": "earc-not-working",
+  "tags": ["LG","eARC","Atmos","AVR"],
+  "audience": "LG C2/C3 owners with sound dropouts or Atmos missing.",
+  "quick": {
+    "fast": "eARC On, Pass Through, Bitstream; CEC On; reboot chain TV->AVR->Source.",
+    "deeper": "Denon/Marantz HDMI Control & ARC/eARC On; assign TV Audio input; cable sanity."
+  },
+  "steps": [
+    "Settings -> Sound -> eARC = On; Digital Sound Out = Pass Through; HDMI Input Audio = Bitstream; SIMPLINK = On.",
+    "Disable TV speakers when using eARC.",
+    "Power off all; power on TV -> AVR/Soundbar -> Source.",
+    "Denon: Setup -> Video -> HDMI Setup -> HDMI Control On; ARC/eARC On; set TV Audio input."
+  ],
+  "why": "eARC/CEC handshakes plus PCM vs bitstream cause dropouts; this stabilizes negotiation.",
+  "next": ["Denon AVR: eARC audio drops", "Apple TV 4K: Match Range & Frame Rate"],
+  "draft": true
+}

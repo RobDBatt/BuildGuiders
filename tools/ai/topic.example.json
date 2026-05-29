@@ -1,0 +1,13 @@
+{
+  "slug": "apple-tv-4k-match-frame-rate-dolby-vision-settings",
+  "title": "Apple TV 4K: match frame rate & Dolby Vision settings",
+  "description": "Lag, HDMI, and HDR that actually works.",
+  "brandFocus": ["Apple TV 4K", "LG C2/C3", "Denon eARC"],
+  "tags": ["apple-tv", "dolby-vision", "match-frame-rate", "hdr", "hdmi-2.1"],
+  "sources": [
+    "https://support.apple.com/",
+    "https://www.avsforum.com/",
+    "https://www.reddit.com/r/appletv/"
+  ],
+  "recommend": ["uhs_hdmi", "apple_tv"]
+}

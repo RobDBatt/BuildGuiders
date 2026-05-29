@@ -1,0 +1,129 @@
+# DEPRECATED 2026-05-03 — Article generation is now done in Cowork sessions
+# (see CLAUDE.md "Generating New Articles" section). This workflow is kept
+# for emergency fallback only. The schedule trigger is disabled; manual
+# dispatch is preserved but requires OPENAI_API_KEY in GitHub Secrets.
+name: Auto Generate Articles (DEPRECATED — manual dispatch only)
+
+on:
+  # schedule:
+  #   - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Research topics and generate articles
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node scripts/research-and-generate.mjs
+
+      - name: Check for new files
+        id: check_new
+        run: |
+          NEW_FILES=$(git diff --name-only --diff-filter=A -- 'content/articles/*.mdx')
+          NEW_COUNT=$(echo "$NEW_FILES" | grep -c '\.mdx$' || true)
+          echo "new_count=$NEW_COUNT" >> "$GITHUB_OUTPUT"
+          echo "new_files<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$NEW_FILES" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          if [ "$NEW_COUNT" -eq 0 ]; then
+            echo "No new articles generated. Skipping quality gates."
+          else
+            echo "$NEW_COUNT new article(s) generated. Running quality gates..."
+            echo "$NEW_FILES"
+          fi
+
+      - name: Gate — Duplicate slug check
+        if: steps.check_new.outputs.new_count != '0'
+        run: node scripts/audit-content.mjs
+
+      - name: Gate — Content validation (new files only)
+        if: steps.check_new.outputs.new_count != '0'
+        run: |
+          # Validate only newly generated files to avoid pre-existing issues
+          ERRORS=0
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            # Check minimum word count (300 words)
+            WORDS=$(sed -n '/^---$/,/^---$/!p' "$file" | wc -w)
+            if [ "$WORDS" -lt 300 ]; then
+              echo "FAIL: $file has only $WORDS words (minimum 300)"
+              ERRORS=1
+            fi
+            # Check for duplicate H1 matching title
+            TITLE=$(grep '^title:' "$file" | head -1 | sed "s/^title:[[:space:]]*['\"]*//" | sed "s/['\"].*$//")
+            if grep -q "^# $TITLE" "$file"; then
+              echo "WARN: $file has H1 matching title (duplicate heading)"
+            fi
+          done <<< "${{ steps.check_new.outputs.new_files }}"
+          if [ "$ERRORS" -eq 1 ]; then
+            echo "Content validation failed for new articles."
+            exit 1
+          fi
+          echo "All new articles pass content validation."
+
+      - name: Gate — Amazon tag check (new files only)
+        if: steps.check_new.outputs.new_count != '0'
+        run: |
+          # Check only newly generated files for Amazon tag issues
+          ISSUES=0
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            if grep -q 'amazon.com' "$file" && ! grep -q 'tag=buildguiders-20' "$file"; then
+              echo "FAIL: $file has Amazon links without buildguiders-20 tag"
+              ISSUES=1
+            fi
+          done <<< "${{ steps.check_new.outputs.new_files }}"
+          if [ "$ISSUES" -eq 1 ]; then
+            echo "Amazon tag check failed for new articles."
+            exit 1
+          fi
+          echo "All new articles have correct Amazon tags."
+
+      - name: Gate — Brand-product match check
+        if: steps.check_new.outputs.new_count != '0'
+        run: npm run check:brand-match
+
+      - name: Gate — Format claims check
+        if: steps.check_new.outputs.new_count != '0'
+        run: npm run check:format-claims
+
+      - name: Gate — Power cycle time check
+        if: steps.check_new.outputs.new_count != '0'
+        run: npm run check:power-cycle
+
+      - name: Gate — Product relevance check
+        if: steps.check_new.outputs.new_count != '0'
+        run: npm run check:product-relevance
+
+      - name: Gate — Viewing distance check
+        if: steps.check_new.outputs.new_count != '0'
+        run: npm run check:viewing-distance
+
+      - name: Gate — Build check
+        if: steps.check_new.outputs.new_count != '0'
+        run: npm run build
+
+      - name: Commit and publish new articles
+        if: steps.check_new.outputs.new_count != '0'
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions [bot]"
+          git add content/articles/*.mdx
+          git diff --cached --quiet || git commit -m "chore(content): research-driven article batch $(date +'%Y-%m-%d')"
+          git push

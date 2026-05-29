@@ -1,0 +1,22 @@
+{
+  "title": "LG C3/C4: Best motion settings to reduce judder vs stutter",
+  "brand": "LG",
+  "device": "C3/C4 OLED",
+  "problem": "motion-settings-judder-vs-stutter",
+  "tags": ["LG", "OLED", "Motion", "Settings"],
+  "audience": "LG C3/C4 owners seeing judder in films or smearing in sports.",
+  "quick": {
+    "fast": "Movies: Cinematic Movement; Sports: User Selection (De-blur 10).",
+    "deeper": "Fine-tune de-judder 0-1 for films; 2-3 for sports; optional OLED Motion Low."
+  },
+  "steps": [
+    "Settings  Picture  Advanced  Clarity  TruMotion.",
+    "Movies: Cinematic Movement or User Selection (de-judder 0-1, de-blur 8).",
+    "Sports: User Selection (de-judder 2-3, de-blur 10).",
+    "Real Cinema: On; Noise Reduction: Off on clean sources."
+  ],
+  "why": "De-blur helps high-fps sports; low de-judder preserves 24p film cadence.",
+  "paidLink": "https://example.com",
+  "next": ["LG OLED: HDR/Dolby Vision looks dim", "LG C2/C3: eARC not working"],
+  "draft": true
+}
