@@ -34,3 +34,45 @@ input[type="number"] {
 html {
   scroll-behavior: smooth;
 }
+
+/* Prose styles for MDX articles */
+.prose-buildguiders h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1C1917;
+  margin-top: 2rem;
+  margin-bottom: 0.65rem;
+  line-height: 1.3;
+}
+.prose-buildguiders h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1C1917;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.prose-buildguiders p {
+  margin-bottom: 1.1rem;
+  color: #44403c;
+}
+.prose-buildguiders ul, .prose-buildguiders ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.1rem;
+}
+.prose-buildguiders li {
+  margin-bottom: 0.35rem;
+  color: #44403c;
+}
+.prose-buildguiders strong {
+  color: #1C1917;
+  font-weight: 700;
+}
+.prose-buildguiders a {
+  color: #1B4332;
+  font-weight: 600;
+}
+.prose-buildguiders hr {
+  border: none;
+  border-top: 1px solid #e7e3da;
+  margin: 2rem 0;
+}
