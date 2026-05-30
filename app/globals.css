@@ -76,3 +76,19 @@ html {
   border-top: 1px solid #e7e3da;
   margin: 2rem 0;
 }
+
+/* Guide card hover — CSS-only, safe for Server Components */
+.guide-card {
+  background: #fff;
+  border: 1px solid #e7e3da;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: box-shadow 0.15s;
+}
+.guide-card:hover {
+  box-shadow: 0 2px 12px rgba(27, 67, 50, 0.10);
+}

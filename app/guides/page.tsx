@@ -62,26 +62,7 @@ export default async function GuidesPage() {
                 href={`/guides/${article.slug}`}
                 style={{ textDecoration: "none" }}
               >
-                <div
-                  style={{
-                    background: "#fff",
-                    border: "1px solid #e7e3da",
-                    borderRadius: 16,
-                    padding: "1.25rem 1.5rem",
-                    display: "flex",
-                    alignItems: "flex-start",
-                    justifyContent: "space-between",
-                    gap: "1rem",
-                    transition: "box-shadow 0.15s",
-                  }}
-                  onMouseEnter={(e) =>
-                    ((e.currentTarget as HTMLElement).style.boxShadow =
-                      "0 2px 12px rgba(27,67,50,0.10)")
-                  }
-                  onMouseLeave={(e) =>
-                    ((e.currentTarget as HTMLElement).style.boxShadow = "none")
-                  }
-                >
+                <div className="guide-card">
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.35rem" }}>
                       {article.category && CATEGORY_LABELS[article.category] && (
