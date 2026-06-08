@@ -71,6 +71,36 @@ const maintenanceCalculators = [
   },
 ];
 
+const lawnGardenCalculators = [
+  {
+    emoji: "🌱",
+    title: "Grass Seed Calculator",
+    description: "Pounds of seed, starter fertilizer, and straw cover — for new lawns, overseeding, or patch repair.",
+    href: "/grass-seed-calculator",
+    status: "live",
+    tag: "New",
+  },
+  {
+    emoji: "🥕",
+    title: "Raised Garden Bed Soil",
+    description: "Bags of soil, compost, and perlite to fill any raised bed. Premix or 60/30/10 DIY mix.",
+    href: "/raised-garden-bed-calculator",
+    status: "live",
+    tag: "New",
+  },
+];
+
+const interiorCalculators = [
+  {
+    emoji: "🌸",
+    title: "Wallpaper Calculator",
+    description: "Rolls, paste, and tools — peel-and-stick, pre-pasted, or traditional. Pattern repeat waste included.",
+    href: "/wallpaper-calculator",
+    status: "live",
+    tag: "New",
+  },
+];
+
 const steps = [
   {
     num: "01",
@@ -252,7 +282,7 @@ export default function HomePage() {
         <div style={{ fontFamily: "'Fraunces', serif", fontSize: "clamp(22px, 4vw, 28px)", fontWeight: 900, color: INK, letterSpacing: "-1px", marginBottom: 16 }}>
           Keep it looking good
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 40 }}>
           {maintenanceCalculators.map(({ emoji, title, description, href, status, tag }) => (
             <a
               key={title}
@@ -270,6 +300,52 @@ export default function HomePage() {
               {status === "live" && (
                 <span className="calc-link">Calculate now →</span>
               )}
+            </a>
+          ))}
+        </div>
+
+        {/* Lawn & Garden calculators */}
+        <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#78716C", marginBottom: 4 }}>
+          Lawn &amp; Garden Calculators
+        </div>
+        <div style={{ fontFamily: "'Fraunces', serif", fontSize: "clamp(22px, 4vw, 28px)", fontWeight: 900, color: INK, letterSpacing: "-1px", marginBottom: 16 }}>
+          Grow something great
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 40 }}>
+          {lawnGardenCalculators.map(({ emoji, title, description, href, status, tag }) => (
+            <a key={title} href={status === "live" ? href : undefined} className={`calc-card ${status}`}>
+              {tag && (
+                <div style={{ position: "absolute", top: 10, right: 10, background: GREEN, color: "#fff", fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", padding: "2px 7px", borderRadius: 3 }}>
+                  {tag}
+                </div>
+              )}
+              <span className="calc-icon">{emoji}</span>
+              <div style={{ fontFamily: "'Fraunces', serif", fontSize: 15, fontWeight: 700, color: INK, marginBottom: 4, lineHeight: 1.2 }}>{title}</div>
+              <div style={{ fontSize: 11, color: "#78716C", lineHeight: 1.45 }}>{description}</div>
+              {status === "live" && <span className="calc-link">Calculate now →</span>}
+            </a>
+          ))}
+        </div>
+
+        {/* Interior calculators */}
+        <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#78716C", marginBottom: 4 }}>
+          Interior Calculators
+        </div>
+        <div style={{ fontFamily: "'Fraunces', serif", fontSize: "clamp(22px, 4vw, 28px)", fontWeight: 900, color: INK, letterSpacing: "-1px", marginBottom: 16 }}>
+          Finish the inside
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
+          {interiorCalculators.map(({ emoji, title, description, href, status, tag }) => (
+            <a key={title} href={status === "live" ? href : undefined} className={`calc-card ${status}`}>
+              {tag && (
+                <div style={{ position: "absolute", top: 10, right: 10, background: GREEN, color: "#fff", fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", padding: "2px 7px", borderRadius: 3 }}>
+                  {tag}
+                </div>
+              )}
+              <span className="calc-icon">{emoji}</span>
+              <div style={{ fontFamily: "'Fraunces', serif", fontSize: 15, fontWeight: 700, color: INK, marginBottom: 4, lineHeight: 1.2 }}>{title}</div>
+              <div style={{ fontSize: 11, color: "#78716C", lineHeight: 1.45 }}>{description}</div>
+              {status === "live" && <span className="calc-link">Calculate now →</span>}
             </a>
           ))}
         </div>

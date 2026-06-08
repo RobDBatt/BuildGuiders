@@ -15,6 +15,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/concrete-calculator", priority: 0.8 },
     { path: "/fence-calculator", priority: 0.8 },
     { path: "/deck-stain-calculator", priority: 0.8 },
+    { path: "/grass-seed-calculator", priority: 0.9 },
+    { path: "/wallpaper-calculator", priority: 0.9 },
+    { path: "/raised-garden-bed-calculator", priority: 0.8 },
   ];
 
   return [
