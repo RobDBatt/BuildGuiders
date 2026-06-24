@@ -50,9 +50,68 @@ export default async function ArticlePage({ params }: Props) {
   if (!article || !article.published) notFound();
 
   const calc = CALCULATOR_LINKS[article.category];
+  const url = `https://www.buildguiders.com/guides/${slug}`;
+
+  // Related guides: same category first, then most-recent others, capped at 3
+  const related = (() => {
+    const all = getAllArticles().filter((a) => a.slug !== slug);
+    const same = all.filter((a) => a.category === article.category);
+    const rest = all.filter((a) => a.category !== article.category);
+    return [...same, ...rest].slice(0, 3);
+  })();
+
+  const articleLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.description,
+    datePublished: article.date || undefined,
+    dateModified: article.date || undefined,
+    image: article.coverImage ? `https://www.buildguiders.com${article.coverImage}` : undefined,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    author: { "@type": "Organization", name: "BuildGuiders", url: "https://www.buildguiders.com" },
+    publisher: {
+      "@type": "Organization",
+      name: "BuildGuiders",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://www.buildguiders.com/images/covers/Cover-Deck.png",
+      },
+    },
+  };
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.buildguiders.com" },
+      { "@type": "ListItem", position: 2, name: "Guides", item: "https://www.buildguiders.com/guides" },
+      { "@type": "ListItem", position: 3, name: article.title, item: url },
+    ],
+  };
+
+  const itemListLd =
+    article.products && article.products.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: article.title,
+          itemListElement: article.products.map((p, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: p.name,
+            url: p.url,
+          })),
+        }
+      : null;
 
   return (
     <div style={{ background: "#FEFBF3", minHeight: "100vh" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {itemListLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+      )}
       {/* Nav */}
       <nav style={{ background: "#FEFBF3", borderBottom: "1px solid #e7e3da", padding: "0 1.5rem" }}>
         <div style={{ maxWidth: 780, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 56 }}>
@@ -166,6 +225,31 @@ export default async function ArticlePage({ params }: Props) {
               {calc.label} &rarr;
             </Link>
           </div>
+        )}
+
+        {/* Related guides — internal linking / topical cluster */}
+        {related.length > 0 && (
+          <section style={{ marginTop: "3rem", paddingTop: "2rem", borderTop: "1px solid #e7e3da" }}>
+            <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "#78716c", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "1rem" }}>
+              Related Guides
+            </h2>
+            <div style={{ display: "grid", gap: "0.6rem" }}>
+              {related.map((r) => (
+                <Link
+                  key={r.slug}
+                  href={`/guides/${r.slug}`}
+                  style={{ display: "block", background: "#fff", border: "1px solid #e7e3da", borderRadius: 12, padding: "0.85rem 1.1rem", textDecoration: "none" }}
+                >
+                  <span style={{ display: "block", fontWeight: 700, color: "#1C1917", fontSize: "0.95rem" }}>{r.title}</span>
+                  {r.description && (
+                    <span style={{ display: "block", color: "#78716c", fontSize: "0.85rem", marginTop: "0.25rem", lineHeight: 1.5 }}>
+                      {r.description}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
       </main>
 

@@ -50,9 +50,26 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const orgLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "BuildGuiders",
+    url: "https://www.buildguiders.com",
+    logo: "https://www.buildguiders.com/images/covers/Cover-Deck.png",
+  };
+
+  const siteLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "BuildGuiders",
+    url: "https://www.buildguiders.com",
+  };
+
   return (
     <html lang="en">
       <body>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteLd) }} />
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-5LZDVK9T95" strategy="afterInteractive" />
         <Script id="ga-init" strategy="afterInteractive">
           {`
