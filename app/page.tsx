@@ -1,4 +1,4 @@
-"use client";
+import { getAllArticles } from "@/lib/articles";
 
 const buildCalculators = [
   {
@@ -153,6 +153,7 @@ const HD_ORANGE = "#F96302";
 const AMAZON_ORANGE = "#FF9900";
 
 export default function HomePage() {
+  const guides = getAllArticles();
   return (
     <div style={{ minHeight: "100vh", background: CREAM, fontFamily: "'DM Sans', sans-serif", color: INK }}>
 
@@ -440,6 +441,36 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* ── Buying Guides ── */}
+      {guides.length > 0 && (
+        <section style={{ background: CREAM, padding: "44px 24px", borderTop: `2.5px solid ${INK}` }}>
+          <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#78716C", marginBottom: 4 }}>
+            Buying guides
+          </div>
+          <div style={{ fontFamily: "'Fraunces', serif", fontSize: "clamp(26px, 5vw, 34px)", fontWeight: 900, color: INK, letterSpacing: "-1px", marginBottom: 6 }}>
+            Pick the right materials first
+          </div>
+          <p style={{ fontSize: 14, color: "#57534E", marginBottom: 24, maxWidth: 560 }}>
+            Honest, up-to-date picks for paint, decking, stain, tile and more — each guide ends with the matching calculator so you know exactly how much to buy.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 10 }}>
+            {guides.map((g) => (
+              <a
+                key={g.slug}
+                href={`/guides/${g.slug}`}
+                style={{ display: "block", background: "#fff", border: "2px solid #E7E5E4", borderRadius: 10, padding: "14px 16px", textDecoration: "none" }}
+              >
+                <div style={{ fontWeight: 800, fontSize: 14, color: INK, marginBottom: 4, lineHeight: 1.3 }}>{g.title}</div>
+                <div style={{ fontSize: 12.5, color: "#78716C", lineHeight: 1.45 }}>{g.description}</div>
+              </a>
+            ))}
+          </div>
+          <div style={{ marginTop: 22 }}>
+            <a href="/guides" style={{ fontSize: 13, fontWeight: 700, color: GREEN, textDecoration: "none" }}>See all guides →</a>
+          </div>
+        </section>
+      )}
 
       {/* ── CTA ── */}
       <section style={{ background: AMBER, padding: "40px 24px", textAlign: "center", borderTop: `2.5px solid ${INK}` }}>
