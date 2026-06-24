@@ -151,7 +151,7 @@ export default function AboutPage() {
             </h2>
             <div style={{ background: "#fff", border: `2px solid #E7E5E4`, borderRadius: 8, padding: 24, display: "flex", flexDirection: "column", gap: 14, fontSize: 15, color: "#44403C", lineHeight: 1.75 }}>
               <p>
-                BuildGuiders participates in affiliate programs including the <strong>Amazon Associates Program</strong>, the <strong>Home Depot affiliate program</strong>, and other programs through <strong>Commission Junction (CJ)</strong>. As an affiliate, we earn a small commission when you purchase through links on this site, at no additional cost to you.
+                BuildGuiders participates in the <strong>Amazon Associates Program</strong>. As an affiliate, we earn a small commission when you purchase through links on this site, at no additional cost to you.
               </p>
               <p>
                 These commissions are how we keep the calculators free. They don't influence our calculations, our shopping list contents, or which items we recommend — we list what you actually need for the job, not what earns us more.

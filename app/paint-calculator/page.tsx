@@ -306,7 +306,6 @@ export default function PaintCalculatorPage() {
                         </div>
                         <div className="flex gap-2 ml-11">
                           <a href={item.amazonUrl} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 text-white text-xs font-bold rounded-lg" style={{ backgroundColor: "#FF9900" }}>Amazon</a>
-                          <a href={item.hdUrl} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 text-white text-xs font-bold rounded-lg" style={{ backgroundColor: "#F96302" }}>Home Depot</a>
                         </div>
                       </div>
                     ))}

@@ -126,15 +126,13 @@ export default function PrivacyPage() {
 
           <h3>Affiliate tracking cookies</h3>
           <p>
-            BuildGuiders participates in affiliate programs. When you click an affiliate link on our Site (for example, a link to a product on Amazon.com or HomeDepot.com), the retailer may place a cookie on your device to track whether you complete a purchase. If you do, we receive a small commission at no additional cost to you.
+            BuildGuiders participates in the Amazon Associates affiliate program. When you click an affiliate link on our Site (for example, a link to a product on Amazon.com), the retailer may place a cookie on your device to track whether you complete a purchase. If you do, we receive a small commission at no additional cost to you.
           </p>
           <p>
             These affiliate programs include, but are not limited to:
           </p>
           <ul>
             <li><strong>Amazon Associates</strong> — operated by Amazon.com, Inc. Amazon may place cookies subject to <a href="https://www.amazon.com/gp/help/customer/display.html?nodeId=468496" target="_blank" rel="noopener noreferrer">Amazon's Privacy Notice</a>.</li>
-            <li><strong>Home Depot affiliate program</strong> — operated via Commission Junction (CJ Affiliate). Subject to <a href="https://www.homedepot.com/c/privacy_security" target="_blank" rel="noopener noreferrer">Home Depot's Privacy Policy</a> and <a href="https://www.cj.com/legal/privacy" target="_blank" rel="noopener noreferrer">CJ Affiliate's Privacy Policy</a>.</li>
-            <li><strong>Lowe's affiliate program</strong> — operated via Commission Junction (CJ Affiliate). Subject to <a href="https://www.lowes.com/l/privacy.html" target="_blank" rel="noopener noreferrer">Lowe's Privacy Policy</a> and CJ Affiliate's Privacy Policy.</li>
             <li><strong>Other retailers</strong> — we may add additional affiliate programs over time. All will be disclosed here when added.</li>
           </ul>
           <p>

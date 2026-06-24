@@ -115,7 +115,7 @@ const steps = [
   {
     num: "03",
     title: "Walk out with a list",
-    body: "Every item you need — Amazon, Home Depot, and Menards links — including the stuff you'd forget.",
+    body: "Every item you need — with direct Amazon links — including the stuff you'd forget.",
   },
 ];
 
@@ -234,7 +234,7 @@ export default function HomePage() {
 
       {/* ── Strip ── */}
       <div style={{ background: GREEN, padding: "11px 24px", display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
-        {["Waste factor included", "Full shopping list output", "Amazon + Home Depot + Menards", "Copy list to clipboard"].map(item => (
+        {["Waste factor included", "Full shopping list output", "Direct Amazon links", "Copy list to clipboard"].map(item => (
           <div key={item} style={{ color: "#fff", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 6, opacity: 0.95 }}>
             <span className="strip-check">✓</span> {item}
           </div>
@@ -399,7 +399,7 @@ export default function HomePage() {
         <div style={{ fontFamily: "'Fraunces', serif", fontSize: "clamp(24px, 5vw, 32px)", fontWeight: 900, color: INK, letterSpacing: "-1px", marginBottom: 6 }}>
           What you actually get
         </div>
-        <p style={{ fontSize: 14, color: "#57534E", marginBottom: 20 }}>Every item on your list has three purchase options — pick your store.</p>
+        <p style={{ fontSize: 14, color: "#57534E", marginBottom: 20 }}>Every item on your list links straight to Amazon — no hunting required.</p>
         <div style={{ background: "#FAFAF8", border: `2px solid #E7E5E4`, borderRadius: 10, overflow: "hidden", maxWidth: 480 }}>
           <div style={{ background: GREEN, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div>
@@ -429,8 +429,6 @@ export default function HomePage() {
               <div style={{ display: "flex", gap: 6, marginLeft: 42, flexWrap: "wrap" }}>
                 {[
                   { label: "Amazon", bg: AMAZON_ORANGE },
-                  { label: "Home Depot", bg: HD_ORANGE },
-                  { label: "Menards", bg: MENARDS_RED },
                 ].map(({ label, bg }) => (
                   <div key={label} style={{ display: "inline-flex", alignItems: "center", padding: "5px 10px", borderRadius: 5, fontSize: 11, fontWeight: 700, color: "#fff", background: bg, cursor: "pointer" }}>
                     {label}
