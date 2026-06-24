@@ -33,11 +33,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: article.title,
     description: article.description,
     keywords: article.keywords,
-    alternates: { canonical: `https://buildguiders.com/guides/${slug}` },
+    alternates: { canonical: `https://www.buildguiders.com/guides/${slug}` },
     openGraph: {
       title: article.title,
       description: article.description,
-      url: `https://buildguiders.com/guides/${slug}`,
+      url: `https://www.buildguiders.com/guides/${slug}`,
       type: "article",
       publishedTime: article.date,
     },

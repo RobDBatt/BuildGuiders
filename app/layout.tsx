@@ -20,14 +20,14 @@ export const metadata: Metadata = {
     "how much paint do I need",
     "how many deck boards do I need",
   ],
-  metadataBase: new URL("https://buildguiders.com"),
+  metadataBase: new URL("https://www.buildguiders.com"),
   openGraph: {
     type: "website",
     siteName: "BuildGuiders",
     title: "BuildGuiders — Free Home Project Material Calculators",
     description:
       "Enter your dimensions, get an exact shopping list. Every item, every quantity, every link — before you leave the house.",
-    url: "https://buildguiders.com",
+    url: "https://www.buildguiders.com",
   },
   twitter: {
     card: "summary_large_image",

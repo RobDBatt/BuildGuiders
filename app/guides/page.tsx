@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Buying Guides — Home Improvement Material Picks",
   description:
     "Expert buying guides for paint, flooring, deck stain, drywall, and more — with calculator links so you know exactly how much to buy.",
-  alternates: { canonical: "https://buildguiders.com/guides" },
+  alternates: { canonical: "https://www.buildguiders.com/guides" },
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
