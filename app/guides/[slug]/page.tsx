@@ -152,6 +152,9 @@ export default async function ArticlePage({ params }: Props) {
               {new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
             </p>
           )}
+          <p style={{ fontSize: "0.75rem", color: "#a8a29e", margin: 0, marginTop: "0.75rem", fontStyle: "italic" }}>
+            Some links on this page are affiliate links. If you buy through one, BuildGuiders may earn a commission at no extra cost to you.
+          </p>
         </header>
 
         {/* Calculator CTA — top */}
