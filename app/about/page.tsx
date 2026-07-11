@@ -144,6 +144,24 @@ export default function AboutPage() {
             </div>
           </section>
 
+          {/* How we research */}
+          <section>
+            <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 900, color: INK, letterSpacing: "-1px", marginBottom: 16 }}>
+              How we research our guides
+            </h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16, fontSize: 16, color: "#44403C", lineHeight: 1.75 }}>
+              <p>
+                Our buying guides are written by the BuildGuiders team with the help of AI research tools, and we&apos;re upfront about what that means: we don&apos;t lab-test every product ourselves. Each pick is based on a comparison of manufacturer specifications, independent and professional test results (like Consumer Reports and trade reviews), and verified buyer feedback.
+              </p>
+              <p>
+                We only claim what we actually do. You won&apos;t find invented &ldquo;hands-on testing,&rdquo; fake reviewer bios, or staged product photos here — if a guide says a paint covers 400 square feet per gallon, that figure comes from the manufacturer&apos;s data, not a number we made up.
+              </p>
+              <p>
+                Recommendations are editorially independent. We don&apos;t accept payment to feature a brand, and the affiliate links below never change which products we recommend.
+              </p>
+            </div>
+          </section>
+
           {/* Affiliate disclosure — required by FTC, CJ, Amazon */}
           <section style={{ borderTop: `2.5px solid ${INK}`, paddingTop: 40 }}>
             <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 900, color: INK, letterSpacing: "-1px", marginBottom: 16 }}>
