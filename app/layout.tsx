@@ -74,6 +74,14 @@ export default function RootLayout({
     url: "https://www.buildguiders.com",
   };
 
+  // Skimlinks auto-affiliate layer. When NEXT_PUBLIC_SKIMLINKS_ID is set,
+  // Skimlinks rewrites outbound merchant links (Home Depot, Lowe's, tools,
+  // decking, etc.) into affiliate links at runtime. It does NOT touch Amazon
+  // links, so the existing tag=buildguiders-20 links are unaffected. Left
+  // inert (nothing rendered) until the env var is configured in Vercel.
+  // To use Sovrn instead, swap the src below for the Sovrn/VigLink snippet.
+  const skimlinksId = process.env.NEXT_PUBLIC_SKIMLINKS_ID;
+
   return (
     <html lang="en">
       <body>
@@ -88,6 +96,12 @@ export default function RootLayout({
             gtag('config', 'G-5LZDVK9T95');
           `}
         </Script>
+        {skimlinksId && (
+          <Script
+            src={`https://s.skimresources.com/js/${skimlinksId}.skimlinks.js`}
+            strategy="lazyOnload"
+          />
+        )}
         {children}
       </body>
     </html>
