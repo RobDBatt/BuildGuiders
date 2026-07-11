@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getAllArticles } from "@/lib/articles";
 
 const buildCalculators = [
@@ -207,6 +208,65 @@ export default function HomePage() {
         </nav>
       </header>
       <div className="amber-bar" />
+
+      {/* ── Brand banner masthead ── */}
+      <section
+        aria-label="BuildGuiders"
+        style={{
+          position: "relative",
+          width: "100%",
+          aspectRatio: "16 / 5",
+          minHeight: 150,
+          overflow: "hidden",
+          borderBottom: `2.5px solid ${INK}`,
+          background: CREAM,
+        }}
+      >
+        <Image
+          src="/header-flatlay.webp"
+          alt="BuildGuiders — flat-lay of home project materials in cream, green, and amber"
+          fill
+          priority
+          sizes="100vw"
+          style={{ objectFit: "cover", objectPosition: "right center" }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: 8,
+            width: "52%",
+            minWidth: 240,
+            padding: "0 24px",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "'Fraunces', serif",
+              fontWeight: 900,
+              fontSize: "clamp(26px, 5vw, 34px)",
+              color: INK,
+              letterSpacing: "-1px",
+              lineHeight: 1,
+            }}
+          >
+            BuildGuiders
+          </div>
+          <div
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "clamp(12px, 2.4vw, 15px)",
+              color: "#57534E",
+              lineHeight: 1.4,
+            }}
+          >
+            Material calculators with a shopping list.
+          </div>
+        </div>
+      </section>
 
       {/* ── Hero ── */}
       <section style={{ background: CREAM, padding: "52px 24px 44px", borderBottom: `2.5px solid ${INK}`, position: "relative", overflow: "hidden" }}>

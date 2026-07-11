@@ -28,12 +28,21 @@ export const metadata: Metadata = {
     description:
       "Enter your dimensions, get an exact shopping list. Every item, every quantity, every link — before you leave the house.",
     url: "https://www.buildguiders.com",
+    images: [
+      {
+        url: "/og-default.png",
+        width: 1200,
+        height: 630,
+        alt: "BuildGuiders — flat-lay of home project materials in cream, green, and amber",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "BuildGuiders — Free Home Project Material Calculators",
     description:
       "Enter your dimensions, get an exact shopping list. Make one trip, not four.",
+    images: ["/og-default.png"],
   },
   robots: {
     index: true,
