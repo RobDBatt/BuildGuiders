@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { AMAZON_TAG } from "@/lib/site-config.generated";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface Room {
@@ -30,7 +31,6 @@ const PRIMER_COVERAGE = 300;
 const DOOR_AREA = 20;
 const WINDOW_AREA = 15;
 
-const AMAZON_TAG = "buildguiders-20";
 const HD_BASE = "https://www.homedepot.com/s/";
 
 function amazonUrl(asin: string) {

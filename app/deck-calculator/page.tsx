@@ -1,8 +1,8 @@
 "use client";
 import { useState, useMemo } from "react";
+import { AMAZON_TAG } from "@/lib/site-config.generated";
 
 const GREEN = "#1B4332";
-const AMAZON_TAG = "buildguiders-20";
 const aUrl = (asin: string) => `https://www.amazon.com/dp/${asin}?tag=${AMAZON_TAG}`;
 const hdUrl = (q: string) => `https://www.homedepot.com/s/${encodeURIComponent(q)}`;
 

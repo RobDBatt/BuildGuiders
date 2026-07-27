@@ -1,8 +1,8 @@
 "use client";
 import { useState, useMemo } from "react";
+import { AMAZON_TAG } from "@/lib/site-config.generated";
 
 const GREEN = "#1B4332";
-const AMAZON_TAG = "buildguiders-20";
 const aUrl = (q: string) => `https://www.amazon.com/s?k=${encodeURIComponent(q)}&tag=${AMAZON_TAG}`;
 
 const PREMIX_BAG_CUFT = 1.5;   // Miracle-Gro Raised Bed Soil
