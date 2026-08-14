@@ -94,16 +94,17 @@ function CategoryBadge({ cat }: { cat: ShoppingItem["category"] }) {
   return <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${color}`}>{label}</span>;
 }
 
-const defaultRoom = (): Room => ({ id: crypto.randomUUID(), length: "", width: "", height: "", doors: "1", windows: "1" });
+let roomSeq = 0;
+const defaultRoom = (): Room => ({ id: `room-${++roomSeq}`, length: "", width: "", height: "8", doors: "1", windows: "1" });
+const firstRoom = (): Room[] => [{ id: "room-1", length: "12", width: "12", height: "8", doors: "1", windows: "1" }];
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 export default function PaintCalculatorPage() {
-  const [rooms, setRooms] = useState<Room[]>([defaultRoom()]);
+  const [rooms, setRooms] = useState<Room[]>(firstRoom());
   const [coats, setCoats] = useState(2);
   const [includePrimer, setIncludePrimer] = useState(true);
   const [wallsOnly, setWallsOnly] = useState(false);
   const [surfaceType, setSurfaceType] = useState<"smooth" | "textured">("smooth");
-  const [calculated, setCalculated] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const result = useMemo(() => calcPaint(rooms, coats, includePrimer, wallsOnly), [rooms, coats, includePrimer, wallsOnly]);
@@ -244,17 +245,11 @@ export default function PaintCalculatorPage() {
               </button>
             </div>
 
-            <button onClick={() => setCalculated(true)} disabled={!hasValidInput} className="w-full py-3.5 text-white font-bold rounded-xl text-base disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-              style={{ backgroundColor: "#1B4332" }}
-              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) e.currentTarget.style.backgroundColor = "#14532d"; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = "#1B4332"; }}>
-              Calculate & Build My List →
-            </button>
           </div>
 
           {/* Results */}
           <div className="lg:col-span-3 space-y-4">
-            {!calculated || !hasValidInput ? (
+            {!hasValidInput ? (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-20 px-6 text-center">
                 <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 text-3xl">🪣</div>
                 <h3 className="font-bold text-slate-700 text-lg">Your shopping list will appear here</h3>

@@ -31,11 +31,10 @@ function calc(sqft: number, rate: number) {
 }
 
 export default function GrassSeedCalculator() {
-  const [length,   setLength]   = useState("");
-  const [width,    setWidth]    = useState("");
+  const [length,   setLength]   = useState("50");
+  const [width,    setWidth]    = useState("40");
   const [seedType, setSeedType] = useState("new");
   const [sunType,  setSunType]  = useState("sun");
-  const [calculated, setCalculated] = useState(false);
 
   const sqft    = (parseFloat(length) || 0) * (parseFloat(width) || 0);
   const hasInput = sqft > 0;
@@ -168,18 +167,11 @@ export default function GrassSeedCalculator() {
               {sqft > 0 && <p className="px-4 pb-3 text-xs text-slate-400">{sqft.toLocaleString()} sq ft total</p>}
             </div>
 
-            <button onClick={() => setCalculated(true)} disabled={!hasInput}
-              className="w-full py-3.5 text-white font-bold rounded-xl text-base disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-              style={{ backgroundColor: GREEN }}
-              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) e.currentTarget.style.backgroundColor = "#14532d"; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = GREEN; }}>
-              Calculate & Build My List →
-            </button>
           </div>
 
           {/* ── Results ── */}
           <div className="lg:col-span-3 space-y-4">
-            {!calculated || !hasInput ? (
+            {!hasInput ? (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-20 px-6 text-center">
                 <div className="text-4xl mb-4">🌱</div>
                 <h3 className="font-bold text-slate-700 text-lg">Your shopping list will appear here</h3>

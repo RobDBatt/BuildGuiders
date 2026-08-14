@@ -25,7 +25,9 @@ const MIX_TYPES = [
 ];
 
 interface Bed { id: string; length: string; width: string; }
-const defaultBed = (): Bed => ({ id: crypto.randomUUID(), length: "", width: "" });
+let bedSeq = 0;
+const defaultBed = (): Bed => ({ id: `bed-${++bedSeq}`, length: "", width: "" });
+const firstBed = (): Bed[] => [{ id: "bed-1", length: "8", width: "4" }];
 
 function calc(beds: Bed[], depthIn: number) {
   const depthFt  = depthIn / 12;
@@ -51,10 +53,9 @@ function calc(beds: Bed[], depthIn: number) {
 }
 
 export default function RaisedGardenBedCalculator() {
-  const [beds,      setBeds]      = useState<Bed[]>([defaultBed()]);
+  const [beds,      setBeds]      = useState<Bed[]>(firstBed());
   const [depth,     setDepth]     = useState(8);
   const [mixType,   setMixType]   = useState("premix");
-  const [calculated, setCalculated] = useState(false);
 
   const hasInput = beds.some(b => parseFloat(b.length) > 0 && parseFloat(b.width) > 0);
   const result   = useMemo(() => calc(beds, depth), [beds, depth]);
@@ -226,18 +227,11 @@ export default function RaisedGardenBedCalculator() {
               </button>
             </div>
 
-            <button onClick={() => setCalculated(true)} disabled={!hasInput}
-              className="w-full py-3.5 text-white font-bold rounded-xl text-base disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-              style={{ backgroundColor: GREEN }}
-              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) e.currentTarget.style.backgroundColor = "#14532d"; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = GREEN; }}>
-              Calculate & Build My List →
-            </button>
           </div>
 
           {/* ── Results ── */}
           <div className="lg:col-span-3 space-y-4">
-            {!calculated || !hasInput ? (
+            {!hasInput ? (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-20 px-6 text-center">
                 <div className="text-4xl mb-4">🥕</div>
                 <h3 className="font-bold text-slate-700 text-lg">Your shopping list will appear here</h3>

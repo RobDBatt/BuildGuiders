@@ -16,7 +16,9 @@ const TILE_SIZES = [
 ];
 
 interface Area { id: string; length: string; width: string; }
-const defaultArea = (): Area => ({ id: crypto.randomUUID(), length: "", width: "" });
+let areaSeq = 0;
+const defaultArea = (): Area => ({ id: `area-${++areaSeq}`, length: "", width: "" });
+const firstArea = (): Area[] => [{ id: "area-1", length: "10", width: "8" }];
 
 function calc(areas: Area[], tileSizeId: string, waste: number, groutLine: number) {
   const tileSize = TILE_SIZES.find(t => t.id === tileSizeId)!;
@@ -29,12 +31,11 @@ function calc(areas: Area[], tileSizeId: string, waste: number, groutLine: numbe
 }
 
 export default function TileCalculator() {
-  const [areas, setAreas] = useState<Area[]>([defaultArea()]);
+  const [areas, setAreas] = useState<Area[]>(firstArea());
   const [tileSizeId, setTileSizeId] = useState("12x12");
   const [waste, setWaste] = useState(10);
   const [groutLine, setGroutLine] = useState(3);
   const [surface, setSurface] = useState<"floor" | "wall">("floor");
-  const [calculated, setCalculated] = useState(false);
   const result = useMemo(() => calc(areas, tileSizeId, waste, groutLine), [areas, tileSizeId, waste, groutLine]);
   const hasInput = areas.some(a => parseFloat(a.length) > 0 && parseFloat(a.width) > 0);
 
@@ -157,16 +158,10 @@ export default function TileCalculator() {
               </button>
             </div>
 
-            <button onClick={() => setCalculated(true)} disabled={!hasInput} className="w-full py-3.5 text-white font-bold rounded-xl text-base disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-              style={{ backgroundColor: GREEN }}
-              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) e.currentTarget.style.backgroundColor = "#14532d"; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = GREEN; }}>
-              Calculate & Build My List →
-            </button>
           </div>
 
           <div className="lg:col-span-3 space-y-4">
-            {!calculated || !hasInput ? (
+            {!hasInput ? (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-20 px-6 text-center">
                 <div className="text-4xl mb-4">🔲</div>
                 <h3 className="font-bold text-slate-700 text-lg">Your shopping list will appear here</h3>

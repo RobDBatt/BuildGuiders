@@ -160,9 +160,9 @@ function Toggle({ label, sub, checked, onChange }: { label: string; sub?: string
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function DeckCalculator() {
-  const [deckL, setDeckL] = useState("");
-  const [deckW, setDeckW] = useState("");
-  const [deckHeight, setDeckHeight] = useState("");
+  const [deckL, setDeckL] = useState("16");
+  const [deckW, setDeckW] = useState("12");
+  const [deckHeight, setDeckHeight] = useState("3");
   const [boardWidth, setBoardWidth] = useState(5.5);
   const [postSpacing, setPostSpacing] = useState(8);
   const [boardType, setBoardType] = useState("pressure-treated");
@@ -170,7 +170,6 @@ export default function DeckCalculator() {
   const [includeStairs, setIncludeStairs] = useState(false);
   const [stairWidth, setStairWidth] = useState(36);
   const [includeRailing, setIncludeRailing] = useState(false);
-  const [calculated, setCalculated] = useState(false);
 
   const result = useMemo(() => {
     const l = parseFloat(deckL);
@@ -338,17 +337,11 @@ export default function DeckCalculator() {
               </div>
             </div>
 
-            <button onClick={() => setCalculated(true)} disabled={!hasInput} className="w-full py-3.5 text-white font-bold rounded-xl text-base disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-              style={{ backgroundColor: GREEN }}
-              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) e.currentTarget.style.backgroundColor = "#14532d"; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = GREEN; }}>
-              Calculate & Build My List →
-            </button>
           </div>
 
           {/* ── RIGHT: Results ── */}
           <div className="lg:col-span-3 space-y-4">
-            {!calculated || !result ? (
+            {!result ? (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-20 px-6 text-center">
                 <div className="text-4xl mb-4">🪚</div>
                 <h3 className="font-bold text-slate-700 text-lg">Your shopping list will appear here</h3>
