@@ -294,6 +294,16 @@ export default function RaisedGardenBedCalculator() {
         </div>
       </div>
 
+      <div className="max-w-4xl mx-auto px-4 pb-4">
+        <p className="text-sm text-slate-500">
+          Topping a border rather than filling a frame? The{" "}
+          <a href="/mulch-calculator" className="font-semibold underline" style={{ color: GREEN }}>
+            mulch calculator
+          </a>{" "}
+          works out cubic yards and bag counts for mulch, topsoil, compost and gravel at any bed depth.
+        </p>
+      </div>
+
       <footer className="mt-16 border-t border-slate-200 bg-white">
         <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-slate-400">© 2026 BuildGuiders.com</p>
