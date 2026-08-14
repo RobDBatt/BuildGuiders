@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/grass-seed-calculator", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/wallpaper-calculator", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/raised-garden-bed-calculator", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/pool-volume-calculator", priority: 0.9, changeFrequency: "monthly" as const },
   ];
 
   const now = new Date();

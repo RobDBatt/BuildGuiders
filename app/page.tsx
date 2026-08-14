@@ -91,6 +91,17 @@ const lawnGardenCalculators = [
   },
 ];
 
+const poolCalculators = [
+  {
+    emoji: "🏊",
+    title: "Pool Volume Calculator",
+    description: "Gallons for rectangle, round, oval, or kidney pools — sloped floors handled, plus the chemical list.",
+    href: "/pool-volume-calculator",
+    status: "live",
+    tag: "New",
+  },
+];
+
 const interiorCalculators = [
   {
     emoji: "🌸",
@@ -374,6 +385,29 @@ export default function HomePage() {
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 40 }}>
           {lawnGardenCalculators.map(({ emoji, title, description, href, status, tag }) => (
+            <a key={title} href={status === "live" ? href : undefined} className={`calc-card ${status}`}>
+              {tag && (
+                <div style={{ position: "absolute", top: 10, right: 10, background: GREEN, color: "#fff", fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", padding: "2px 7px", borderRadius: 3 }}>
+                  {tag}
+                </div>
+              )}
+              <span className="calc-icon">{emoji}</span>
+              <div style={{ fontFamily: "'Fraunces', serif", fontSize: 15, fontWeight: 700, color: INK, marginBottom: 4, lineHeight: 1.2 }}>{title}</div>
+              <div style={{ fontSize: 11, color: "#78716C", lineHeight: 1.45 }}>{description}</div>
+              {status === "live" && <span className="calc-link">Calculate now →</span>}
+            </a>
+          ))}
+        </div>
+
+        {/* Pool & Water calculators */}
+        <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#78716C", marginBottom: 4 }}>
+          Pool &amp; Water Calculators
+        </div>
+        <div style={{ fontFamily: "'Fraunces', serif", fontSize: "clamp(22px, 4vw, 28px)", fontWeight: 900, color: INK, letterSpacing: "-1px", marginBottom: 16 }}>
+          Know what you&apos;re treating
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 40 }}>
+          {poolCalculators.map(({ emoji, title, description, href, status, tag }) => (
             <a key={title} href={status === "live" ? href : undefined} className={`calc-card ${status}`}>
               {tag && (
                 <div style={{ position: "absolute", top: 10, right: 10, background: GREEN, color: "#fff", fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", padding: "2px 7px", borderRadius: 3 }}>
