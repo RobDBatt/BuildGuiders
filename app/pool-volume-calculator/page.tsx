@@ -307,17 +307,19 @@ const RECT_EXAMPLES: [string, string][] = [
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function PoolVolumeCalculator() {
+  // Seeded with the most common residential inground size (16 × 32 ft sloping
+  // 3 ft to 8 ft, ~21,100 gallons) so the volume and the shopping list render
+  // server-side. A crawler never clicks a Calculate button.
   const [shapeId, setShapeId] = useState("rectangle");
-  const [length, setLength] = useState("");
-  const [width, setWidth] = useState("");
+  const [length, setLength] = useState("32");
+  const [width, setWidth] = useState("16");
   const [diameter, setDiameter] = useState("");
   const [widthA, setWidthA] = useState("");
   const [widthB, setWidthB] = useState("");
   const [sloped, setSloped] = useState(true);
   const [depth, setDepth] = useState("");
-  const [shallow, setShallow] = useState("");
-  const [deep, setDeep] = useState("");
-  const [calculated, setCalculated] = useState(false);
+  const [shallow, setShallow] = useState("3");
+  const [deep, setDeep] = useState("8");
   const [copied, setCopied] = useState(false);
 
   const shape = SHAPES.find((s) => s.id === shapeId)!;
@@ -492,31 +494,17 @@ export default function PoolVolumeCalculator() {
               </div>
             </Card>
 
-            <button
-              onClick={() => setCalculated(true)}
-              disabled={!result}
-              className="w-full py-3.5 text-white font-bold rounded-xl text-base disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-              style={{ backgroundColor: GREEN }}
-              onMouseEnter={(e) => {
-                if (!(e.currentTarget as HTMLButtonElement).disabled) e.currentTarget.style.backgroundColor = "#14532d";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = GREEN;
-              }}
-            >
-              Calculate &amp; Build My List →
-            </button>
           </div>
 
           {/* ── RIGHT: Results ── */}
           <div className="lg:col-span-3 space-y-4">
-            {!calculated || !result ? (
+            {!result ? (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-20 px-6 text-center">
                 <div className="text-4xl mb-4">🏊</div>
-                <h3 className="font-bold text-slate-700 text-lg">Your volume and shopping list will appear here</h3>
+                <h3 className="font-bold text-slate-700 text-lg">Enter your pool&apos;s dimensions</h3>
                 <p className="text-slate-400 text-sm mt-2 max-w-xs">
-                  Pick a shape, enter the dimensions, and use your real water depth — the shallow and deep readings, not
-                  the wall height.
+                  Pick a shape and fill in the measurements. Use your real water depth — the shallow and deep readings,
+                  not the wall height.
                 </p>
               </div>
             ) : (
