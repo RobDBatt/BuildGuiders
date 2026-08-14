@@ -19,6 +19,7 @@ const CALCULATORS: [string, string][] = [
   ["Grass seed calculator", "/grass-seed-calculator"],
   ["Wallpaper calculator", "/wallpaper-calculator"],
   ["Raised garden bed calculator", "/raised-garden-bed-calculator"],
+  ["Pool volume calculator", "/pool-volume-calculator"],
 ];
 
 function label(category: unknown): string {
