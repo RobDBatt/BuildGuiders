@@ -119,7 +119,93 @@ production HTML. Order: merge → Vercel deploy → confirm live → verify.
 - A sibling site pulling data with the same tool/date range is your control that
   the connection and query are fine.
 
-## 7. Git / PR workflow
+## 7. The page's value must be in the server-rendered HTML
+
+**The worst thing we've shipped.** Twelve of thirteen calculators hid their
+results and shopping list behind a Calculate button. A crawler never presses it,
+so the shopping-list output — the entire reason to pick us over calculator.net —
+was invisible to Google on every one of them. The mulch calculator sat at zero
+GSC impressions for twelve months and it read as a ranking problem. It wasn't:
+the page had 93 crawlable words and no title.
+
+- **Never gate the differentiator behind an interaction.** Seed the inputs with a
+  common, realistic project and render a populated result on first paint. Keep an
+  empty state for when a user clears the fields — that's the only time it shows.
+- JS rendering does not save you. Googlebot executes JavaScript; it does not
+  click buttons, fill forms, or scroll to trigger loads.
+- A `"use client"` page is still server-rendered on first request. Whatever the
+  initial state produces is what gets indexed, so make the initial state useful.
+- Seeded defaults must be **deterministic**. `crypto.randomUUID()` or `Date.now()`
+  in initial state gives the server and client different markup.
+
+## 8. Every route ships its own title, description and canonical
+
+Ten pages once shared the site-default title and emitted no canonical at all.
+`metadataBase` alone does **not** emit a canonical tag.
+
+- A `"use client"` page cannot export `metadata` — it needs a sibling
+  `layout.tsx` that does. That's the pattern; follow it for every interactive page.
+- Server components export `metadata` directly.
+- The root layout needs `alternates: { canonical: "/" }` for the homepage.
+
+## 9. Title ≤60 characters, description ≤160 — measured on the rendered page
+
+Seventeen guide titles ran to 78 characters and seventeen descriptions to 219.
+Google truncates both, so the tail was never shown — and on our best-ranking
+page the half that survived was the dishonest half.
+
+- Measure the **rendered** `<title>`, not the frontmatter string. The
+  `%s | BuildGuiders` template costs 15 characters, so the page portion has ~45.
+- Decode HTML entities before counting: `&amp;` is one character on screen and
+  five in the file. `wc -c` and bash `${#var}` count bytes, so an em dash reads
+  as three. Count code points.
+- Lead with the head term. The year belongs on "best of" guides where freshness
+  is a ranking signal, not on evergreen troubleshooting pages.
+
+## 10. Structured data must point at assets that exist
+
+All 26 guides emitted Article schema whose `image` resolved to a 404, because
+the frontmatter pointed at `/images/covers/` and nothing was ever committed
+there. Google requires a resolvable `image` for the Article rich result, so
+every one of them was invalid — and no crawler flags it, because the path only
+appears in JSON-LD and OG tags, never as an `<img>`.
+
+- Resolve image paths against `public/` **at build time** and fall back to a
+  known-good asset. `resolveCoverImage()` in `lib/articles.ts` is the pattern.
+- Same for `Organization.logo` and `publisher.logo`.
+- After a build, grep the output for the schema image URL and confirm the file
+  is actually in `public/`.
+
+## 11. One H1 per page
+
+Four guides carried a body-level `# Heading` on top of the template's H1. If the
+template renders the frontmatter title as the H1, the MDX body must start at
+`##`.
+
+## 12. The honesty standard covers title tags and meta descriptions
+
+See "Content & editorial voice" above — it applies to **metadata**, not just body
+prose. "Tested Picks" in a title tag is the same fabrication as "I tested" in a
+paragraph, and it does more damage, because the title is the part Google shows.
+Our highest-impression page carried it for months.
+
+## 13. Verify these after every build, before pushing
+
+The failures above are all invisible in the source and obvious in the output.
+Check the built HTML, not the components:
+
+```bash
+npm run build
+# every page has a unique title + canonical
+cd .next/server/app && for f in *.html guides/*.html; do
+  printf "%s %s %s\n" "$f" "$(grep -c 'rel=\"canonical\"' $f)" \
+    "$(grep -o '<title>[^<]*</title>' $f)"; done | sort
+# the tool's output is actually in the HTML
+grep -c "Your Shopping List" *-calculator.html
+# no NaN/undefined leaking into rendered text
+```
+
+## 14. Git / PR workflow
 
 Branch off the latest default branch; one concern per PR; `npm run build` before
 pushing; squash-merge. Don't stack unrelated fixes onto a feature branch that
