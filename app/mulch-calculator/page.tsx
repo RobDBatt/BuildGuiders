@@ -190,7 +190,7 @@ function buildShoppingList(result: Result, delivery: boolean): ShoppingItem[] {
         qty: Math.max(1, Math.ceil(cubicYards)),
         name: `${mat.label} — Bulk Delivery (cubic yards)`,
         note: `${cubicYards} cubic yards, ordered as ${Math.max(1, Math.ceil(cubicYards))} — suppliers sell by the whole yard. That is about ${bags} bags' worth.`,
-        tip: `Tip: One cubic yard covers about ${result.sqFtPerYard} sq ft at this depth. Order from a local landscape supplier or garden centre — have somewhere for the pile to be dumped and a wheelbarrow ready before it arrives.`,
+        tip: `Tip: One cubic yard covers about ${result.sqFtPerYard} sq ft at this depth. Order from a local landscape supplier or garden center — have somewhere for the pile to be dumped and a wheelbarrow ready before it arrives.`,
       }
     : {
         qty: bags,
@@ -768,7 +768,7 @@ export default function MulchCalculator() {
               <a href="/guides/best-mulch-for-flower-beds" className="font-semibold underline" style={{ color: GREEN }}>
                 best mulch for flower beds
               </a>{" "}
-              compares shredded hardwood, cedar, pine bark and dyed options on how long they hold colour and how well
+              compares shredded hardwood, cedar, pine bark and dyed options on how long they hold color and how well
               they knit together. Filling a raised bed rather than topping a border? The{" "}
               <a href="/raised-garden-bed-calculator" className="font-semibold underline" style={{ color: GREEN }}>
                 raised garden bed soil calculator

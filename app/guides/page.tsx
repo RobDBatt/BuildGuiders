@@ -3,7 +3,7 @@ import { getAllArticles } from "@/lib/articles";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Buying Guides — Home Improvement Material Picks",
+  title: "Buying Guides — Material Picks",
   description:
     "Expert buying guides for paint, flooring, deck stain, drywall, and more — with calculator links so you know exactly how much to buy.",
   alternates: { canonical: "https://www.buildguiders.com/guides" },

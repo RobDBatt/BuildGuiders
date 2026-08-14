@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: "%s | BuildGuiders",
   },
   description:
-    "Free material calculators for home projects. Enter your dimensions, get an exact shopping list — every item, every quantity, every link. Make one trip, not four.",
+    "Free material calculators for home projects. Enter your dimensions, get an exact shopping list — every item, every quantity, every link.",
   keywords: [
     "home project calculator",
     "material calculator",
