@@ -1,3 +1,12 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description:
+    "How BuildGuiders handles your data: what the calculators store, which cookies are set, and how affiliate tracking works.",
+  alternates: { canonical: "/privacy" },
+};
+
 const GREEN = "#1B4332";
 const AMBER = "#D97706";
 const INK = "#1C1917";

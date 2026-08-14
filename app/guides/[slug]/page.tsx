@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
-import { getAllArticles, getArticleBySlug } from "@/lib/articles";
+import { getAllArticles, getArticleBySlug, resolveCoverImage } from "@/lib/articles";
 import type { Metadata } from "next";
 
 const CALCULATOR_LINKS: Record<string, { href: string; label: string }> = {
@@ -67,7 +67,7 @@ export default async function ArticlePage({ params }: Props) {
     description: article.description,
     datePublished: article.date || undefined,
     dateModified: article.date || undefined,
-    image: article.coverImage ? `https://www.buildguiders.com${article.coverImage}` : undefined,
+    image: `https://www.buildguiders.com${resolveCoverImage(article.coverImage)}`,
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
     author: { "@type": "Organization", name: "BuildGuiders", url: "https://www.buildguiders.com" },
     publisher: {
@@ -75,7 +75,7 @@ export default async function ArticlePage({ params }: Props) {
       name: "BuildGuiders",
       logo: {
         "@type": "ImageObject",
-        url: "https://www.buildguiders.com/images/covers/Cover-Deck.png",
+        url: "https://www.buildguiders.com/og-default.png",
       },
     },
   };

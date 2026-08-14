@@ -1,3 +1,12 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About & Methodology",
+  description:
+    "How BuildGuiders researches its calculators and product picks, who writes them, and the full affiliate disclosure.",
+  alternates: { canonical: "/about" },
+};
+
 const GREEN = "#1B4332";
 const AMBER = "#D97706";
 const INK = "#1C1917";

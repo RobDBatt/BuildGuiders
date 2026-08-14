@@ -3,6 +3,22 @@ import path from "path";
 import matter from "gray-matter";
 
 const ARTICLES_DIR = path.join(process.cwd(), "content", "articles");
+const PUBLIC_DIR = path.join(process.cwd(), "public");
+
+/** Site-wide fallback image. Ships in public/, so it always resolves. */
+export const FALLBACK_IMAGE = "/og-default.png";
+
+/**
+ * Frontmatter `coverImage` paths point at /images/covers/*.png, which are not in
+ * the repo. A schema `image` that 404s invalidates the Article rich result, so
+ * resolve against public/ at build time and fall back to the OG image. If the
+ * cover files are added later they get picked up with no code change.
+ */
+export function resolveCoverImage(coverImage?: string): string {
+  if (!coverImage) return FALLBACK_IMAGE;
+  const onDisk = path.join(PUBLIC_DIR, coverImage.replace(/^\//, ""));
+  return fs.existsSync(onDisk) ? coverImage : FALLBACK_IMAGE;
+}
 
 export interface Product {
   name: string;

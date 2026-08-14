@@ -22,6 +22,7 @@ export const metadata: Metadata = {
     "how many deck boards do I need",
   ],
   metadataBase: new URL("https://www.buildguiders.com"),
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     siteName: "BuildGuiders",
@@ -65,7 +66,8 @@ export default function RootLayout({
     "@type": "Organization",
     name: "BuildGuiders",
     url: "https://www.buildguiders.com",
-    logo: "https://www.buildguiders.com/images/covers/Cover-Deck.png",
+    // public/images/ is not in the repo — point at an asset that actually ships.
+    logo: "https://www.buildguiders.com/og-default.png",
   };
 
   const siteLd = {
