@@ -5,7 +5,7 @@ import { FAQS } from "./faqs";
 export const metadata: Metadata = {
   title: "Pool Volume Calculator",
   description:
-    "Calculate how many gallons your pool holds — rectangle, round, oval, or kidney, with a sloped floor or a constant depth. Includes liters, cubic feet, turnover flow rate, and a maintenance shopping list.",
+    "Calculate how many gallons your pool holds — rectangle, round, oval or kidney, sloped floor or constant depth. Plus liters, cubic feet and pump turnover rate.",
   alternates: { canonical: "/pool-volume-calculator" },
   openGraph: {
     title: "Pool Volume Calculator — How Many Gallons Is My Pool?",
