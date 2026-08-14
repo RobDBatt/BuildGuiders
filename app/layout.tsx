@@ -75,25 +75,16 @@ export default function RootLayout({
     url: "https://www.buildguiders.com",
   };
 
-  // Skimlinks auto-affiliate layer. Skimlinks rewrites outbound merchant links
-  // (Home Depot, Lowe's, tools, decking, etc.) into affiliate links at runtime.
-  // It does NOT touch Amazon links, so the existing tag=buildguiders-20 links
-  // are unaffected. The publisher ID is public (it ships in the client-side
-  // script, like the GA ID above); set NEXT_PUBLIC_SKIMLINKS_ID to override it.
-  // To use Sovrn instead, swap the src below for the Sovrn/VigLink snippet.
-  const skimlinksId = process.env.NEXT_PUBLIC_SKIMLINKS_ID || "306091X1794326";
-
-  // Impact.com Universal Tracking Tag (UTT). Two jobs: it verifies domain
-  // ownership (Impact detects the tag firing on buildguiders.com), and its
-  // transformLinks call rewrites outbound links to Impact-partnered advertisers
-  // (e.g. Home Depot, once the partnership is approved) into tracked affiliate
-  // links at runtime. It does NOT touch Amazon links (tag=buildguiders-20 is
-  // unaffected), and Skimlinks stays the catch-all for everything Impact
-  // doesn't cover. The UTT URL is public (it ships in the client-side script);
-  // set NEXT_PUBLIC_IMPACT_UTT_SRC to override it.
-  const impactUttSrc =
-    process.env.NEXT_PUBLIC_IMPACT_UTT_SRC ||
-    "https://utt.impactcdn.com/P-A7270311-aa48-4ba2-996f-0033f3364b3c1.js";
+  // Affiliate layer: Amazon Associates only.
+  //
+  // Skimlinks was removed in Jul 2026 — permanent, do not re-add.
+  // The Impact.com UTT was removed after the Jul 2026 application was denied.
+  // Impact can be reapplied for around Oct 2026; if it is approved, the UTT
+  // goes back in as a `beforeInteractive` script (it both verifies domain
+  // ownership and runs transformLinks for partnered advertisers like Home
+  // Depot) and /privacy needs a matching disclosure added at the same time.
+  // Until then, neither network's script belongs in this layout: they load on
+  // every page, cost real render time, and track nothing.
 
   return (
     <html lang="en">
@@ -109,17 +100,6 @@ export default function RootLayout({
             gtag('config', 'G-5LZDVK9T95');
           `}
         </Script>
-        {skimlinksId && (
-          <Script
-            src={`https://s.skimresources.com/js/${skimlinksId}.skimlinks.js`}
-            strategy="lazyOnload"
-          />
-        )}
-        {impactUttSrc && (
-          <Script id="impact-utt" strategy="beforeInteractive">
-            {`(function(i,m,p,a,c,t){c.ire_o=p;c[p]=c[p]||function(){(c[p].a=c[p].a||[]).push(arguments)};t=a.createElement(m);var z=a.getElementsByTagName(m)[0];t.async=1;t.src=i;z.parentNode.insertBefore(t,z)})('${impactUttSrc}','script','impactStat',document,window);impactStat('transformLinks');impactStat('trackImpression');`}
-          </Script>
-        )}
         {children}
         <Analytics />
       </body>

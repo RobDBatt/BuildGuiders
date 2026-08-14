@@ -85,14 +85,19 @@ relevant live page or a sensible fallback** (`/articles`), never hard-404.
 
 - **Amazon:** every product link carries the site's own tag
   (`buildguiders-20`, `gearguiders-20`, `gadgetguiders01-20`). No cross-tagging.
-- **Skimlinks:** account-level publisher ID in a `next/script` `lazyOnload` tag;
-  override via `NEXT_PUBLIC_SKIMLINKS_ID`. Does NOT touch Amazon links.
-- **Impact UTT:** the `utt.impactcdn.com/…` snippet in a `beforeInteractive`
-  script (so it's in the server-rendered HTML). It both **verifies domain
-  ownership** and runs `transformLinks` to auto-track partnered advertisers
-  (e.g. Home Depot). Override via `NEXT_PUBLIC_IMPACT_UTT_SRC`.
+- **Skimlinks: removed Jul 2026, permanent.** Do not re-add it to any site in
+  the network, and do not reintroduce a Sovrn/VigLink equivalent in its place.
+- **Impact UTT: removed Jul 2026** after the application was denied. Reapply
+  around Oct 2026. If approved, the `utt.impactcdn.com/…` snippet goes back in
+  as a `beforeInteractive` script (so it lands in the server-rendered HTML) —
+  it both **verifies domain ownership** and runs `transformLinks` to auto-track
+  partnered advertisers like Home Depot. Add the matching `/privacy` disclosure
+  in the same change, not after.
+- **Only add a network's script once the account is live.** A tag for a denied
+  or closed account tracks nothing and still costs render time on every page.
 - Disclosure above the links, `/about` methodology, and `/privacy` naming the
-  actual networks (Amazon, Skimlinks/Impact, CJ, etc.) must all exist.
+  actual networks in use must all exist, and `/privacy` must not name a network
+  the site no longer runs.
 
 ## 5. Deploy BEFORE you verify
 
