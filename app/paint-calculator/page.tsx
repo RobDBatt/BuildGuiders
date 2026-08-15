@@ -94,16 +94,17 @@ function CategoryBadge({ cat }: { cat: ShoppingItem["category"] }) {
   return <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${color}`}>{label}</span>;
 }
 
-const defaultRoom = (): Room => ({ id: crypto.randomUUID(), length: "", width: "", height: "", doors: "1", windows: "1" });
+const INITIAL_ROOMS: Room[] = [{ id: "room-0", length: "12", width: "12", height: "8", doors: "1", windows: "1" }];
+let nextRoomId = 1;
+const newRoom = (): Room => ({ id: `room-${nextRoomId++}`, length: "", width: "", height: "", doors: "1", windows: "1" });
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 export default function PaintCalculatorPage() {
-  const [rooms, setRooms] = useState<Room[]>([defaultRoom()]);
+  const [rooms, setRooms] = useState<Room[]>(INITIAL_ROOMS);
   const [coats, setCoats] = useState(2);
   const [includePrimer, setIncludePrimer] = useState(true);
   const [wallsOnly, setWallsOnly] = useState(false);
   const [surfaceType, setSurfaceType] = useState<"smooth" | "textured">("smooth");
-  const [calculated, setCalculated] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const result = useMemo(() => calcPaint(rooms, coats, includePrimer, wallsOnly), [rooms, coats, includePrimer, wallsOnly]);
@@ -237,24 +238,26 @@ export default function PaintCalculatorPage() {
                   </div>
                 </div>
               ))}
-              <button onClick={() => setRooms(prev => [...prev, defaultRoom()])} className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-300 text-slate-500 text-sm font-semibold transition-all"
+              <button onClick={() => setRooms(prev => [...prev, newRoom()])} className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-300 text-slate-500 text-sm font-semibold transition-all"
                 onMouseEnter={e => { e.currentTarget.style.borderColor = "#1B4332"; e.currentTarget.style.color = "#1B4332"; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = "#cbd5e1"; e.currentTarget.style.color = "#64748b"; }}>
                 + Add another room
               </button>
             </div>
 
-            <button onClick={() => setCalculated(true)} disabled={!hasValidInput} className="w-full py-3.5 text-white font-bold rounded-xl text-base disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+            {/* The list updates live as the inputs change, so this jumps to it
+                rather than gating it — on mobile the results stack below. */}
+            <a href="#shopping-list" className="block w-full py-3.5 text-white font-bold rounded-xl text-base text-center shadow-sm no-underline"
               style={{ backgroundColor: "#1B4332" }}
-              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) e.currentTarget.style.backgroundColor = "#14532d"; }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#14532d"; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = "#1B4332"; }}>
-              Calculate & Build My List →
-            </button>
+              See My Shopping List →
+            </a>
           </div>
 
           {/* Results */}
-          <div className="lg:col-span-3 space-y-4">
-            {!calculated || !hasValidInput ? (
+          <div className="lg:col-span-3 space-y-4" id="shopping-list">
+            {!hasValidInput ? (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-20 px-6 text-center">
                 <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 text-3xl">🪣</div>
                 <h3 className="font-bold text-slate-700 text-lg">Your shopping list will appear here</h3>
@@ -282,6 +285,8 @@ export default function PaintCalculatorPage() {
                   <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                     <div>
                       <h2 className="font-black text-slate-800">Your Shopping List</h2>
+                      <p className="text-xs text-slate-400 mt-0.5">Based on the dimensions on the left — edit them to match your project and this updates as you type.</p>
+
                       <p className="text-xs text-slate-400 mt-0.5">Everything you need — one trip</p>
                     </div>
                     <button onClick={handleCopyList} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold border-2 transition-all"

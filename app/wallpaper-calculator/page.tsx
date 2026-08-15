@@ -32,15 +32,13 @@ function calc(length: number, width: number, height: number, doors: number, wind
 }
 
 export default function WallpaperCalculator() {
-  const [length,     setLength]     = useState("");
-  const [width,      setWidth]      = useState("");
+  const [length,     setLength]     = useState("12");
+  const [width,      setWidth]      = useState("12");
   const [height,     setHeight]     = useState(9);
   const [doors,      setDoors]      = useState(1);
   const [windows,    setWindows]    = useState(2);
   const [wallType,   setWallType]   = useState("peelstick");
   const [repeatType, setRepeatType] = useState("none");
-  const [calculated, setCalculated] = useState(false);
-
   const l = parseFloat(length) || 0;
   const w = parseFloat(width)  || 0;
   const hasInput = l > 0 && w > 0;
@@ -232,18 +230,19 @@ export default function WallpaperCalculator() {
               </div>
             </div>
 
-            <button onClick={() => setCalculated(true)} disabled={!hasInput}
-              className="w-full py-3.5 text-white font-bold rounded-xl text-base disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+            {/* The list updates live as the inputs change, so this jumps to it
+                rather than gating it — on mobile the results stack below. */}
+            <a href="#shopping-list" className="block w-full py-3.5 text-white font-bold rounded-xl text-base text-center shadow-sm no-underline"
               style={{ backgroundColor: GREEN }}
-              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) e.currentTarget.style.backgroundColor = "#14532d"; }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#14532d"; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = GREEN; }}>
-              Calculate & Build My List →
-            </button>
+              See My Shopping List →
+            </a>
           </div>
 
           {/* ── Results ── */}
-          <div className="lg:col-span-3 space-y-4">
-            {!calculated || !hasInput ? (
+          <div className="lg:col-span-3 space-y-4" id="shopping-list">
+            {!hasInput ? (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-20 px-6 text-center">
                 <div className="text-4xl mb-4">🌸</div>
                 <h3 className="font-bold text-slate-700 text-lg">Your shopping list will appear here</h3>
@@ -270,6 +269,8 @@ export default function WallpaperCalculator() {
                 <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                   <div className="px-5 py-4 border-b border-slate-100">
                     <h2 className="font-black text-slate-800">Your Shopping List</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Based on the dimensions on the left — edit them to match your project and this updates as you type.</p>
+
                   </div>
                   <div className="divide-y divide-slate-100">
                     {shoppingItems.map(item => (
