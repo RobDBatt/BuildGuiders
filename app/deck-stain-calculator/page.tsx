@@ -150,19 +150,17 @@ function Toggle({ label, sub, checked, onChange }: { label: string; sub?: string
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function DeckStainCalculator() {
-  const [deckL, setDeckL] = useState("");
-  const [deckW, setDeckW] = useState("");
+  const [deckL, setDeckL] = useState("16");
+  const [deckW, setDeckW] = useState("12");
   const [coats, setCoats] = useState(2);
   const [stainTypeId, setStainTypeId] = useState("semi-transparent");
   const [conditionId, setConditionId] = useState("weathered");
   const [includeRailing, setIncludeRailing] = useState(true);
-  const [railingLinearFt, setRailingLinearFt] = useState("");
+  const [railingLinearFt, setRailingLinearFt] = useState("40");
   const [railStyle, setRailStyle] = useState("open");
   const [includeSteps, setIncludeSteps] = useState(false);
-  const [stepCount, setStepCount] = useState("");
+  const [stepCount, setStepCount] = useState("3");
   const [stepWidth, setStepWidth] = useState(36);
-  const [calculated, setCalculated] = useState(false);
-
   const result = useMemo(() => {
     const l = parseFloat(deckL);
     const w = parseFloat(deckW);
@@ -357,17 +355,19 @@ export default function DeckStainCalculator() {
               </div>
             </div>
 
-            <button onClick={() => setCalculated(true)} disabled={!hasInput} className="w-full py-3.5 text-white font-bold rounded-xl text-base disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+            {/* The list updates live as the inputs change, so this jumps to it
+                rather than gating it — on mobile the results stack below. */}
+            <a href="#shopping-list" className="block w-full py-3.5 text-white font-bold rounded-xl text-base text-center shadow-sm no-underline"
               style={{ backgroundColor: GREEN }}
-              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) e.currentTarget.style.backgroundColor = "#14532d"; }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#14532d"; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = GREEN; }}>
-              Calculate & Build My List →
-            </button>
+              See My Shopping List →
+            </a>
           </div>
 
           {/* ── RIGHT: Results ── */}
-          <div className="lg:col-span-3 space-y-4">
-            {!calculated || !result ? (
+          <div className="lg:col-span-3 space-y-4" id="shopping-list">
+            {!result ? (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-20 px-6 text-center">
                 <div className="text-4xl mb-4">🖌️</div>
                 <h3 className="font-bold text-slate-700 text-lg">Your shopping list will appear here</h3>
@@ -427,6 +427,8 @@ export default function DeckStainCalculator() {
                 <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                   <div className="px-5 py-4 border-b border-slate-100">
                     <h2 className="font-black text-slate-800">Your Shopping List</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Based on the dimensions on the left — edit them to match your project and this updates as you type.</p>
+
                     <p className="text-xs text-slate-400 mt-0.5">{result.totalGallons} gallons · {result.totalSqFt} sq ft — one trip</p>
                   </div>
                   <div className="divide-y divide-slate-100">

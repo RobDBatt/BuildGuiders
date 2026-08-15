@@ -11,7 +11,17 @@ const DOOR_AREA = 20;
 const WINDOW_AREA = 15;
 
 interface Room { id: string; length: string; width: string; height: string; doors: string; windows: string; }
-const defaultRoom = (): Room => ({ id: crypto.randomUUID(), length: "", width: "", height: "", doors: "1", windows: "1" });
+
+// The first room is a fixed, populated example so the shopping list is in the
+// server-rendered HTML. A crawler never presses Calculate, so an empty initial
+// state meant the page's entire output was invisible to Google.
+// Its id is a literal, not crypto.randomUUID(): a random id (or a counter that
+// survives across server requests) renders different markup on the server and
+// the client and breaks hydration.
+const INITIAL_ROOMS: Room[] = [{ id: "room-0", length: "12", width: "12", height: "8", doors: "1", windows: "1" }];
+
+let nextRoomId = 1;
+const newRoom = (): Room => ({ id: `room-${nextRoomId++}`, length: "", width: "", height: "", doors: "1", windows: "1" });
 
 function calc(rooms: Room[], includeCeiling: boolean, thickness: string) {
   let wallSqFt = 0;
@@ -36,10 +46,9 @@ function calc(rooms: Room[], includeCeiling: boolean, thickness: string) {
 }
 
 export default function DrywallCalculator() {
-  const [rooms, setRooms] = useState<Room[]>([defaultRoom()]);
+  const [rooms, setRooms] = useState<Room[]>(INITIAL_ROOMS);
   const [includeCeiling, setIncludeCeiling] = useState(true);
   const [thickness, setThickness] = useState("1/2");
-  const [calculated, setCalculated] = useState(false);
   const result = useMemo(() => calc(rooms, includeCeiling, thickness), [rooms, includeCeiling, thickness]);
   const hasInput = rooms.some(r => parseFloat(r.length) > 0 && parseFloat(r.width) > 0);
 
@@ -132,27 +141,29 @@ export default function DrywallCalculator() {
                   </div>
                 </div>
               ))}
-              <button onClick={() => setRooms(prev => [...prev, defaultRoom()])} className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-300 text-slate-500 text-sm font-semibold"
+              <button onClick={() => setRooms(prev => [...prev, newRoom()])} className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-300 text-slate-500 text-sm font-semibold"
                 onMouseEnter={e => { e.currentTarget.style.borderColor = GREEN; e.currentTarget.style.color = GREEN; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = "#cbd5e1"; e.currentTarget.style.color = "#64748b"; }}>
                 + Add another room
               </button>
             </div>
 
-            <button onClick={() => setCalculated(true)} disabled={!hasInput} className="w-full py-3.5 text-white font-bold rounded-xl text-base disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+            {/* The list updates live as the inputs change, so this jumps to it
+                rather than gating it — on mobile the results stack below. */}
+            <a href="#shopping-list" className="block w-full py-3.5 text-white font-bold rounded-xl text-base text-center shadow-sm no-underline"
               style={{ backgroundColor: GREEN }}
-              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) e.currentTarget.style.backgroundColor = "#14532d"; }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#14532d"; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = GREEN; }}>
-              Calculate & Build My List →
-            </button>
+              See My Shopping List →
+            </a>
           </div>
 
-          <div className="lg:col-span-3 space-y-4">
-            {!calculated || !hasInput ? (
+          <div className="lg:col-span-3 space-y-4" id="shopping-list">
+            {!hasInput ? (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-20 px-6 text-center">
                 <div className="text-4xl mb-4">🧱</div>
                 <h3 className="font-bold text-slate-700 text-lg">Your shopping list will appear here</h3>
-                <p className="text-slate-400 text-sm mt-2">Enter your room dimensions and click Calculate.</p>
+                <p className="text-slate-400 text-sm mt-2">Enter a room length and width to see it.</p>
               </div>
             ) : (
               <>
@@ -169,7 +180,10 @@ export default function DrywallCalculator() {
                   </div>
                 </div>
                 <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                  <div className="px-5 py-4 border-b border-slate-100"><h2 className="font-black text-slate-800">Your Shopping List</h2></div>
+                  <div className="px-5 py-4 border-b border-slate-100">
+                    <h2 className="font-black text-slate-800">Your Shopping List</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Based on the dimensions on the left — edit them to match your project and this updates as you type.</p>
+                  </div>
                   <div className="divide-y divide-slate-100">
                     {shoppingItems.map(item => (
                       <div key={item.name} className="px-5 py-4">

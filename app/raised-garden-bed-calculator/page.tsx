@@ -25,7 +25,9 @@ const MIX_TYPES = [
 ];
 
 interface Bed { id: string; length: string; width: string; }
-const defaultBed = (): Bed => ({ id: crypto.randomUUID(), length: "", width: "" });
+const INITIAL_BEDS: Bed[] = [{ id: "bed-0", length: "8", width: "4" }];
+let nextBedId = 1;
+const newBed = (): Bed => ({ id: `bed-${nextBedId++}`, length: "", width: "" });
 
 function calc(beds: Bed[], depthIn: number) {
   const depthFt  = depthIn / 12;
@@ -51,11 +53,9 @@ function calc(beds: Bed[], depthIn: number) {
 }
 
 export default function RaisedGardenBedCalculator() {
-  const [beds,      setBeds]      = useState<Bed[]>([defaultBed()]);
+  const [beds,      setBeds]      = useState<Bed[]>(INITIAL_BEDS);
   const [depth,     setDepth]     = useState(8);
   const [mixType,   setMixType]   = useState("premix");
-  const [calculated, setCalculated] = useState(false);
-
   const hasInput = beds.some(b => parseFloat(b.length) > 0 && parseFloat(b.width) > 0);
   const result   = useMemo(() => calc(beds, depth), [beds, depth]);
 
@@ -218,7 +218,7 @@ export default function RaisedGardenBedCalculator() {
                 </div>
               ))}
 
-              <button onClick={() => setBeds(prev => [...prev, defaultBed()])}
+              <button onClick={() => setBeds(prev => [...prev, newBed()])}
                 className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-300 text-slate-500 text-sm font-semibold"
                 onMouseEnter={e => { e.currentTarget.style.borderColor = GREEN; e.currentTarget.style.color = GREEN; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = "#cbd5e1"; e.currentTarget.style.color = "#64748b"; }}>
@@ -226,18 +226,19 @@ export default function RaisedGardenBedCalculator() {
               </button>
             </div>
 
-            <button onClick={() => setCalculated(true)} disabled={!hasInput}
-              className="w-full py-3.5 text-white font-bold rounded-xl text-base disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+            {/* The list updates live as the inputs change, so this jumps to it
+                rather than gating it — on mobile the results stack below. */}
+            <a href="#shopping-list" className="block w-full py-3.5 text-white font-bold rounded-xl text-base text-center shadow-sm no-underline"
               style={{ backgroundColor: GREEN }}
-              onMouseEnter={e => { if (!(e.currentTarget as HTMLButtonElement).disabled) e.currentTarget.style.backgroundColor = "#14532d"; }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#14532d"; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = GREEN; }}>
-              Calculate & Build My List →
-            </button>
+              See My Shopping List →
+            </a>
           </div>
 
           {/* ── Results ── */}
-          <div className="lg:col-span-3 space-y-4">
-            {!calculated || !hasInput ? (
+          <div className="lg:col-span-3 space-y-4" id="shopping-list">
+            {!hasInput ? (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-20 px-6 text-center">
                 <div className="text-4xl mb-4">🥕</div>
                 <h3 className="font-bold text-slate-700 text-lg">Your shopping list will appear here</h3>
@@ -267,6 +268,8 @@ export default function RaisedGardenBedCalculator() {
                 <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                   <div className="px-5 py-4 border-b border-slate-100">
                     <h2 className="font-black text-slate-800">Your Shopping List</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Based on the dimensions on the left — edit them to match your project and this updates as you type.</p>
+
                   </div>
                   <div className="divide-y divide-slate-100">
                     {shoppingItems.map(item => (
