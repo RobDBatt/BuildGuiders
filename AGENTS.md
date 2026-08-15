@@ -85,14 +85,22 @@ relevant live page or a sensible fallback** (`/articles`), never hard-404.
 
 - **Amazon:** every product link carries the site's own tag
   (`buildguiders-20`, `gearguiders-20`, `gadgetguiders01-20`). No cross-tagging.
-- **Skimlinks:** account-level publisher ID in a `next/script` `lazyOnload` tag;
-  override via `NEXT_PUBLIC_SKIMLINKS_ID`. Does NOT touch Amazon links.
-- **Impact UTT:** the `utt.impactcdn.com/…` snippet in a `beforeInteractive`
-  script (so it's in the server-rendered HTML). It both **verifies domain
-  ownership** and runs `transformLinks` to auto-track partnered advertisers
-  (e.g. Home Depot). Override via `NEXT_PUBLIC_IMPACT_UTT_SRC`.
+- **Skimlinks: REMOVED Aug 2026 — application denied Jul 2026.** Do NOT re-add
+  the `s.skimresources.com` script. If approved later, restore a `lazyOnload`
+  tag gated on `NEXT_PUBLIC_SKIMLINKS_ID` with **no hardcoded fallback ID**, so
+  an un-set variable means the tag stays off.
+- **Impact UTT: REMOVED Aug 2026 — Home Depot application denied Jul 2026.**
+  Do NOT add the `utt.impactcdn.com/…` snippet. Reapply to Home Depot once
+  traffic has grown; only then add the UTT script (`beforeInteractive`,
+  override via `NEXT_PUBLIC_IMPACT_UTT_SRC`, again with no fallback ID).
+- **This section previously described both as installed, which is how they
+  survived the denial by ten months.** When a network is denied, change the doc
+  in the same commit that removes the script — a playbook that still says
+  "install it" is an instruction to put it back.
 - Disclosure above the links, `/about` methodology, and `/privacy` naming the
-  actual networks (Amazon, Skimlinks/Impact, CJ, etc.) must all exist.
+  actual networks must all exist. `/privacy` currently describes affiliate
+  cookies generically (Amazon and retailer links) and needs no change while
+  Amazon is the only network in use.
 
 ## 5. Deploy BEFORE you verify
 
