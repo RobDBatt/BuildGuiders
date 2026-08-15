@@ -12,6 +12,11 @@ export const metadata: Metadata = {
     description:
       "Enter your pool's shape and depth, get gallons, liters, cubic feet, the pump flow rate for an 8-hour turnover, and the maintenance supplies to buy.",
     url: `${BASE_URL}/pool-volume-calculator`,
+    type: "website",
+    siteName: "BuildGuiders",
+    // A page-level openGraph replaces the root layout's wholesale, so the
+    // image has to be restated or shares of this page render with no card.
+    images: [{ url: `${BASE_URL}/og-default.png`, width: 1200, height: 630 }],
   },
 };
 
