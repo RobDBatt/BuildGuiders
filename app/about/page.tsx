@@ -1,7 +1,25 @@
+import type { Metadata } from "next";
+
 const GREEN = "#1B4332";
 const AMBER = "#D97706";
 const INK = "#1C1917";
 const CREAM = "#FEFBF3";
+
+export const metadata: Metadata = {
+  title: "About BuildGuiders",
+  description:
+    "Who builds BuildGuiders, how the material calculators are put together, and how the product picks in our guides are researched and compared.",
+  alternates: { canonical: "https://www.buildguiders.com/about" },
+  openGraph: {
+    title: "About BuildGuiders",
+    description:
+      "How the material calculators are built and how the product picks in our guides are researched and compared.",
+    url: "https://www.buildguiders.com/about",
+    type: "website",
+    siteName: "BuildGuiders",
+    images: [{ url: "https://www.buildguiders.com/og-default.png", width: 1200, height: 630 }],
+  },
+};
 
 export default function AboutPage() {
   return (

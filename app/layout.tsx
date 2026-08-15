@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: "%s | BuildGuiders",
   },
   description:
-    "Free material calculators for home projects. Enter your dimensions, get an exact shopping list — every item, every quantity, every link. Make one trip, not four.",
+    "Free material calculators for home projects. Enter your dimensions, get an exact shopping list — every item, every quantity, every link. One trip, not four.",
   keywords: [
     "home project calculator",
     "material calculator",
@@ -65,7 +65,8 @@ export default function RootLayout({
     "@type": "Organization",
     name: "BuildGuiders",
     url: "https://www.buildguiders.com",
-    logo: "https://www.buildguiders.com/images/covers/Cover-Deck.png",
+    // Was /images/covers/Cover-Deck.png, which 404s — no file in public/.
+    logo: "https://www.buildguiders.com/og-default.png",
   };
 
   const siteLd = {

@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 const GREEN = "#1B4332";
 const AMBER = "#D97706";
 const INK = "#1C1917";
@@ -6,6 +8,22 @@ const EFFECTIVE_DATE = "May 3, 2026";
 const SITE_NAME = "BuildGuiders";
 const SITE_URL = "buildguiders.com";
 const CONTACT_EMAIL = "GuidersNetwork@gmail.com";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description:
+    "What BuildGuiders collects, the analytics and affiliate networks we use, how cookies are set on this site, and how to contact us about your data.",
+  alternates: { canonical: "https://www.buildguiders.com/privacy" },
+  openGraph: {
+    title: "Privacy Policy | BuildGuiders",
+    description:
+      "What BuildGuiders collects, the analytics and affiliate networks we use, and how to contact us about your data.",
+    url: "https://www.buildguiders.com/privacy",
+    type: "website",
+    siteName: "BuildGuiders",
+    images: [{ url: "https://www.buildguiders.com/og-default.png", width: 1200, height: 630 }],
+  },
+};
 
 export default function PrivacyPage() {
   return (

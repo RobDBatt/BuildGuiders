@@ -1,8 +1,29 @@
+import fs from "fs";
+import path from "path";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getAllArticles, getArticleBySlug } from "@/lib/articles";
 import type { Metadata } from "next";
+
+const SITE = "https://www.buildguiders.com";
+const FALLBACK_IMAGE = "/og-default.png";
+
+/**
+ * Absolute URL for a guide's share/schema image.
+ *
+ * Every `coverImage` in frontmatter points at /images/covers/*.png, and none of
+ * those files exist in public/ — they 404 in production, which meant Article
+ * schema declared an image Google could not fetch. Resolve against the on-disk
+ * file so a real cover is used the moment one is added, and fall back to the
+ * site OG image until then.
+ */
+function articleImage(coverImage?: string): string {
+  if (coverImage && fs.existsSync(path.join(process.cwd(), "public", coverImage.replace(/^\//, "")))) {
+    return `${SITE}${coverImage}`;
+  }
+  return `${SITE}${FALLBACK_IMAGE}`;
+}
 
 const CALCULATOR_LINKS: Record<string, { href: string; label: string }> = {
   paint: { href: "/paint-calculator", label: "Free Paint Calculator" },
@@ -29,17 +50,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const article = getArticleBySlug(slug);
   if (!article) return {};
+  const url = `https://www.buildguiders.com/guides/${slug}`;
+  const image = articleImage(article.coverImage);
   return {
-    title: article.title,
+    // `absolute` opts out of the root layout's "%s | BuildGuiders" template.
+    // Guide titles are already keyword-led and self-branding; the 15-char
+    // suffix only pushed them past Google's ~60-char SERP limit.
+    title: { absolute: article.title },
     description: article.description,
     keywords: article.keywords,
-    alternates: { canonical: `https://www.buildguiders.com/guides/${slug}` },
+    alternates: { canonical: url },
     openGraph: {
       title: article.title,
       description: article.description,
-      url: `https://www.buildguiders.com/guides/${slug}`,
+      url,
       type: "article",
       publishedTime: article.date,
+      // A page-level openGraph replaces the layout's wholesale, so the image
+      // has to be restated here or guide shares render with no card.
+      images: [{ url: image, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.description,
+      images: [image],
     },
   };
 }
@@ -67,15 +102,15 @@ export default async function ArticlePage({ params }: Props) {
     description: article.description,
     datePublished: article.date || undefined,
     dateModified: article.date || undefined,
-    image: article.coverImage ? `https://www.buildguiders.com${article.coverImage}` : undefined,
+    image: articleImage(article.coverImage),
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
-    author: { "@type": "Organization", name: "BuildGuiders", url: "https://www.buildguiders.com" },
+    author: { "@type": "Organization", name: "BuildGuiders", url: SITE },
     publisher: {
       "@type": "Organization",
       name: "BuildGuiders",
       logo: {
         "@type": "ImageObject",
-        url: "https://www.buildguiders.com/images/covers/Cover-Deck.png",
+        url: `${SITE}${FALLBACK_IMAGE}`,
       },
     },
   };

@@ -3,10 +3,19 @@ import { getAllArticles } from "@/lib/articles";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Buying Guides — Home Improvement Material Picks",
+  title: "Buying Guides: Paint, Deck, Flooring & Tile",
   description:
-    "Expert buying guides for paint, flooring, deck stain, drywall, and more — with calculator links so you know exactly how much to buy.",
+    "Researched buying guides for paint, flooring, deck stain, drywall, and more — each linked to a calculator so you know exactly how much to buy.",
   alternates: { canonical: "https://www.buildguiders.com/guides" },
+  openGraph: {
+    title: "Buying Guides: Paint, Deck, Flooring & Tile | BuildGuiders",
+    description:
+      "Researched buying guides for paint, flooring, deck stain, and drywall — each linked to a calculator so you know how much to buy.",
+    url: "https://www.buildguiders.com/guides",
+    type: "website",
+    siteName: "BuildGuiders",
+    images: [{ url: "https://www.buildguiders.com/og-default.png", width: 1200, height: 630 }],
+  },
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
