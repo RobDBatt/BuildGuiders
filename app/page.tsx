@@ -1,5 +1,12 @@
 import Image from "next/image";
+import type { Metadata } from "next";
 import { getAllArticles } from "@/lib/articles";
+
+// Title and description come from the root layout, which describes the site as
+// a whole and is correct here. Only the canonical was missing.
+export const metadata: Metadata = {
+  alternates: { canonical: "https://www.buildguiders.com" },
+};
 
 const buildCalculators = [
   {
