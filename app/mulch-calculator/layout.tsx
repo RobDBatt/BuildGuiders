@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { FAQS } from "./faqs";
 
 // The calculator page itself is a client component and cannot export metadata,
 // so it lives here. Without it every calculator inherited the site-default
@@ -22,5 +23,23 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return children;
+  // FAQPage structured data. The answers are the same strings the page renders
+  // — both import FAQS — so the markup cannot drift from the visible copy,
+  // which is what Google requires for the rich result.
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: { "@type": "Answer", text: faq.answer },
+    })),
+  };
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      {children}
+    </>
+  );
 }

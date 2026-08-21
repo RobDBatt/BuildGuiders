@@ -1,6 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import { AMAZON_TAG } from "@/lib/site-config.generated";
+import { FAQS } from "./faqs";
 
 const GREEN = "#1B4332";
 const aUrl = (asin: string) => `https://www.amazon.com/dp/${asin}?tag=${AMAZON_TAG}`;
@@ -66,8 +67,15 @@ export default function MulchCalculator() {
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-amber-50 border-2 border-amber-200 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">🌿</div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Mulch & Topsoil Calculator</h1>
-              <p className="text-slate-500 mt-1">Bags or cubic yards, landscape fabric, edging — for any bed depth.</p>
+              {/* Narrowed from "Mulch & Topsoil Calculator" to the head term.
+                  "mulch calculator" is ~19k/mo at KD 15; splitting the H1
+                  across two products diluted it. Topsoil, compost, gravel and
+                  sand still carry their secondary terms in the subhead. */}
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Mulch Calculator</h1>
+              <p className="text-slate-500 mt-1">
+                Cubic yards and the exact bag count for any bed shape and depth. Also handles topsoil, compost, gravel,
+                and paver sand.
+              </p>
             </div>
           </div>
         </div>
@@ -206,6 +214,21 @@ export default function MulchCalculator() {
             )}
           </div>
         </div>
+
+        {/* Visible FAQ. FAQPage schema in layout.tsx renders from this same
+            FAQS array — Google requires the marked-up answers to appear on the
+            page, so neither copy can drift from the other. */}
+        <section className="mt-12 max-w-3xl">
+          <h2 className="text-xl font-black text-slate-900 tracking-tight mb-4">Frequently asked questions</h2>
+          <div className="space-y-5">
+            {FAQS.map((faq) => (
+              <div key={faq.question}>
+                <h3 className="font-bold text-slate-800 text-sm mb-1.5">{faq.question}</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
       <footer className="mt-16 border-t border-slate-200 bg-white">
         <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
