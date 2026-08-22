@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/privacy", priority: 0.4, changeFrequency: "monthly" as const },
     { path: "/guides", priority: 0.9, changeFrequency: "weekly" as const },
     { path: "/paint-calculator", priority: 0.9, changeFrequency: "monthly" as const },
+    { path: "/roof-calculator", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/flooring-calculator", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/tile-calculator", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/deck-calculator", priority: 0.9, changeFrequency: "monthly" as const },

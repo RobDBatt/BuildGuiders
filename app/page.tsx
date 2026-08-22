@@ -66,6 +66,14 @@ const buildCalculators = [
     href: "/fence-calculator",
     status: "live",
   },
+  {
+    emoji: "🏠",
+    title: "Roof Calculator",
+    description: "Squares and shingle bundles from your footprint and pitch, plus underlayment and drip edge.",
+    href: "/roof-calculator",
+    status: "live",
+    tag: "New",
+  },
 ];
 
 const maintenanceCalculators = [
