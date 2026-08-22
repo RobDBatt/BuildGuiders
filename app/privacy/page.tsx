@@ -52,7 +52,7 @@ export default function PrivacyPage() {
             Build<span style={{ color: "#86efac" }}>Guiders</span>
           </a>
           <nav style={{ display: "flex", gap: 20 }}>
-            <a href="/#calculators" className="nav-link">Calculators</a>
+            <a href="/calculators" className="nav-link">Calculators</a>
             <a href="/about" className="nav-link">About</a>
           </nav>
         </div>
@@ -280,7 +280,7 @@ export default function PrivacyPage() {
       <footer style={{ background: INK, padding: "22px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, borderTop: `3px solid ${AMBER}` }}>
         <div style={{ fontFamily: "'Fraunces', serif", fontSize: 15, fontWeight: 900, color: "#fff" }}>BuildGuiders.com</div>
         <div style={{ display: "flex", gap: 20 }}>
-          <a href="/#calculators" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Calculators</a>
+          <a href="/calculators" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Calculators</a>
           <a href="/about" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>About</a>
           <a href="/privacy" style={{ fontSize: 13, color: "#86efac", textDecoration: "none" }}>Privacy</a>
           <a href={`mailto:${CONTACT_EMAIL}`} style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Contact</a>
