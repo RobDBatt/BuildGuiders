@@ -5,12 +5,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Roof Calculator: Squares, Bundles & Materials",
   description:
-    "Work out roof area, squares, and shingle bundles from your footprint and pitch, plus underlayment, drip edge, and ridge cap. Includes a roof pitch multiplier table.",
+    "Roof area, squares, and shingle bundles from your footprint and pitch, plus underlayment, drip edge, and ridge cap. Includes a pitch multiplier table.",
   alternates: { canonical: "https://www.buildguiders.com/roof-calculator" },
   openGraph: {
     title: "Roof Calculator: Squares, Bundles & Materials | BuildGuiders",
     description:
-      "Work out roof area, squares, and shingle bundles from your footprint and pitch, plus underlayment, drip edge, and ridge cap. Includes a roof pitch multiplier table.",
+      "Roof area, squares, and shingle bundles from your footprint and pitch, plus underlayment, drip edge, and ridge cap. Includes a pitch multiplier table.",
     url: "https://www.buildguiders.com/roof-calculator",
     type: "website",
     siteName: "BuildGuiders",
