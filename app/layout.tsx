@@ -103,6 +103,14 @@ export default function RootLayout({
         </Script>
         {children}
         <Analytics />
+
+        {/* Ahrefs Web Analytics (privacy-friendly, cookieless). Key is the
+            public data-key for the BuildGuiders Ahrefs project. */}
+        <Script
+          src="https://analytics.ahrefs.com/analytics.js"
+          data-key="PsTS/JyosXsLfnN2TD10kg"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

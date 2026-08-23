@@ -80,6 +80,15 @@ export default function RoofCalculator() {
   const shoppingItems: {
     qty: number; name: string; note: string; tip: string; amazon?: string; local?: string;
   }[] = result ? [
+    // Fall protection leads the list because it is the one thing to have on the
+    // roof before anything else gets carried up there.
+    {
+      qty: 1,
+      name: "Roof Harness & Fall Protection Kit",
+      note: "Harness, rope grab, and a ridge anchor — the whole setup, before any material goes up",
+      tip: "Tip: Falls are the leading cause of death in roofing. Anything above a single storey or a 6/12 pitch needs this and roof jacks.",
+      amazon: aUrl("roofing fall protection harness kit"),
+    },
     {
       qty: result.bundles,
       name: "Architectural Shingles (bundles)",
@@ -128,13 +137,6 @@ export default function RoofCalculator() {
       note: "Hand-nailing a full roof is a two-day job that a nailer does in hours",
       tip: "",
       amazon: aUrl("roofing nailer"),
-    },
-    {
-      qty: 1,
-      name: "Roof Harness & Fall Protection Kit",
-      note: "Rope, anchor, and harness — required on most roofs over one storey",
-      tip: "Tip: Buy this first. Falls are the leading cause of death in roofing work.",
-      amazon: aUrl("roofing fall protection harness kit"),
     },
   ] : [];
 
