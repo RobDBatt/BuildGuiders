@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { AMAZON_TAG } from "@/lib/site-config.generated";
+import { FAQS } from "./faqs";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface Room {
@@ -340,6 +341,163 @@ export default function PaintCalculatorPage() {
               </>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* ── Supporting content ── */}
+      <div className="bg-white border-t border-slate-200">
+        <div className="max-w-3xl mx-auto px-4 py-12 space-y-10">
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              The coverage figure on the can assumes a wall you probably don&apos;t have
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              Sherwin-Williams states that a gallon covers about 350 to 400 square feet, and adds its own
+              caveat: &ldquo;depending on wall texture and desired coverage, having a little more than a
+              gallon on hand may be best.&rdquo; That range is measured on smooth, primed, previously
+              painted drywall. Very little in a real house is all three of those things at once.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              Texture is what eats the difference. Light orange peel — the finish on most drywall hung since
+              the 1980s — pulls coverage toward the bottom of that range, because the surface has more actual
+              area than its length times its height. Knockdown, stucco and bare brick take it lower again.
+              Bare drywall is a separate problem: the paper face and the joint compound drink the first coat
+              at different rates, which is why an unprimed wall can look patchy after two coats and fine
+              after three.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              This calculator works from 400 — the optimistic end of that range — and rounds every result up to a
+              whole gallon. On smooth, primed drywall that is right. On anything textured, add a gallon to
+              whatever it gives you, and treat the leftover as the touch-up can you will want in two years
+              when a chair back scuffs the paint.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              Primer is a decision about four situations, not a default step
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              Skipping primer is the usual way a two-coat job becomes a four-coat one. Priming a wall that
+              did not need it is the usual way to buy a gallon you never open. Prime when one of these is
+              true:
+            </p>
+            <ul className="text-sm text-slate-600 leading-relaxed space-y-2 list-disc pl-5 mb-3">
+              <li>
+                <span className="font-semibold text-slate-700">Bare drywall.</span> A PVA drywall primer
+                seals the paper and the joint compound so they absorb the topcoat at the same rate.
+              </li>
+              <li>
+                <span className="font-semibold text-slate-700">A big color change</span>, in either
+                direction. Light over dark is the obvious case. Dark over light is the one people
+                underestimate, and a grey-tinted primer under a saturated color saves a coat more reliably
+                than a white one does.
+              </li>
+              <li>
+                <span className="font-semibold text-slate-700">Stains that will bleed.</span> Water rings,
+                smoke, crayon and knots in bare wood need a stain-blocking primer — shellac or oil-based.
+                Latex primer does not hold them back, and they surface through the finish coat weeks later.
+              </li>
+              <li>
+                <span className="font-semibold text-slate-700">A glossy surface.</span> Semi-gloss or oil
+                paint needs a bonding primer or a scuff-sand before anything will stick to it.
+              </li>
+            </ul>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              A wall already painted a similar color in flat or eggshell needs none of this. Wash it, patch
+              it, put the paint on.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              What a gallon covers, by room
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-4">
+              Walls only, 8 ft ceilings, one standard door (20 sq ft) and the windows noted (15 sq ft each), at
+              400 square feet per gallon — the same figures the calculator above uses. Double the gallons
+              for two coats. The calculator adds the ceiling on top of this by default, which is another
+              length × width, so its total for the same room will read higher than the row here.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left border-collapse">
+                <thead>
+                  <tr className="border-b-2 border-slate-300">
+                    <th className="py-2 pr-4 font-bold text-slate-700">Room</th>
+                    <th className="py-2 pr-4 font-bold text-slate-700">Wall area</th>
+                    <th className="py-2 font-bold text-slate-700">One coat</th>
+                  </tr>
+                </thead>
+                <tbody className="text-slate-600">
+                  <tr className="border-b border-slate-200">
+                    <td className="py-2 pr-4">Bathroom, 5 × 8, one window</td>
+                    <td className="py-2 pr-4">173 sq ft</td>
+                    <td className="py-2">0.4 gal</td>
+                  </tr>
+                  <tr className="border-b border-slate-200">
+                    <td className="py-2 pr-4">Bedroom, 10 × 12, two windows</td>
+                    <td className="py-2 pr-4">302 sq ft</td>
+                    <td className="py-2">0.8 gal</td>
+                  </tr>
+                  <tr className="border-b border-slate-200">
+                    <td className="py-2 pr-4">Bedroom, 12 × 14, two windows</td>
+                    <td className="py-2 pr-4">366 sq ft</td>
+                    <td className="py-2">0.9 gal</td>
+                  </tr>
+                  <tr className="border-b border-slate-200">
+                    <td className="py-2 pr-4">Living room, 14 × 20, three windows</td>
+                    <td className="py-2 pr-4">479 sq ft</td>
+                    <td className="py-2">1.2 gal</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">Open plan, 20 × 30, four windows</td>
+                    <td className="py-2 pr-4">720 sq ft</td>
+                    <td className="py-2">1.8 gal</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed mt-4">
+              Round up to the next whole gallon rather than buying a quart to make up a shortfall. A quart
+              costs more than half a gallon does, and it is tinted separately, so it is the batch most likely
+              to read slightly different on the wall.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-4">Frequently asked questions</h2>
+            <div className="space-y-5">
+              {FAQS.map((faq) => (
+                <div key={faq.question}>
+                  <h3 className="font-bold text-slate-800 text-sm mb-1.5">{faq.question}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="border-t border-slate-200 pt-6">
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Written and maintained by the{" "}
+              <a href="/about" className="font-semibold underline text-emerald-800">
+                BuildGuiders team
+              </a>
+              . The 350–400 sq ft per gallon figure is Sherwin-Williams&apos; own published spread rate, on
+              its{" "}
+              <a
+                href="https://www.sherwin-williams.com/en-us/color/color-tools/paint-calculator"
+                className="font-semibold underline text-emerald-800"
+                rel="nofollow noopener"
+                target="_blank"
+              >
+                paint calculator page
+              </a>
+              . Product recommendations are researched and compared against manufacturer specifications and
+              verified buyer feedback — we do not lab-test paint. One thing we could not pin down: no
+              manufacturer publishes a spread rate for knockdown or stucco, so &ldquo;lower again&rdquo; is
+              deliberately vague rather than a number we would have had to invent.
+            </p>
+          </section>
         </div>
       </div>
 
