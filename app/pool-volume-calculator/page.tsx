@@ -379,7 +379,7 @@ export default function PoolVolumeCalculator() {
           <a href="/" style={{ fontFamily: "'Fraunces',serif", fontSize: 18, fontWeight: 900, color: "#fff", textDecoration: "none" }}>
             Build<span style={{ color: "#86efac" }}>Guiders</span>
           </a>
-          <a href="/#calculators" style={{ color: "#86efac", fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+          <a href="/calculators" style={{ color: "#86efac", fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
             ← All Calculators
           </a>
         </div>

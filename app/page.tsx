@@ -1,132 +1,19 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getAllArticles } from "@/lib/articles";
+import {
+  buildCalculators,
+  maintenanceCalculators,
+  lawnGardenCalculators,
+  poolCalculators,
+  interiorCalculators,
+} from "@/lib/calculators";
 
 // Title and description come from the root layout, which describes the site as
 // a whole and is correct here. Only the canonical was missing.
 export const metadata: Metadata = {
   alternates: { canonical: "https://www.buildguiders.com" },
 };
-
-const buildCalculators = [
-  {
-    emoji: "🖌️",
-    title: "Paint Calculator",
-    description: "Gallons, primer, rollers, tape — the full kit. Never under-buy or make a second run.",
-    href: "/paint-calculator",
-    status: "live",
-    tag: "Live",
-  },
-  {
-    emoji: "🪵",
-    title: "Flooring Calculator",
-    description: "Square footage, waste factor, underlayment, and transition strips — all in one list.",
-    href: "/flooring-calculator",
-    status: "live",
-  },
-  {
-    emoji: "🔲",
-    title: "Tile Calculator",
-    description: "Floor or wall tile with grout lines, adhesive, and the tools everyone forgets.",
-    href: "/tile-calculator",
-    status: "live",
-  },
-  {
-    emoji: "🪚",
-    title: "Deck Calculator",
-    description: "Decking boards, joists, post concrete, and every piece of hardware for a solid build.",
-    href: "/deck-calculator",
-    status: "live",
-  },
-  {
-    emoji: "🧱",
-    title: "Drywall Calculator",
-    description: "Sheet count, joint compound, tape, screws — the full mudding kit.",
-    href: "/drywall-calculator",
-    status: "live",
-  },
-  {
-    emoji: "🌿",
-    title: "Mulch & Topsoil",
-    description: "Cubic yards or bags for any bed depth. Landscape fabric and edging included.",
-    href: "/mulch-calculator",
-    status: "live",
-  },
-  {
-    emoji: "🏗️",
-    title: "Concrete Calculator",
-    description: "Slabs, footings, or post holes. Bags or yards — plus your mixing tools.",
-    href: "/concrete-calculator",
-    status: "live",
-  },
-  {
-    emoji: "🪟",
-    title: "Fence Calculator",
-    description: "Posts, panels, concrete, post caps, and gate hardware for any fence run.",
-    href: "/fence-calculator",
-    status: "live",
-  },
-  {
-    emoji: "🏠",
-    title: "Roof Calculator",
-    description: "Squares and shingle bundles from your footprint and pitch, plus underlayment and drip edge.",
-    href: "/roof-calculator",
-    status: "live",
-    tag: "New",
-  },
-];
-
-const maintenanceCalculators = [
-  {
-    emoji: "🖌️",
-    title: "Deck Stain Calculator",
-    description: "How many gallons you actually need — including railings. The part everyone under-buys.",
-    href: "/deck-stain-calculator",
-    status: "live",
-    tag: "New",
-  },
-];
-
-const lawnGardenCalculators = [
-  {
-    emoji: "🌱",
-    title: "Grass Seed Calculator",
-    description: "Pounds of seed, starter fertilizer, and straw cover — for new lawns, overseeding, or patch repair.",
-    href: "/grass-seed-calculator",
-    status: "live",
-    tag: "New",
-  },
-  {
-    emoji: "🥕",
-    title: "Raised Garden Bed Soil",
-    description: "Bags of soil, compost, and perlite to fill any raised bed. Premix or 60/30/10 DIY mix.",
-    href: "/raised-garden-bed-calculator",
-    status: "live",
-    tag: "New",
-  },
-];
-
-const poolCalculators = [
-  {
-    emoji: "🏊",
-    title: "Pool Volume Calculator",
-    description: "Gallons for rectangle, round, oval, or kidney pools — sloped floors handled, plus the chemical list.",
-    href: "/pool-volume-calculator",
-    status: "live",
-    tag: "New",
-  },
-];
-
-const interiorCalculators = [
-  {
-    emoji: "🌸",
-    title: "Wallpaper Calculator",
-    description: "Rolls, paste, and tools — peel-and-stick, pre-pasted, or traditional. Pattern repeat waste included.",
-    href: "/wallpaper-calculator",
-    status: "live",
-    tag: "New",
-  },
-];
 
 const steps = [
   {
@@ -228,7 +115,7 @@ export default function HomePage() {
           Build<span style={{ color: "#86efac" }}>Guiders</span>
         </a>
         <nav style={{ display: "flex", gap: 20 }}>
-          <a href="#calculators" className="nav-link">Calculators</a>
+          <a href="/calculators" className="nav-link">Calculators</a>
           <a href="#how-it-works" className="nav-link">How it works</a>
           <a href="/about" className="nav-link">About</a>
         </nav>
@@ -594,7 +481,7 @@ export default function HomePage() {
         BuildGuiders.com
         </div>
         <div style={{ display: "flex", gap: 20 }}>
-        <a href="/#calculators" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Calculators</a>
+        <a href="/calculators" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Calculators</a>
           <a href="/about" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>About</a>
           <a href="/privacy" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Privacy</a>
           <a href="mailto:GuidersNetwork@gmail.com" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Contact</a>

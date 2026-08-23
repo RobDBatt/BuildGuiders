@@ -42,7 +42,7 @@ export default function AboutPage() {
             Build<span style={{ color: "#86efac" }}>Guiders</span>
           </a>
           <nav style={{ display: "flex", gap: 20 }}>
-            <a href="/#calculators" className="nav-link">Calculators</a>
+            <a href="/calculators" className="nav-link">Calculators</a>
             <a href="/#how-it-works" className="nav-link">How it works</a>
           </nav>
         </div>
@@ -225,7 +225,7 @@ export default function AboutPage() {
         <div style={{ fontFamily: "'Fraunces', serif", fontSize: 15, fontWeight: 900, color: "#fff" }}>BuildGuiders.com</div>
         <div style={{ display: "flex", gap: 20 }}>
           <a href="/" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Home</a>
-          <a href="/#calculators" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Calculators</a>
+          <a href="/calculators" style={{ fontSize: 13, color: "#57534E", textDecoration: "none" }}>Calculators</a>
           <a href="/about" style={{ fontSize: 13, color: "#86efac", textDecoration: "none" }}>About</a>
         </div>
       </footer>

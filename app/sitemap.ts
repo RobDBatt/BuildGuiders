@@ -7,6 +7,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://www.buildguiders.com";
 
   const staticPages = [
+    // The calculator hub: the crawl path to 14 calculators, 11 of which Google
+    // had either never fetched or did not know existed as of Aug 2026.
+    { path: "/calculators", priority: 0.9, changeFrequency: "weekly" as const },
     { path: "/about", priority: 0.7, changeFrequency: "monthly" as const },
     { path: "/privacy", priority: 0.4, changeFrequency: "monthly" as const },
     { path: "/guides", priority: 0.9, changeFrequency: "weekly" as const },
