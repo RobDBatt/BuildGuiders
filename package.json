@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "node scripts/check-redirects.mjs && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate": "node scripts/research-and-generate.mjs",
+    "test:scripts": "node scripts/research-and-generate.test.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
@@ -21,8 +23,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "openai": "^6.9.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
