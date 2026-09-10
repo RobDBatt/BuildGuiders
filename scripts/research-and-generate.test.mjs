@@ -8,7 +8,7 @@
 // that mislabels categories cross-links the wrong calculator, which is invisible
 // until someone reads a published article.
 
-import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage } from "./research-and-generate.mjs";
+import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount } from "./research-and-generate.mjs";
 
 let fail = 0;
 const eq = (got, want, label) => {
@@ -67,6 +67,17 @@ for (const t of titles) {
   const out = capTitle(t, " — Complete Buying Guide");
   const n = [...out].length;
   eq(n <= 60, true, `${n} chars: "${out}"`);
+}
+
+console.log("\n— batch size: the count input decides the bill —");
+eq(resolveArticleCount(undefined), 20, "unset falls back to 20");
+eq(resolveArticleCount(""), 20, "empty string falls back, not 0");
+eq(resolveArticleCount("3"), 3, "the workflow default");
+eq(resolveArticleCount(" 7 "), 7, "whitespace tolerated");
+for (const bad of ["0", "-1", "abc", "2.5", "999", "1e3"]) {
+  let threw = false;
+  try { resolveArticleCount(bad); } catch { threw = true; }
+  eq(threw, true, `rejects ${JSON.stringify(bad)}`);
 }
 
 console.log("\n— cover falls back rather than emitting a 404 path —");

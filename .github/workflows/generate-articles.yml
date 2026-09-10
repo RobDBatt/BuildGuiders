@@ -13,7 +13,9 @@
 #      generator can actually break.
 #
 # Manual trigger only. The weekly schedule stays commented out until a run has
-# been reviewed and the output is trusted.
+# been reviewed and the output is trusted. The "count" input defaults to 3 rather
+# than the script's own 20: the point of the first runs is that somebody reads
+# every article, and twenty is more than anyone reads carefully.
 #
 # Requires GEMINI_API_KEY in repository secrets:
 #   Settings -> Secrets and variables -> Actions -> New repository secret
@@ -27,6 +29,11 @@ on:
   # schedule:
   #   - cron: '0 6 * * 1'
   workflow_dispatch:
+    inputs:
+      count:
+        description: 'Articles to generate (1-50). Keep it small — every one has to be read.'
+        required: false
+        default: '3'
 
 permissions:
   contents: write
@@ -64,7 +71,10 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
-        run: npm run generate
+          MAX_NEW_ARTICLES: ${{ inputs.count }}
+        run: |
+          echo "Generating up to ${MAX_NEW_ARTICLES:-20} article(s)."
+          npm run generate
 
       - name: Collect newly added articles
         id: collect
