@@ -1,7 +1,7 @@
 // scripts/research-and-generate.mjs
 // Hits Google Autocomplete with material+intent seeds, scores by buying-guide
 // intent, filters existing slugs, checks home-improvement relevance, deduplicates
-// fuzzy matches, and generates up to MAX_NEW_ARTICLES via OpenAI.
+// fuzzy matches, and generates up to MAX_NEW_ARTICLES via the Gemini API.
 //
 // Articles are buying guides that cross-link to a BuildGuiders calculator. The
 // calculator list is read from lib/calculators.ts at run time rather than copied
@@ -17,7 +17,18 @@ import { pathToFileURL } from "url";
 const ROOT = process.cwd();
 const ARTICLES_DIR = path.join(ROOT, "content", "articles");
 const MAX_NEW_ARTICLES = 20;
-const MODEL = process.env.OPENAI_MODEL || "gpt-4o";
+// Gemini model. Overridable because model names move faster than this file:
+// run `npm run models` to list what the key can actually reach, then set
+// GEMINI_MODEL to one of them. The default is the one the earlier Gemini
+// scripts on the old branch used, and it is still current.
+const MODEL = normalizeModelName(process.env.GEMINI_MODEL) || "gemini-2.5-flash";
+
+// The API rejects the "models/" prefix that its own list endpoint returns, which
+// is an easy way to set GEMINI_MODEL to something that looks right and 404s.
+function normalizeModelName(name) {
+  if (!name) return null;
+  return name.trim().replace(/^models\//, "");
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CALCULATORS — single source of truth is lib/calculators.ts
@@ -521,13 +532,17 @@ const AFFILIATE_NOTE =
 // product-level errors (wrong coverage rates, wrong drying times, etc.)
 // that no static validator can catch because they vary per product.
 //
-// Uses gpt-4o-search-preview (or SPEC_VERIFY_MODEL env override).
-// Set SPEC_VERIFY_ENABLED=false to skip (e.g., for offline testing).
-// Hard timeout: 15s — if the search is slow, article is still generated
-// without the verified context rather than blocking the pipeline.
+// Uses the same Gemini model with the Google Search grounding tool switched on.
+// The OpenAI version called a dedicated search model (gpt-4o-search-preview);
+// Gemini does this by attaching a tool to an ordinary model instead, so there is
+// no separate search model to name.
+//
+// Set SPEC_VERIFY_ENABLED=false to skip (e.g. for offline testing).
+// Hard timeout: 15s — if the search is slow the article is still written, just
+// without the verified context, rather than blocking the run.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SPEC_VERIFY_MODEL = process.env.SPEC_VERIFY_MODEL || "gpt-4o-search-preview";
+const SPEC_VERIFY_MODEL = normalizeModelName(process.env.SPEC_VERIFY_MODEL) || MODEL;
 const SPEC_VERIFY_ENABLED = process.env.SPEC_VERIFY_ENABLED !== "false";
 const SPEC_VERIFY_TIMEOUT_MS = 15_000;
 
@@ -555,18 +570,19 @@ Return a bullet-point list of verified facts only. If you are unsure of a fact, 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), SPEC_VERIFY_TIMEOUT_MS);
 
-    const response = await client.chat.completions.create(
-      {
-        model: SPEC_VERIFY_MODEL,
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 350,
+    const response = await client.models.generateContent({
+      model: SPEC_VERIFY_MODEL,
+      contents: prompt,
+      config: {
+        tools: [{ googleSearch: {} }],
+        maxOutputTokens: 350,
         temperature: 0,
+        abortSignal: controller.signal,
       },
-      { signal: controller.signal },
-    );
+    });
     clearTimeout(timer);
 
-    const raw = response.choices?.[0]?.message?.content?.trim() || "";
+    const raw = response.text?.trim() || "";
     if (!raw || raw.startsWith("NO_MODEL") || raw.length < 30) return null;
 
     // Strip citation markers ([1], [^2], etc.) that search models add
@@ -574,7 +590,7 @@ Return a bullet-point list of verified facts only. If you are unsure of a fact, 
     console.log(`  [spec-verify] Fetched specs for "${title.substring(0, 60)}"`);
     return cleaned;
   } catch (err) {
-    if (err.name === "AbortError") {
+    if (err.name === "AbortError" || /abort/i.test(err.message || "")) {
       console.warn(`  [spec-verify] Timed out after ${SPEC_VERIFY_TIMEOUT_MS / 1000}s — continuing without verified specs`);
     } else {
       console.warn(`  [spec-verify] Error: ${err.message} — continuing without verified specs`);
@@ -1096,19 +1112,26 @@ async function generateArticleBody(
       "- Minimum 700 words of substantive content." +
       relatedLinksHint;
 
-  const response = await client.chat.completions.create({
+  const response = await client.models.generateContent({
     model: MODEL,
-    temperature: 0.4,
-    max_tokens: 2500,
-    messages: [
-      { role: "system", content: system },
-      { role: "user", content: userPrompt },
-    ],
+    contents: userPrompt,
+    config: {
+      systemInstruction: system,
+      temperature: 0.4,
+      maxOutputTokens: 2500,
+    },
   });
 
-  const content = response.choices?.[0]?.message?.content;
-  if (!content)
-    throw new Error("No content returned from OpenAI for: " + title);
+  const content = response.text;
+  if (!content) {
+    // An empty body is usually a safety block or a token cap, not a network
+    // failure, so say which rather than leaving a bare "no content".
+    const reason = response.candidates?.[0]?.finishReason;
+    throw new Error(
+      "Gemini returned no content for: " + title +
+        (reason ? ` (finishReason: ${reason})` : ""),
+    );
+  }
   return content.trim();
 }
 
@@ -1125,16 +1148,16 @@ async function main() {
     "Cross-linking " + calculators.length + " calculators from lib/calculators.ts.",
   );
 
-  if (!process.env.OPENAI_API_KEY) {
-    console.error("OPENAI_API_KEY is not set.");
+  if (!process.env.GEMINI_API_KEY) {
+    console.error("GEMINI_API_KEY is not set.");
     process.exit(1);
   }
 
   // Imported here rather than at module scope so the pure helpers above can be
   // imported and tested without these packages present.
   await import("dotenv/config");
-  const { default: OpenAI } = await import("openai");
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const { GoogleGenAI } = await import("@google/genai");
+  const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   const existingSlugs = getExistingSlugs();
   console.log(
     "Found " + existingSlugs.size + " existing articles — skipping those.\n",
