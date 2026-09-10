@@ -44,40 +44,45 @@ export function loadCalculators() {
   return titles.map((title, i) => ({ title, href: hrefs[i] }));
 }
 
-// Content category -> the calculator an article in that category should send the
-// reader to. Every href is checked against lib/calculators.ts on startup, so a
-// typo or a renamed route fails loudly instead of shipping a dead cross-link.
-const CATEGORY_TO_CALCULATOR = {
-  paint: "/paint-calculator",
-  flooring: "/flooring-calculator",
-  tile: "/tile-calculator",
-  deck: "/deck-calculator",
-  drywall: "/drywall-calculator",
-  landscaping: "/mulch-calculator",
-  concrete: "/concrete-calculator",
-  fence: "/fence-calculator",
-  "stain-sealer": "/deck-stain-calculator",
-  roofing: "/roof-calculator",
-  lawn: "/grass-seed-calculator",
-  garden: "/raised-garden-bed-calculator",
-  pool: "/pool-volume-calculator",
-  wallpaper: "/wallpaper-calculator",
-};
+// Content category -> calculator. Parsed from the categoryCalculators map in
+// lib/calculators.ts rather than kept here, because a copy in this file is how
+// the generator came to know 14 categories while the guide template still knew
+// 9 — which made a roofing or pool guide render no calculator CTA at all.
+export function loadCategoryCalculators() {
+  const src = fs.readFileSync(path.join(ROOT, "lib", "calculators.ts"), "utf8");
+  const block = src.match(
+    /export const categoryCalculators[\s\S]*?=\s*\{([\s\S]*?)\n\};/,
+  );
+  if (!block) {
+    throw new Error(
+      "Could not find the categoryCalculators map in lib/calculators.ts. " +
+        "If it moved or was renamed, update loadCategoryCalculators() to match " +
+        "rather than hardcoding the mapping here.",
+    );
+  }
+  const entries = [
+    ...block[1].matchAll(/["']?([a-z-]+)["']?:\s*\{\s*href:\s*"([^"]+)"/g),
+  ];
+  if (entries.length === 0) {
+    throw new Error("categoryCalculators parsed to zero entries.");
+  }
+  return Object.fromEntries(entries.map((m) => [m[1], m[2]]));
+}
 
-export function validateCalculatorMap(calculators) {
+export function validateCalculatorMap(calculators, categoryMap = loadCategoryCalculators()) {
   const live = new Set(calculators.map((c) => c.href));
-  const dead = Object.entries(CATEGORY_TO_CALCULATOR).filter(
+  const dead = Object.entries(categoryMap).filter(
     ([, href]) => !live.has(href),
   );
   if (dead.length > 0) {
     throw new Error(
-      "CATEGORY_TO_CALCULATOR points at calculators that do not exist in " +
+      "categoryCalculators points at calculators that do not exist in " +
         "lib/calculators.ts:\n" +
         dead.map(([cat, href]) => `  ${cat} -> ${href}`).join("\n"),
     );
   }
   const unmapped = calculators.filter(
-    (c) => !Object.values(CATEGORY_TO_CALCULATOR).includes(c.href),
+    (c) => !Object.values(categoryMap).includes(c.href),
   );
   if (unmapped.length > 0) {
     console.warn(
@@ -88,8 +93,11 @@ export function validateCalculatorMap(calculators) {
   }
 }
 
+let categoryMapCache = null;
+
 export function calculatorFor(categorySlug) {
-  return CATEGORY_TO_CALCULATOR[categorySlug] || CALCULATOR_HUB;
+  if (!categoryMapCache) categoryMapCache = loadCategoryCalculators();
+  return categoryMapCache[categorySlug] || CALCULATOR_HUB;
 }
 
 // Human name for a calculator path, taken from lib/calculators.ts so the prompt

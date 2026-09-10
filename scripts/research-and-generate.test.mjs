@@ -8,7 +8,7 @@
 // that mislabels categories cross-links the wrong calculator, which is invisible
 // until someone reads a published article.
 
-import { capTitle, inferCategoryFromTopic, loadCalculators, validateCalculatorMap, calculatorFor, getCoverImage } from "./research-and-generate.mjs";
+import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage } from "./research-and-generate.mjs";
 
 let fail = 0;
 const eq = (got, want, label) => {
@@ -22,6 +22,18 @@ const cals = loadCalculators();
 eq(cals.length, 14, "14 calculators found");
 validateCalculatorMap(cals);
 console.log("  ok   category map validates against the live list");
+
+console.log("\n— generator and guide template read ONE map —");
+const catMap = loadCategoryCalculators();
+eq(Object.keys(catMap).length, 14, "14 categories parsed from lib/calculators.ts");
+const tpl = await import("node:fs").then(fs =>
+  fs.readFileSync("app/guides/[slug]/page.tsx", "utf8"));
+eq(/import \{ categoryCalculators \} from "@\/lib\/calculators"/.test(tpl), true,
+   "guide template imports the shared map");
+eq(/const CALCULATOR_LINKS/.test(tpl), false,
+   "guide template no longer holds its own copy");
+for (const c of ["roofing", "lawn", "garden", "pool", "wallpaper"])
+  eq(c in catMap, true, `template can render a CTA for "${c}"`);
 
 console.log("\n— category inference, incl. the 5 new areas —");
 const cases = [
