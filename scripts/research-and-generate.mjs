@@ -16,7 +16,31 @@ import { pathToFileURL } from "url";
 
 const ROOT = process.cwd();
 const ARTICLES_DIR = path.join(ROOT, "content", "articles");
-const MAX_NEW_ARTICLES = 20;
+// How many articles one run may write. Set MAX_NEW_ARTICLES to override; the
+// workflow exposes it as the "count" input so a first run can be small enough
+// to actually read. Falls back to 20, which is what the script has always done
+// when run by hand.
+const ARTICLE_COUNT_DEFAULT = 20;
+const ARTICLE_COUNT_CEILING = 50;
+const MAX_NEW_ARTICLES = resolveArticleCount(process.env.MAX_NEW_ARTICLES);
+
+// Validated rather than coerced: Number("") is 0 and Number("3 ") is 3, so a
+// blank or fat-fingered value would otherwise silently produce no articles, or
+// far too many, and the bill arrives either way.
+export function resolveArticleCount(raw) {
+  if (raw === undefined || raw === null || String(raw).trim() === "") {
+    return ARTICLE_COUNT_DEFAULT;
+  }
+  const n = Number(String(raw).trim());
+  if (!Number.isInteger(n) || n < 1 || n > ARTICLE_COUNT_CEILING) {
+    throw new Error(
+      `MAX_NEW_ARTICLES must be a whole number between 1 and ` +
+        `${ARTICLE_COUNT_CEILING}, got "${raw}".`,
+    );
+  }
+  return n;
+}
+
 // Gemini model. Overridable because model names move faster than this file:
 // run `npm run models` to list what the key can actually reach, then set
 // GEMINI_MODEL to one of them. The default is the one the earlier Gemini
