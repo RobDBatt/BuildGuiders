@@ -147,3 +147,34 @@ export const calculatorGroups: {
 ];
 
 export const allCalculators: Calculator[] = calculatorGroups.flatMap((g) => g.items);
+
+// Content category -> the calculator a guide in that category sends readers to.
+//
+// Lives here, beside the calculator list, because three separate copies of this
+// mapping had already appeared: the guide template, the article generator, and
+// the list above. The generator was taught all 14 categories while the template
+// still knew 9, so a roofing or pool guide rendered no calculator CTA at all —
+// silently, because the template guards on `calc &&`. One copy, read by both.
+//
+// The label is spelled out rather than derived from Calculator.title: two of the
+// titles ("Mulch & Topsoil", "Raised Garden Bed Soil") do not read correctly with
+// "Free" bolted on the front.
+export const categoryCalculators: Record<
+  string,
+  { href: string; label: string }
+> = {
+  paint: { href: "/paint-calculator", label: "Free Paint Calculator" },
+  flooring: { href: "/flooring-calculator", label: "Free Flooring Calculator" },
+  tile: { href: "/tile-calculator", label: "Free Tile Calculator" },
+  deck: { href: "/deck-calculator", label: "Free Deck Calculator" },
+  drywall: { href: "/drywall-calculator", label: "Free Drywall Calculator" },
+  landscaping: { href: "/mulch-calculator", label: "Free Mulch Calculator" },
+  concrete: { href: "/concrete-calculator", label: "Free Concrete Calculator" },
+  fence: { href: "/fence-calculator", label: "Free Fence Calculator" },
+  "stain-sealer": { href: "/deck-stain-calculator", label: "Free Deck Stain Calculator" },
+  roofing: { href: "/roof-calculator", label: "Free Roof Calculator" },
+  lawn: { href: "/grass-seed-calculator", label: "Free Grass Seed Calculator" },
+  garden: { href: "/raised-garden-bed-calculator", label: "Free Raised Bed Soil Calculator" },
+  pool: { href: "/pool-volume-calculator", label: "Free Pool Volume Calculator" },
+  wallpaper: { href: "/wallpaper-calculator", label: "Free Wallpaper Calculator" },
+};

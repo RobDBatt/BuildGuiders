@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getAllArticles, getArticleBySlug } from "@/lib/articles";
+import { categoryCalculators } from "@/lib/calculators";
 import type { Metadata } from "next";
 
 const SITE = "https://www.buildguiders.com";
@@ -24,18 +25,6 @@ function articleImage(coverImage?: string): string {
   }
   return `${SITE}${FALLBACK_IMAGE}`;
 }
-
-const CALCULATOR_LINKS: Record<string, { href: string; label: string }> = {
-  paint: { href: "/paint-calculator", label: "Free Paint Calculator" },
-  flooring: { href: "/flooring-calculator", label: "Free Flooring Calculator" },
-  tile: { href: "/tile-calculator", label: "Free Tile Calculator" },
-  deck: { href: "/deck-calculator", label: "Free Deck Calculator" },
-  drywall: { href: "/drywall-calculator", label: "Free Drywall Calculator" },
-  landscaping: { href: "/mulch-calculator", label: "Free Mulch Calculator" },
-  concrete: { href: "/concrete-calculator", label: "Free Concrete Calculator" },
-  fence: { href: "/fence-calculator", label: "Free Fence Calculator" },
-  "stain-sealer": { href: "/deck-stain-calculator", label: "Free Deck Stain Calculator" },
-};
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -84,7 +73,7 @@ export default async function ArticlePage({ params }: Props) {
   const article = getArticleBySlug(slug);
   if (!article || !article.published) notFound();
 
-  const calc = CALCULATOR_LINKS[article.category];
+  const calc = categoryCalculators[article.category];
   const url = `https://www.buildguiders.com/guides/${slug}`;
 
   // Related guides: same category first, then most-recent others, capped at 3
