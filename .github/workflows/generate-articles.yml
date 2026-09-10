@@ -15,8 +15,11 @@
 # Manual trigger only. The weekly schedule stays commented out until a run has
 # been reviewed and the output is trusted.
 #
-# Requires OPENAI_API_KEY in repository secrets:
+# Requires GEMINI_API_KEY in repository secrets:
 #   Settings -> Secrets and variables -> Actions -> New repository secret
+#
+# Optionally set a GEMINI_MODEL repository variable to override the default.
+# `npm run models` lists what a key can actually reach.
 
 name: Generate Articles
 
@@ -46,10 +49,10 @@ jobs:
 
       - name: Fail early if the API key is missing
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          if [ -z "$OPENAI_API_KEY" ]; then
-            echo "OPENAI_API_KEY is not set in repository secrets."
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "GEMINI_API_KEY is not set in repository secrets."
             echo "Add it under Settings -> Secrets and variables -> Actions."
             exit 1
           fi
@@ -59,8 +62,8 @@ jobs:
 
       - name: Generate articles
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
         run: npm run generate
 
       - name: Collect newly added articles
