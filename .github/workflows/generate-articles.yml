@@ -88,7 +88,11 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
           if [ "$COUNT" -eq 0 ]; then
-            echo "No new articles. Every candidate topic already exists as an article."
+            # Deliberately does not say why. This step can see that no file was
+            # written; it cannot see whether that is because every candidate
+            # topic already existed or because the API refused every call. The
+            # generate step above fails the run in the second case.
+            echo "No new articles were written. See the generate step for what it attempted."
           else
             echo "$COUNT new article(s):"
             printf '%s\n' "$NEW_FILES"
