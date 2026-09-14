@@ -1,6 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import { AMAZON_TAG } from "@/lib/site-config.generated";
+import { FAQS } from "./faqs";
 
 const GREEN = "#1B4332";
 const aUrl = (asin: string) => `https://www.amazon.com/dp/${asin}?tag=${AMAZON_TAG}`;
@@ -23,6 +24,18 @@ const INITIAL_ROOMS: Room[] = [{ id: "room-0", length: "12", width: "12", height
 let nextRoomId = 1;
 const newRoom = (): Room => ({ id: `room-${nextRoomId++}`, length: "", width: "", height: "", doors: "1", windows: "1" });
 
+
+// Walls + ceiling at 8 ft, one door and one window, 10% waste — computed with
+// the calc() above so the table cannot drift from the tool.
+const SHEET_EXAMPLES: [string, string, string][] = [
+  ["10 × 10 ft", "385 sq ft", "14"],
+  ["12 × 12 ft", "493 sq ft", "17"],
+  ["12 × 16 ft", "605 sq ft", "21"],
+  ["14 × 16 ft", "669 sq ft", "23"],
+  ["16 × 20 ft", "861 sq ft", "30"],
+  ["20 × 24 ft", "1,149 sq ft", "40"],
+];
+
 function calc(rooms: Room[], includeCeiling: boolean, thickness: string) {
   let wallSqFt = 0;
   let ceilingSqFt = 0;
@@ -36,7 +49,9 @@ function calc(rooms: Room[], includeCeiling: boolean, thickness: string) {
     if (includeCeiling) ceilingSqFt += l * w;
   }
   const totalSqFt = wallSqFt + ceilingSqFt;
-  const sheets = Math.ceil(totalSqFt / SHEET_SQ_FT * 1.10); // 10% waste
+  // 10% waste. Multiply before dividing and round off the float dust before
+  // ceil(): a 320 sq ft total gives 11.000000000000002 and buys a 12th sheet.
+  const sheets = Math.ceil(Number(((totalSqFt * 110) / 100 / SHEET_SQ_FT).toFixed(6)));
   const screwBoxes = Math.ceil(sheets / 5); // 1 box per 5 sheets
   const mudBuckets = Math.ceil(totalSqFt / 400); // 1 bucket per 400 sqft
   // Each sheet has ~16 ft of net seams; a 75-ft roll covers ~4-5 sheets
@@ -209,6 +224,167 @@ export default function DrywallCalculator() {
               </>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* ── Supporting content ── */}
+      <div className="bg-white border-t border-slate-200">
+        <div className="max-w-3xl mx-auto px-4 py-12 space-y-10">
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              Sheet length decides how much finishing you do
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              Drywall has tapered long edges — a shallow recess milled into the face so that tape and
+              compound sit flush instead of proud. Seams along those edges disappear with a normal three-coat
+              finish. The cut ends have no taper. Butt two of them together and you have a seam standing
+              proud of the surface, which has to be built up on both sides and feathered out 16 to 24 inches
+              to become invisible under a raking light.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              That is the whole argument for long sheets. A 4 × 12 board spans most residential walls in one
+              piece and gives you zero butt joints. Two 4 × 8 sheets on the same wall give you one, plus the
+              hour of feathering and sanding that goes with it. Hanging horizontally — the long edge running
+              across the studs — also puts the tapered seam at a comfortable 4 ft working height instead of
+              running vertical seams floor to ceiling.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              This calculator works in 32 square feet per sheet, the 4 × 8 size, because that is what fits in
+              a vehicle and what two people can carry up a stairwell. If you are having board delivered, ask
+              for 12-footers and divide the square footage by 48 instead.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              Half-inch is the default, and the exceptions matter
+            </h2>
+            <ul className="text-sm text-slate-600 leading-relaxed space-y-2 list-disc pl-5 mb-3">
+              <li>
+                <span className="font-semibold text-slate-700">1/2 inch</span> — the residential standard for
+                walls, and for ceilings where the joists are 16 inches on centre.
+              </li>
+              <li>
+                <span className="font-semibold text-slate-700">5/8 inch Type X</span> — where fire resistance
+                is required. In US residential code the usual case is the garage side of a garage-to-house
+                wall and the ceiling below habitable space. It is also the right call on any ceiling framed
+                at 24 inches on centre, because half-inch board sags between joists over time, and faster
+                with insulation resting on it. Requirements vary by jurisdiction, so check local code rather
+                than this page.
+              </li>
+              <li>
+                <span className="font-semibold text-slate-700">3/8 and 1/4 inch</span> — patching and curved
+                walls. Not for general hanging; they are too floppy to stay flat between studs.
+              </li>
+            </ul>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Thickness does not change the sheet count, only the weight and the price. A 4 × 8 sheet of
+              5/8 runs noticeably heavier than 1/2, which is worth knowing before you plan a ceiling as a
+              two-person job.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              The openings you deduct do not actually save you board
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              This calculator subtracts 20 square feet per door and 15 per window, which is the right way to
+              estimate the finished surface. It is not how the board gets used. Almost nobody cuts a sheet to
+              fit around a door before hanging it — you hang straight over the opening, screw off the field,
+              then run a saw around the frame from behind. It is faster, the edges land exactly on the
+              opening, and the cut-out is usually scrap.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              So treat the deduction as an estimate of area, not of sheets saved, and leave the 10 percent
+              waste factor alone. Raise it to 15 percent if the room has a lot of angles, a stairwell, a
+              vaulted ceiling, or more openings than a normal bedroom — those are the jobs where offcuts pile
+              up faster than you can use them.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              What the compound, tape and screw quantities assume
+            </h2>
+            <ul className="text-sm text-slate-600 leading-relaxed space-y-2 list-disc pl-5 mb-3">
+              <li>
+                <span className="font-semibold text-slate-700">Joint compound:</span> one bucket per 400
+                square feet of board, enough for a three-coat finish — a bedding coat over the tape, a fill
+                coat, and a thin skim. Buy a bag of setting-type compound as well if you have butt joints or
+                deep gaps to build up: it hardens chemically rather than by drying, shrinks less, and lets
+                you recoat the same day.
+              </li>
+              <li>
+                <span className="font-semibold text-slate-700">Tape:</span> one 75 ft roll per four sheets.
+                Paper tape on flats and inside corners — it is stronger in tension and creases cleanly. Mesh
+                is faster but needs setting-type compound over it, because premixed all-purpose does not
+                develop enough strength to stop a mesh seam cracking.
+              </li>
+              <li>
+                <span className="font-semibold text-slate-700">Screws:</span> one box per five sheets. The
+                spec is every 16 inches along each framing member on walls and every 12 inches on ceilings —
+                about 32 screws in a 4 × 8 wall sheet. Use 1-1/4 inch coarse thread in wood, fine thread in
+                steel studs, and set them just below the paper without breaking it.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-4">
+              Sheets needed by room size
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-4">
+              Walls and ceiling, 8 ft ceiling height, one door and one window, 10 percent waste included.
+              Every figure is this page&apos;s own formula applied to the stated room.
+            </p>
+            <div className="rounded-xl border border-slate-200 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2 bg-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wide">
+                <span>Room</span>
+                <span className="flex gap-8">
+                  <span className="w-24 text-right">Area</span>
+                  <span className="w-20 text-right">4 × 8 sheets</span>
+                </span>
+              </div>
+              {SHEET_EXAMPLES.map(([room, area, sheets], i) => (
+                <div
+                  key={room}
+                  className={`flex items-center justify-between px-4 py-2 text-sm ${i % 2 ? "bg-slate-50" : "bg-white"}`}
+                >
+                  <span className="text-slate-600">{room}</span>
+                  <span className="flex gap-8">
+                    <span className="w-24 text-right text-slate-600">{area}</span>
+                    <span className="w-20 text-right font-bold text-slate-800">{sheets}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-4">Frequently asked questions</h2>
+            <div className="space-y-5">
+              {FAQS.map((faq) => (
+                <div key={faq.question}>
+                  <h3 className="font-bold text-slate-800 text-sm mb-1.5">{faq.question}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="border-t border-slate-200 pt-6">
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Written and maintained by the{" "}
+              <a href="/about" className="font-semibold underline" style={{ color: GREEN }}>
+                BuildGuiders team
+              </a>
+              . Quantities use standard sheet sizes and trade coverage rates; fire-rating and framing
+              requirements come from the US residential code and vary locally, so confirm yours before you
+              buy. Product recommendations are researched and compared against manufacturer specifications
+              and verified buyer feedback — we do not test drywall.
+            </p>
+          </section>
         </div>
       </div>
       <footer className="mt-16 border-t border-slate-200 bg-white">

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import { AMAZON_TAG } from "@/lib/site-config.generated";
+import { FAQS } from "./faqs";
 
 const GREEN = "#1B4332";
 const aUrl = (asin: string) => `https://www.amazon.com/dp/${asin}?tag=${AMAZON_TAG}`;
@@ -20,11 +21,26 @@ const INITIAL_AREAS: Area[] = [{ id: "area-0", length: "10", width: "10" }];
 let nextAreaId = 1;
 const newArea = (): Area => ({ id: `area-${nextAreaId++}`, length: "", width: "" });
 
+
+// 100 sq ft at the default 10% waste, using the same per-tile square footage as
+// TILE_SIZES above, so the table cannot drift from the tool.
+const TILE_EXAMPLES: [string, string, string][] = [
+  ['12" × 12"', "1.00 sq ft", "110"],
+  ['18" × 18"', "2.25 sq ft", "49"],
+  ['24" × 24"', "4.00 sq ft", "28"],
+  ['6" × 6"', "0.25 sq ft", "440"],
+  ['3" × 6" subway', "0.125 sq ft", "880"],
+  ['4" × 4"', "0.111 sq ft", "991"],
+];
+
 function calc(areas: Area[], tileSizeId: string, waste: number, groutLine: number) {
   const tileSize = TILE_SIZES.find(t => t.id === tileSizeId)!;
   const totalSqFt = areas.reduce((sum, a) => sum + (parseFloat(a.length) || 0) * (parseFloat(a.width) || 0), 0);
-  const withWaste = totalSqFt * (1 + waste / 100);
-  const tileCount = Math.ceil(withWaste / tileSize.sqFt);
+  // Multiply before dividing, and round off the float dust before ceil():
+  // totalSqFt * (1 + waste/100) turns a clean 110 into 110.00000000000001,
+  // which rounds an extra tile (and an extra box) onto every tidy number.
+  const withWaste = (totalSqFt * (100 + waste)) / 100;
+  const tileCount = Math.ceil(Number((withWaste / tileSize.sqFt).toFixed(6)));
   const groutBags = Math.ceil(totalSqFt / 50); // 1 bag per ~50 sqft
   const adhesiveBags = Math.ceil(totalSqFt / 40); // 1 bag per ~40 sqft
   return { totalSqFt: Math.round(totalSqFt), withWaste: Math.round(withWaste), tileCount, groutBags, adhesiveBags, tileSize };
@@ -219,6 +235,158 @@ export default function TileCalculator() {
               </>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* ── Supporting content ── */}
+      <div className="bg-white border-t border-slate-200">
+        <div className="max-w-3xl mx-auto px-4 py-12 space-y-10">
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              The waste factor is about your layout, not your skill
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              Ten percent is the right allowance for a straight grid in a room with square corners. It is the
+              wrong allowance for most other jobs, and the difference is geometry rather than carelessness.
+            </p>
+            <ul className="text-sm text-slate-600 leading-relaxed space-y-2 list-disc pl-5 mb-3">
+              <li>
+                <span className="font-semibold text-slate-700">Diagonal, 15 percent.</span> Every tile on the
+                perimeter is cut corner to corner into two triangles, and only one of them usually fits
+                somewhere else.
+              </li>
+              <li>
+                <span className="font-semibold text-slate-700">Herringbone or chevron, 15 to 20 percent.</span>{" "}
+                Nearly every edge tile is a cut, and the offcuts rarely match the next gap.
+              </li>
+              <li>
+                <span className="font-semibold text-slate-700">Large format, add more again.</span> A botched
+                cut on a 24 × 24 costs four square feet. The same mistake on a 12 × 12 costs one.
+              </li>
+              <li>
+                <span className="font-semibold text-slate-700">Awkward rooms.</span> Alcoves, jogs, a kitchen
+                island, anything that turns one perimeter into five.
+              </li>
+            </ul>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              The waste control above defaults to 10 and goes to 20. Set it before you look at the tile count,
+              not after.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              Grout joint width is decided by the tile, not by taste
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              Rectified tile has its edges mechanically ground square after firing, so every piece is
+              effectively the same size. That is what allows a tight joint — down to about 1/16 inch. Tile
+              that is not rectified comes out of the kiln with real variation between pieces, and a joint
+              around 3/16 inch is what hides it. Try to run a tight line with non-rectified tile and the
+              grout lines visibly wander within a few rows, which cannot be corrected afterwards.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              The joint width then picks the grout. Unsanded below 1/8 inch, sanded at 1/8 and above — the
+              sand is what gives a wider joint enough compressive strength not to crack. The exception is
+              soft or polished faces, marble and glass especially, where sand can scratch the surface during
+              grouting. Use unsanded or a specialty grout there and follow the tile maker&apos;s guidance over any
+              general rule.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              Trowel notch size moves the mortar count more than anything else
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              This calculator allows one 50 lb bag per 40 square feet. That figure assumes a 1/4 inch
+              square-notch trowel, which is the normal choice for tile up to around 12 × 12. Step up to
+              large-format tile and you step up the notch — a 1/2 inch notch lays roughly twice the mortar
+              per square foot, so the same room can need close to double the bags. Buy accordingly if you are
+              setting 18 × 18 or larger.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              The thing to check is contact, not thickness. Industry guidance is 80 percent mortar coverage
+              behind a tile in a dry area and 95 percent in a shower or outdoors. Set your first few tiles,
+              pull one straight back up, and look at the back. Ridges with bare gaps between them mean the
+              notch is too small or the mortar skinned over before the tile went down.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              Order one dye lot, and keep a box
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              Tile is fired in batches and the colour shifts between them. Order the whole job at once and
+              check that every box carries the same lot number before you open any of them — a top-up
+              ordered a week later can arrive visibly different under the same light. Keep a spare box after
+              the job, somewhere dry. A cracked tile in three years is a twenty-minute repair if you have a
+              match and a floor-wide problem if you do not.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              One more check before you buy: the PEI rating. I and II are rated for walls and light duty
+              only, III suits a normal residential floor, IV and V are built for heavy traffic. Putting wall
+              tile on a floor is the common expensive mistake — it is thinner and softer, and it crazes
+              underfoot. The other direction is fine, weight and substrate permitting.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-4">
+              Tiles needed for 100 square feet
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-4">
+              At the standard 10 percent waste. Every figure is this page&apos;s own formula applied to the
+              stated tile size.
+            </p>
+            <div className="rounded-xl border border-slate-200 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2 bg-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wide">
+                <span>Tile size</span>
+                <span className="flex gap-8">
+                  <span className="w-24 text-right">Each covers</span>
+                  <span className="w-20 text-right">Tiles</span>
+                </span>
+              </div>
+              {TILE_EXAMPLES.map(([size, covers, count], i) => (
+                <div
+                  key={size}
+                  className={`flex items-center justify-between px-4 py-2 text-sm ${i % 2 ? "bg-slate-50" : "bg-white"}`}
+                >
+                  <span className="text-slate-600">{size}</span>
+                  <span className="flex gap-8">
+                    <span className="w-24 text-right text-slate-600">{covers}</span>
+                    <span className="w-20 text-right font-bold text-slate-800">{count}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-4">Frequently asked questions</h2>
+            <div className="space-y-5">
+              {FAQS.map((faq) => (
+                <div key={faq.question}>
+                  <h3 className="font-bold text-slate-800 text-sm mb-1.5">{faq.question}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="border-t border-slate-200 pt-6">
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Written and maintained by the{" "}
+              <a href="/about" className="font-semibold underline" style={{ color: GREEN }}>
+                BuildGuiders team
+              </a>
+              . Counts use nominal tile dimensions and standard trade coverage rates; mortar coverage and
+              grout guidance follow published industry practice, and your tile maker&apos;s instructions take
+              precedence over any of it. Product recommendations are researched and compared against
+              manufacturer specifications and verified buyer feedback — we do not test tile.
+            </p>
+          </section>
         </div>
       </div>
       <footer className="mt-16 border-t border-slate-200 bg-white">

@@ -40,7 +40,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(faqLd).replace(/</g, "\u003c"),
+          __html: JSON.stringify(faqLd).replace(/</g, "\\u003c"),
         }}
       />
       {children}
