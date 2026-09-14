@@ -31,7 +31,7 @@ export const FAQS: Faq[] = [
   {
     question: "How many screws do I need per sheet of drywall?",
     answer:
-      "The usual spec is a screw every 16 inches along each framing member on walls and every 12 inches on ceilings, which works out to roughly 32 screws in a 4 × 8 wall sheet. Use 1-1/4 inch coarse-thread screws in wood framing and fine-thread in steel studs. This calculator allows one box per five sheets, which leaves margin for the ones you strip, overdrive through the paper, or drop.",
+      "The usual spec is a screw every 16 inches along each framing member on walls and every 12 inches on ceilings, which works out to roughly 32 screws in a 4 × 8 wall sheet. Length follows the board thickness, because the screw has to bite at least 5/8 inch into the framing: 1-1/4 inch for 3/8 and 1/2 inch drywall, 1-5/8 inch for 5/8. Coarse thread in wood framing, fine thread in steel studs. This calculator allows one box per five sheets, which leaves margin for the ones you strip, overdrive through the paper, or drop.",
   },
   {
     question: "Should I use paper tape or mesh tape?",
