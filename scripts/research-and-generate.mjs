@@ -16,7 +16,31 @@ import { pathToFileURL } from "url";
 
 const ROOT = process.cwd();
 const ARTICLES_DIR = path.join(ROOT, "content", "articles");
-const MAX_NEW_ARTICLES = 20;
+// How many articles one run may write. Set MAX_NEW_ARTICLES to override; the
+// workflow exposes it as the "count" input so a first run can be small enough
+// to actually read. Falls back to 20, which is what the script has always done
+// when run by hand.
+const ARTICLE_COUNT_DEFAULT = 20;
+const ARTICLE_COUNT_CEILING = 50;
+const MAX_NEW_ARTICLES = resolveArticleCount(process.env.MAX_NEW_ARTICLES);
+
+// Validated rather than coerced: Number("") is 0 and Number("3 ") is 3, so a
+// blank or fat-fingered value would otherwise silently produce no articles, or
+// far too many, and the bill arrives either way.
+export function resolveArticleCount(raw) {
+  if (raw === undefined || raw === null || String(raw).trim() === "") {
+    return ARTICLE_COUNT_DEFAULT;
+  }
+  const n = Number(String(raw).trim());
+  if (!Number.isInteger(n) || n < 1 || n > ARTICLE_COUNT_CEILING) {
+    throw new Error(
+      `MAX_NEW_ARTICLES must be a whole number between 1 and ` +
+        `${ARTICLE_COUNT_CEILING}, got "${raw}".`,
+    );
+  }
+  return n;
+}
+
 // Gemini model. Overridable because model names move faster than this file:
 // run `npm run models` to list what the key can actually reach, then set
 // GEMINI_MODEL to one of them. The default is the one the earlier Gemini
@@ -1136,6 +1160,104 @@ async function generateArticleBody(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// FATAL vs PER-ARTICLE ERRORS
+//
+// A depleted quota, a rejected key or a bad model name fails identically on
+// every remaining article. The first run of this workflow burned twenty calls
+// on the same "prepayment credits are depleted" response and still exited 0,
+// so the run went green with nothing written. Stop on the first of these and
+// report it, rather than restating it twenty times.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const FATAL_ERROR_RE =
+  /RESOURCE_EXHAUSTED|PERMISSION_DENIED|UNAUTHENTICATED|quota|credits? (are )?depleted|billing|API key not valid|\b(401|403|429)\b|NOT_FOUND.*model|model.*not found/i;
+
+export function isFatalApiError(message) {
+  return FATAL_ERROR_RE.test(String(message ?? ""));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RUN OUTCOME
+//
+// A run that wrote nothing because the API refused every call is a failure, not
+// a quiet no-op. Run 34794137890 wrote nothing, exited 0, and the workflow
+// reported "Every candidate topic already exists" — a cause it had no way to
+// know. Partial success stays green: one article failing out of three is worth
+// reporting, not worth failing the run over, and the quality gates still judge
+// whatever landed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function describeOutcome({ created, failed, fatal }) {
+  if (created === 0 && failed > 0) {
+    return {
+      ok: false,
+      message:
+        "Nothing was written. " +
+        (fatal
+          ? "The API rejected the request: " + fatal
+          : "Every article failed; the errors are above."),
+    };
+  }
+  return { ok: true, message: `Wrote ${created} article(s), ${failed} failed.` };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GENERATION LOOP
+//
+// Extracted from main() so the failure path can be exercised directly. The bug
+// this guards against — every call failing while the run still reported success
+// — was invisible precisely because this logic sat inline in main() behind eight
+// minutes of network research that no test could reach.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function generateBatch(client, ranked, existingSlugs) {
+  let created = 0;
+  let failed = 0;
+  let fatal = null;
+
+  for (const [slug, { title, brand, categorySlug, coverImage }] of ranked) {
+    const filePath = path.join(ARTICLES_DIR, slug + ".mdx");
+    if (fs.existsSync(filePath)) {
+      console.log("Skipping: " + slug);
+      continue;
+    }
+    try {
+      console.log("Generating: " + title);
+      const product = pickProductForTopic(slug, categorySlug);
+      const verifiedSpecs = await fetchVerifiedSpecs(client, title);
+      const body = await generateArticleBody(
+        client,
+        title,
+        brand,
+        categorySlug,
+        existingSlugs,
+        product,
+        verifiedSpecs,
+      );
+      const fm = buildFrontmatter(slug, title, brand, categorySlug, coverImage, product);
+      fs.writeFileSync(filePath, fm + body + "\n", "utf8");
+      existingSlugs.add(slug); // prevent dupes within this run
+      created++;
+      console.log("Created: " + slug + ".mdx\n");
+    } catch (err) {
+      failed++;
+      console.error("Failed: " + slug + " — " + err.message);
+      if (isFatalApiError(err.message)) {
+        fatal = err.message;
+        console.error(
+          "\nThis error applies to every remaining article, so the run is stopping " +
+            "here rather than repeating it " + (ranked.length - created - failed) +
+            " more time(s).",
+        );
+        break;
+      }
+    }
+  }
+
+  return { created, failed, fatal };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MAIN
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1256,32 +1378,20 @@ async function main() {
   if (!fs.existsSync(ARTICLES_DIR))
     fs.mkdirSync(ARTICLES_DIR, { recursive: true });
 
-  for (const [slug, { title, brand, categorySlug, coverImage }] of ranked) {
-    const filePath = path.join(ARTICLES_DIR, slug + ".mdx");
-    if (fs.existsSync(filePath)) {
-      console.log("Skipping: " + slug);
-      continue;
-    }
-    try {
-      console.log("Generating: " + title);
-      const product = pickProductForTopic(slug, categorySlug);
-      const verifiedSpecs = await fetchVerifiedSpecs(client, title);
-      const body = await generateArticleBody(
-        client,
-        title,
-        brand,
-        categorySlug,
-        existingSlugs,
-        product,
-        verifiedSpecs,
-      );
-      const fm = buildFrontmatter(slug, title, brand, categorySlug, coverImage, product);
-      fs.writeFileSync(filePath, fm + body + "\n", "utf8");
-      existingSlugs.add(slug); // prevent dupes within this run
-      console.log("Created: " + slug + ".mdx\n");
-    } catch (err) {
-      console.error("Failed: " + slug + " — " + err.message);
-    }
+  const { created, failed, fatal } = await generateBatch(
+    client,
+    ranked,
+    existingSlugs,
+  );
+
+  console.log(
+    `\nWrote ${created} article(s), ${failed} failed.`,
+  );
+
+  const outcome = describeOutcome({ created, failed, fatal });
+  if (!outcome.ok) {
+    console.error("\n" + outcome.message);
+    process.exit(1);
   }
 
   console.log("Research and generation complete.");

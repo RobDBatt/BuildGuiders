@@ -8,7 +8,7 @@
 // that mislabels categories cross-links the wrong calculator, which is invisible
 // until someone reads a published article.
 
-import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage } from "./research-and-generate.mjs";
+import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount, isFatalApiError, describeOutcome } from "./research-and-generate.mjs";
 
 let fail = 0;
 const eq = (got, want, label) => {
@@ -68,6 +68,47 @@ for (const t of titles) {
   const n = [...out].length;
   eq(n <= 60, true, `${n} chars: "${out}"`);
 }
+
+console.log("\n— batch size: the count input decides the bill —");
+eq(resolveArticleCount(undefined), 20, "unset falls back to 20");
+eq(resolveArticleCount(""), 20, "empty string falls back, not 0");
+eq(resolveArticleCount("3"), 3, "the workflow default");
+eq(resolveArticleCount(" 7 "), 7, "whitespace tolerated");
+for (const bad of ["0", "-1", "abc", "2.5", "999", "1e3"]) {
+  let threw = false;
+  try { resolveArticleCount(bad); } catch { threw = true; }
+  eq(threw, true, `rejects ${JSON.stringify(bad)}`);
+}
+
+console.log("\n— fatal API errors stop the run instead of repeating —");
+// The verbatim message from run 34794137890, which burned 20 calls and went green.
+const REAL_429 = '{"error":{"code":429,"message":"Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing.","status":"RESOURCE_EXHAUSTED"}}';
+eq(isFatalApiError(REAL_429), true, "the credits-depleted 429 that fooled run 1");
+for (const fatal of [
+  "API key not valid. Please pass a valid API key.",
+  "403 PERMISSION_DENIED",
+  "401 UNAUTHENTICATED",
+  "quota exceeded for this project",
+  "NOT_FOUND: model gemini-9-ultra not found",
+]) eq(isFatalApiError(fatal), true, `fatal: ${fatal.slice(0, 38)}`);
+
+// These are per-article problems; the next topic may well succeed.
+for (const transient of [
+  "Gemini returned no content for: Best Deck Stain (finishReason: SAFETY)",
+  "fetch failed",
+  "socket hang up",
+  "",
+]) eq(isFatalApiError(transient), false, `not fatal: ${JSON.stringify(transient.slice(0, 38))}`);
+
+console.log("\n— a dead run must not report success —");
+eq(describeOutcome({ created: 0, failed: 20, fatal: "429 RESOURCE_EXHAUSTED" }).ok, false,
+   "run 1's shape: 0 written, 20 failed");
+eq(describeOutcome({ created: 0, failed: 1, fatal: "quota" }).ok, false, "0 written, 1 failed");
+eq(describeOutcome({ created: 3, failed: 0, fatal: null }).ok, true, "3 written, none failed");
+eq(describeOutcome({ created: 2, failed: 1, fatal: null }).ok, true, "partial success stays green");
+eq(describeOutcome({ created: 0, failed: 0, fatal: null }).ok, true, "nothing attempted is not a failure");
+eq(describeOutcome({ created: 0, failed: 20, fatal: "429 RESOURCE_EXHAUSTED" }).message.includes("429"), true,
+   "the message names the API error");
 
 console.log("\n— cover falls back rather than emitting a 404 path —");
 eq(getCoverImage("paint"), "/og-default.png", "missing cover falls back");
