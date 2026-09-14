@@ -1101,6 +1101,35 @@ async function generateArticleBody(
     "Use a real number or omit it. No \"we measured\" figures of any kind.\n" +
     "- Attribute a manufacturer's own marketing number to the manufacturer rather " +
     "than stating it as fact.\n\n" +
+    "WRITING — a draft that reads as machine-written is unusable, and these are\n" +
+    "the specific habits that make it read that way:\n" +
+    "- NEVER use bold field labels inside a section. No \"**Best for:**\", \"**Key " +
+    "Features:**\", \"**Caveat:**\", \"**Pros:**\" or any similar label. Write the " +
+    "same information as connected prose. A run of identically-shaped labelled " +
+    "blocks is the single most recognisable tell there is.\n" +
+    "- Do not open a section by asserting that the subject matters. \"Choosing the " +
+    "right paint is crucial because...\" tells the reader nothing they did not " +
+    "know when they searched. Open with the first real decision, or a fact.\n" +
+    "- Avoid these words: crucial, essential, vital, key (as an adjective), " +
+    "comprehensive, robust, seamless, versatile, unique, ideal, optimal, ensure, " +
+    "boasts, delve, showcase, underscore, elevate, leverage, plays a significant " +
+    "role, when it comes to. Test: if deleting the word leaves the sentence " +
+    "intact, it was decoration.\n" +
+    "- Write \"is\" and \"has\". Not \"serves as\", \"functions as\", \"boasts\", " +
+    "\"features\", \"provides\".\n" +
+    "- Do not close a sentence with a floating -ing clause restating significance " +
+    "(\"...making it ideal for bathrooms\", \"...ensuring lasting durability\"). " +
+    "Stop at the fact.\n" +
+    "- A checkable detail beats an adjective. \"AC4 rating\" beats \"highly " +
+    "durable\"; \"three-sided cap\" beats \"excellent protection\". Where you have " +
+    "no real figure, write the plain sentence instead of reaching for a " +
+    "superlative.\n" +
+    "- Vary sentence and paragraph length. Four paragraphs of the same shape read " +
+    "as generated whatever the words are.\n" +
+    "- Say plainly who each product is WRONG for. A guide where everything suits " +
+    "somebody is useless to the person deciding.\n" +
+    "- Commit in the Bottom Line: name one product and say who should buy it. " +
+    "Hedging across every option is not balance.\n\n" +
     "Every article must:\n" +
     "1. Be a buying guide, not a how-to install guide\n" +
     "2. Help readers choose between products before they buy\n" +
@@ -1115,7 +1144,9 @@ async function generateArticleBody(
     "6. Be 700-900 words, no padding\n\n" +
     "Structure every article with these H2 sections:\n" +
     "- \"What to Look for in [Product]\" (2-3 paragraphs on key decision factors)\n" +
-    "- One H2 per top product recommendation (2-3 sentences each: who it's best for, key specs, honest caveat)\n" +
+    "- One H2 per top product recommendation. Cover who it suits, the specs that " +
+    "actually decide it, and an honest caveat — as flowing sentences, NEVER as " +
+    "labelled fields.\n" +
     "- \"What to Skip\" (1 paragraph — warn about common bad choices)\n" +
     "- \"Bottom Line\" (1 paragraph — direct recommendation, link to the calculator)\n\n" +
     "Start at H2. The title is rendered from frontmatter as the page's only H1, so " +
