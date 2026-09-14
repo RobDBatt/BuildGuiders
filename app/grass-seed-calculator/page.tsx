@@ -1,6 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import { AMAZON_TAG } from "@/lib/site-config.generated";
+import { FAQS } from "./faqs";
 
 const GREEN = "#1B4332";
 const aUrl = (q: string) => `https://www.amazon.com/s?k=${encodeURIComponent(q)}&tag=${AMAZON_TAG}`;
@@ -15,6 +16,18 @@ const SUN_TYPES = [
   { id: "sun",   label: "Full Sun (6+ hrs/day)",  query: "full sun grass seed Scotts Pennington" },
   { id: "shade", label: "Shade (< 4 hrs/day)",    query: "shade grass seed tall fescue" },
   { id: "mixed", label: "Mixed Sun / Shade",      query: "sun shade grass seed mix" },
+];
+
+
+// New-lawn and overseeding rates from SEED_TYPES above, in the common 7 lb bag,
+// so the table cannot drift from the tool.
+const SEED_EXAMPLES: [string, string, string][] = [
+  ["1,000 sq ft", "5 lb · 1 bag", "3 lb · 1 bag"],
+  ["2,000 sq ft", "10 lb · 2 bags", "6 lb · 1 bag"],
+  ["5,000 sq ft", "25 lb · 4 bags", "15 lb · 3 bags"],
+  ["7,500 sq ft", "37.5 lb · 6 bags", "22.5 lb · 4 bags"],
+  ["10,000 sq ft", "50 lb · 8 bags", "30 lb · 5 bags"],
+  ["15,000 sq ft", "75 lb · 11 bags", "45 lb · 7 bags"],
 ];
 
 function calc(sqft: number, rate: number) {
@@ -240,6 +253,153 @@ export default function GrassSeedCalculator() {
         </div>
       </div>
 
+
+      {/* ── Supporting content ── */}
+      <div className="bg-white border-t border-slate-200">
+        <div className="max-w-3xl mx-auto px-4 py-12 space-y-10">
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              The pounds you need depend on the grass, not just the area
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              This calculator works from 5 lb per 1,000 sq ft for a new lawn, which is a sensible middle for
+              the sun-and-shade mixes most bags contain. Sow a single species and that number can be badly
+              wrong in either direction. Published seeding rates run roughly:
+            </p>
+            <ul className="text-sm text-slate-600 leading-relaxed space-y-2 list-disc pl-5 mb-3">
+              <li><span className="font-semibold text-slate-700">Kentucky bluegrass</span> — 2 to 3 lb per 1,000 sq ft</li>
+              <li><span className="font-semibold text-slate-700">Fine fescue</span> — 4 to 5 lb</li>
+              <li><span className="font-semibold text-slate-700">Perennial ryegrass</span> — 6 to 9 lb</li>
+              <li><span className="font-semibold text-slate-700">Tall fescue</span> — 6 to 10 lb</li>
+            </ul>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              The spread is seed size, not quality. A pound of Kentucky bluegrass holds roughly two million
+              seeds; a pound of tall fescue closer to 230,000. You need about eight times the weight of tall
+              fescue to put the same number of seeds on the ground. Check the rate printed on the bag against
+              what this page gives you — if you are buying a pure tall fescue, expect to need more.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              Timing decides more than the rate does
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              For cool-season grasses — bluegrass, the fescues, ryegrass — late summer into early autumn is
+              the window worth waiting for. Soil is still warm enough to germinate quickly, air temperature
+              is falling rather than climbing, and the annual weeds are finishing their year instead of
+              starting it. A seeding that would struggle in June often establishes without drama in
+              September.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              Spring is the second-best option and a harder one. Crabgrass germinates in the same conditions
+              your seed does, and the pre-emergent that would normally stop it will stop your grass seed
+              too — so a spring seeding means going into summer with weed pressure and a root system that
+              has not had time to go deep.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Warm-season grasses run on the opposite schedule. Bermuda and zoysia go down in late spring or
+              early summer, once soil temperatures are reliably warm, and seeding them in autumn wastes the
+              bag.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              Watering is where most new lawns are lost
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              Before germination the job is to keep the top quarter inch of soil damp — not wet, and never
+              dry. In warm weather that usually means two or three short waterings a day rather than one
+              long one. The common mistake is a single deep soak, which washes seed into low spots, leaves
+              bare patches where it came from, and lets the surface dry out for twenty hours in between.
+              Seed that has taken up water and then dries out does not recover.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Once the grass is up, reverse it: fewer waterings, each one longer, so the moisture goes deeper
+              and the roots follow it down. And expect the lawn to come up in waves. Perennial ryegrass shows
+              in about 5 to 10 days, tall fescue 7 to 12, fine fescue 7 to 14, and Kentucky bluegrass
+              anywhere from 14 to 30. Most bagged mixes contain ryegrass precisely so something green appears
+              while the slow half is still working — which is also why a seeding that looks like a failure on
+              day ten often is not.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              Starter fertilizer, and the phosphorus rule
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              Starter formulas carry proportionally more phosphorus — the middle number on the bag — because
+              phosphorus supports root development in seedlings. Standard lawn fertilizer is the wrong
+              product here: its nitrogen drives top growth that a seedling has no root system to support, and
+              at high rates it will burn new grass outright.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              One practical catch. Several US states restrict the sale or application of phosphorus lawn
+              fertilizer, generally with an exemption for establishing new turf or where a soil test shows a
+              deficiency. New seeding is usually the case the exemption was written for, but the rule and the
+              paperwork vary by state, so check yours before ordering rather than after.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-4">
+              Seed needed by lawn size
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-4">
+              Using this page&apos;s rates — 5 lb per 1,000 sq ft for a new lawn, 3 for overseeding — and the
+              common 7 lb bag. Every figure is this page&apos;s own formula applied to the stated area.
+            </p>
+            <div className="rounded-xl border border-slate-200 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2 bg-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wide">
+                <span>Lawn area</span>
+                <span className="flex gap-6">
+                  <span className="w-28 text-right">New lawn</span>
+                  <span className="w-28 text-right">Overseeding</span>
+                </span>
+              </div>
+              {SEED_EXAMPLES.map(([area, fresh, over], i) => (
+                <div
+                  key={area}
+                  className={`flex items-center justify-between px-4 py-2 text-sm ${i % 2 ? "bg-slate-50" : "bg-white"}`}
+                >
+                  <span className="text-slate-600">{area}</span>
+                  <span className="flex gap-6">
+                    <span className="w-28 text-right font-bold text-slate-800">{fresh}</span>
+                    <span className="w-28 text-right text-slate-600">{over}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight mb-4">Frequently asked questions</h2>
+            <div className="space-y-5">
+              {FAQS.map((faq) => (
+                <div key={faq.question}>
+                  <h3 className="font-bold text-slate-800 text-sm mb-1.5">{faq.question}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="border-t border-slate-200 pt-6">
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Written and maintained by the{" "}
+              <a href="/about" className="font-semibold underline" style={{ color: GREEN }}>
+                BuildGuiders team
+              </a>
+              . Seeding rates, germination windows and watering guidance follow published agronomic
+              practice; the rate on your seed bag is specific to that blend and takes precedence over any
+              general figure here. Product recommendations are researched and compared against manufacturer
+              specifications and verified buyer feedback — we do not grow test plots.
+            </p>
+          </section>
+        </div>
+      </div>
       <footer className="mt-16 border-t border-slate-200 bg-white">
         <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-slate-400">© 2026 BuildGuiders.com</p>

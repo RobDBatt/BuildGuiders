@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { FAQS } from "./faqs";
 
 export const metadata: Metadata = {
-  title: "Grass Seed Calculator",
+  title: "Grass Seed Calculator: How Much Do I Need?",
   description:
     "Calculate exactly how many pounds of grass seed you need for a new lawn, overseeding, or bare patch repair — plus starter fertilizer and supply list.",
   alternates: { canonical: "/grass-seed-calculator" },
@@ -20,5 +21,27 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  // FAQPage structured data. Answers are the same strings the page renders —
+  // both import FAQS — so the markup never drifts from the visible copy.
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: { "@type": "Answer", text: faq.answer },
+    })),
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      {children}
+    </>
+  );
 }
