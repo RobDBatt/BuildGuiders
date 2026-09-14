@@ -50,6 +50,23 @@ const cases = [
 ];
 for (const [slug, want] of cases) eq(inferCategoryFromTopic(slug, ""), want, slug);
 
+console.log("\n— substring traps: a short token must not match inside a word —");
+// From run 34799314869: "waterproof" contains "roof", so a laminate flooring
+// article was categorised roofing and would have rendered a Free Roof Calculator.
+// "waterproof" is one of the INTENTS seeds, so this recurs across the catalogue.
+for (const [slug, want] of [
+  ["best-waterproof-laminate-flooring-for-pets", "flooring"],
+  ["waterproof-vinyl-plank-flooring", "flooring"],
+  ["best-waterproof-deck-stain", "stain-sealer"],
+  ["waterproof-bathroom-paint", "paint"],
+  ["most-versatile-tile", "tile"],
+  ["sustainable-bamboo-flooring", "flooring"],
+]) eq(inferCategoryFromTopic(slug, ""), want, slug);
+
+// The anchors must not cost real roofing topics their category.
+for (const slug of ["best-asphalt-shingles", "roofing-underlayment", "best-roof-vent-for-kitchen-exhaust-fan", "drip-edge-flashing"])
+  eq(inferCategoryFromTopic(slug, ""), "roofing", slug);
+
 console.log("\n— every category routes to a real calculator —");
 const live = new Set(cals.map(c => c.href));
 for (const [slug] of cases) {

@@ -663,23 +663,31 @@ export function inferCategoryFromTopic(slug, title) {
   // slug-only input and defaulting everything to paint.
   const t = (slug + " " + title).toLowerCase().replace(/-/g, " ");
 
+  // Every short token is anchored with \b. Without it "waterproof" contains
+  // "roof", so "best waterproof laminate flooring for pets" was categorised as
+  // roofing and rendered a Free Roof Calculator button — and "waterproof" is one
+  // of the INTENTS seeds, so it recurs across flooring, paint and deck stain.
+  // The same trap sits in "versatile" (tile) and "sustainable" (stain).
+  // \broof still matches roof, roofs and roofing; it just will not match inside
+  // another word.
+
   // Narrow first
-  if (/pool|chlorine|pool shock|pool pump|pool filter|pool cover/.test(t)) return "pool";
+  if (/\bpool\b|chlorine|pool shock|pool pump|pool filter|pool cover/.test(t)) return "pool";
   if (/wallpaper|peel.and.stick|wall covering/.test(t)) return "wallpaper";
-  if (/raised (garden )?bed|garden soil|raised bed soil|potting mix|compost|perlite/.test(t)) return "garden";
-  if (/grass seed|lawn|sod|overseed|starter fertilizer|straw mat/.test(t)) return "lawn";
-  if (/roof|shingle|drip edge|roofing|ridge vent|soffit|flashing/.test(t)) return "roofing";
-  if (/stain|sealer|sealant|exterior finish/.test(t)) return "stain-sealer";
+  if (/raised (garden )?bed|garden soil|raised bed soil|potting mix|\bcompost|\bperlite/.test(t)) return "garden";
+  if (/grass seed|\blawn|\bsod\b|overseed|starter fertilizer|straw mat/.test(t)) return "lawn";
+  if (/\broof|\bshingle|drip edge|ridge vent|\bsoffit|\bflashing/.test(t)) return "roofing";
+  if (/\bstain|\bsealer|\bsealant|exterior finish/.test(t)) return "stain-sealer";
 
   // Broad
-  if (/paint|primer/.test(t)) return "paint";
-  if (/floor|flooring|hardwood|vinyl plank|lvp|laminate|carpet|underlayment/.test(t)) return "flooring";
-  if (/tile|grout|thinset|mortar|backsplash/.test(t)) return "tile";
-  if (/deck|decking|composite|pressure.treated|deck board|deck screw|railing/.test(t)) return "deck";
+  if (/\bpaint|\bprimer/.test(t)) return "paint";
+  if (/\bfloor|hardwood|vinyl plank|\blvp\b|laminate|\bcarpet|underlayment/.test(t)) return "flooring";
+  if (/\btile|\bgrout|thinset|\bmortar|backsplash/.test(t)) return "tile";
+  if (/\bdeck|composite|pressure.treated|\brailing/.test(t)) return "deck";
   if (/drywall|sheetrock|joint compound|gypsum/.test(t)) return "drywall";
-  if (/mulch|topsoil|landscape|edging|weed barrier/.test(t)) return "landscaping";
-  if (/concrete|cement|quikrete|sakrete|post hole|slab|footing/.test(t)) return "concrete";
-  if (/fence|fencing|picket|chain link/.test(t)) return "fence";
+  if (/\bmulch|topsoil|landscape|\bedging|weed barrier/.test(t)) return "landscaping";
+  if (/concrete|cement|quikrete|sakrete|post hole|\bslab|\bfooting/.test(t)) return "concrete";
+  if (/\bfence|\bfencing|\bpicket|chain link/.test(t)) return "fence";
 
   return "paint"; // default
 }
