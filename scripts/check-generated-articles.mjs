@@ -142,6 +142,25 @@ for (const file of files) {
     );
   }
 
+  // The labelled-field template. The prompt forbids it, and a prompt is a
+  // request rather than a guarantee — run 34800859208 produced "**Best for:**
+  // / **Key Features:** / **Caveat:**" under every product heading, which is
+  // the most recognisable machine-writing tell in the piece.
+  //
+  // Requires a colon inside the bold, so an ordinary editorial lead-in like
+  // "**Wood-plastic composite** is ground wood fibre..." is untouched. Flags at
+  // two or more, because the tell is the repetition.
+  const fieldLabels = [...body.matchAll(/^\s*\*\*[A-Z][^*\n]{2,30}:\*\*/gm)].map((m) =>
+    m[0].trim(),
+  );
+  if (fieldLabels.length >= 2) {
+    note(
+      file,
+      `uses a labelled-field template ${fieldLabels.length} times ` +
+        `(${[...new Set(fieldLabels)].slice(0, 3).join(' ')}). Write it as prose.`,
+    );
+  }
+
   // The editorial standard: no fabricated first-hand experience. These are the
   // phrasings that survive a prompt telling the model not to write them.
   const firstHand = [
