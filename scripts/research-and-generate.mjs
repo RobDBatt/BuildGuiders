@@ -47,6 +47,15 @@ export function resolveArticleCount(raw) {
 // scripts on the old branch used, and it is still current.
 const MODEL = normalizeModelName(process.env.GEMINI_MODEL) || "gemini-2.5-flash";
 
+// Output budget for one article. The prompt asks for 700-900 words, which is
+// roughly 1,200 tokens — but gemini-2.5-flash is a thinking model and its
+// reasoning tokens come out of this same allowance. At 2,500 the first real run
+// produced one article cut mid-word and one missing its entire back half,
+// because thinking had eaten most of the budget before the prose started.
+// Generous rather than tight: unused budget costs nothing, a truncated article
+// costs a regeneration.
+const MAX_OUTPUT_TOKENS = Number(process.env.MAX_OUTPUT_TOKENS) || 8000;
+
 // The API rejects the "models/" prefix that its own list endpoint returns, which
 // is an easy way to set GEMINI_MODEL to something that looks right and 404s.
 function normalizeModelName(name) {
@@ -1150,18 +1159,30 @@ async function generateArticleBody(
     config: {
       systemInstruction: system,
       temperature: 0.4,
-      maxOutputTokens: 2500,
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
     },
   });
 
+  const finishReason = response.candidates?.[0]?.finishReason;
   const content = response.text;
+
+  // A truncated article is worse than no article: it reads as finished until
+  // someone reaches the end, and it still clears a word-count gate. Discard it
+  // and let the batch move on rather than writing half a guide to disk.
+  if (finishReason === "MAX_TOKENS") {
+    throw new Error(
+      "Gemini hit the " + MAX_OUTPUT_TOKENS + "-token output cap on: " + title +
+        ". The article would stop mid-sentence, so it is discarded. Raise " +
+        "MAX_OUTPUT_TOKENS if this recurs.",
+    );
+  }
+
   if (!content) {
-    // An empty body is usually a safety block or a token cap, not a network
-    // failure, so say which rather than leaving a bare "no content".
-    const reason = response.candidates?.[0]?.finishReason;
+    // An empty body is usually a safety block, not a network failure, so say
+    // which rather than leaving a bare "no content".
     throw new Error(
       "Gemini returned no content for: " + title +
-        (reason ? ` (finishReason: ${reason})` : ""),
+        (finishReason ? ` (finishReason: ${finishReason})` : ""),
     );
   }
   return content.trim();

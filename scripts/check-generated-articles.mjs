@@ -116,6 +116,32 @@ for (const file of files) {
     note(file, `body is ${words} words (minimum ${MIN_WORDS}).`);
   }
 
+  // Truncation. A model that hits its output cap stops mid-sentence, and the
+  // result still clears every check above — run 34799314869 wrote a 661-word
+  // stump that passed the word count while missing its whole back half. Two
+  // signals, because either can appear alone: the closing section can be there
+  // with the last sentence still cut, or the cut can land before it.
+  if (!/^##\s+Bottom Line\s*$/m.test(body)) {
+    note(
+      file,
+      'has no "## Bottom Line" section. Every article is prompted to end with ' +
+        'one, so its absence means the response was cut short.',
+    );
+  }
+
+  const lastLine = body
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .pop();
+  // Prose ends in a full stop; a related-guides list item ends in a link's ")".
+  if (lastLine && !/[.!?)"'`\]]$/.test(lastLine)) {
+    note(
+      file,
+      `ends mid-sentence: "...${lastLine.slice(-60)}". The response was cut off.`,
+    );
+  }
+
   // The editorial standard: no fabricated first-hand experience. These are the
   // phrasings that survive a prompt telling the model not to write them.
   const firstHand = [
