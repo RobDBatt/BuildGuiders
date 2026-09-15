@@ -197,6 +197,26 @@ for (const file of files) {
     );
   }
 
+  // The calculator cross-link. Every article is prompted to send the reader to
+  // its category calculator in the closing section, and the cross-link is a real
+  // part of why the article exists. Run 34800859208 wrote "Run your measurements
+  // through our free paint calculator" as plain prose in two of three articles —
+  // the sentence is there, the link is not, so the CTA goes nowhere and reads as
+  // an oversight to anyone who tries to click it.
+  //
+  // Checks for the mention rather than demanding one: the template renders its
+  // own CTA from categoryCalculators, and none of the 27 hand-written articles
+  // links a calculator in the body, so requiring it would be a rule the corpus
+  // itself breaks. Naming one without linking it is the actual defect.
+  if (/\bcalculator\b/i.test(body) && !/\]\(\/[a-z-]+-calculator\)/.test(body)) {
+    note(
+      file,
+      'mentions a calculator but never links one. Write it as a markdown link ' +
+        'to the route (e.g. "[paint calculator](/paint-calculator)") — as plain ' +
+        'text the cross-link does nothing.',
+    );
+  }
+
   // The editorial standard: no fabricated first-hand experience. These are the
   // phrasings that survive a prompt telling the model not to write them.
   const firstHand = [

@@ -8,7 +8,7 @@
 // that mislabels categories cross-links the wrong calculator, which is invisible
 // until someone reads a published article.
 
-import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount, isFatalApiError, describeOutcome, isCacheFresh } from "./research-and-generate.mjs";
+import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount, isFatalApiError, describeOutcome, isCacheFresh, loadStyleExemplar } from "./research-and-generate.mjs";
 
 let fail = 0;
 const eq = (got, want, label) => {
@@ -139,6 +139,20 @@ eq(isCacheFresh(undefined, NOW), false, "missing timestamp");
 console.log("\n— cover falls back rather than emitting a 404 path —");
 eq(getCoverImage("paint"), "/og-default.png", "missing cover falls back");
 eq(getCoverImage("pool"), "/og-default.png", "new category falls back too");
+
+console.log("\n— style exemplar read off the live corpus —");
+const exemplar = loadStyleExemplar();
+eq(exemplar.length > 800, true, `exemplar has substance (${exemplar.length} chars)`);
+eq(/^#/.test(exemplar), false, "starts with prose, not a heading");
+// The exemplar exists to demonstrate finished sentences; one cut mid-clause
+// teaches the opposite, and truncation is this generator's known failure mode.
+for (const part of exemplar.split("\n\n---\n\n"))
+  eq(/[.!?)"]$/.test(part.trim()), true, `part ends on a complete sentence`);
+// Must not smuggle in a banned tell as something to imitate.
+eq(/\*\*[A-Z][^*\n]{2,30}:\*\*/.test(exemplar), false, "carries no labelled-field template");
+eq(/\bI (?:tested|tried|used)\b/i.test(exemplar), false, "claims no first-hand use");
+// Missing files must degrade to "" rather than throwing mid-run.
+eq(loadStyleExemplar(["does-not-exist"]), "", "unreadable corpus yields empty string");
 
 console.log(fail === 0 ? "\nALL PASS" : `\n${fail} FAILURES`);
 process.exit(fail === 0 ? 0 : 1);

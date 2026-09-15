@@ -1010,6 +1010,77 @@ function existsInPublic(webPath) {
   return fs.existsSync(path.join(ROOT, "public", webPath.replace(/^\//, "")));
 }
 
+// ---------------------------------------------------------------------------
+// Style exemplar
+//
+// Every writing rule in the system prompt is a prohibition, and prohibitions
+// only tell the model what to stop doing. It stops, and what is left is prose
+// with no tells and no voice — which is what the first three generated articles
+// were. They passed every gate and still read like a spec sheet apologising.
+//
+// So show it the target instead. These are real paragraphs from the
+// hand-written corpus, read off disk rather than pasted here, so the exemplar
+// cannot drift away from the articles it is supposed to sound like — edit the
+// guides and the exemplar follows.
+//
+// Two excerpts: the opening, which sets how an article enters a subject, and a
+// product section, which is where the generated drafts went flattest.
+const EXEMPLAR_SLUGS = ["best-interior-paint", "best-solid-deck-stain"];
+const EXEMPLAR_MAX_CHARS = 1400;
+
+// First prose paragraphs after the frontmatter, then the first H2 section.
+// Skips headings and list items: the shape being demonstrated is the sentences.
+function excerptFrom(body) {
+  const blocks = body
+    .split(/\n{2,}/)
+    .map((b) => b.trim())
+    .filter(Boolean);
+
+  const opening = blocks.filter((b) => !b.startsWith("#") && !/^[*\-\d]/.test(b)).slice(0, 2);
+
+  const h2 = blocks.findIndex((b) => /^##\s/.test(b));
+  const section =
+    h2 === -1
+      ? []
+      : [blocks[h2], ...blocks.slice(h2 + 1, h2 + 3).filter((b) => !b.startsWith("#"))];
+
+  const joined = [...opening, ...section].join("\n\n");
+  if (joined.length <= EXEMPLAR_MAX_CHARS) return joined;
+
+  // Cut at the last sentence end rather than mid-word. An exemplar that stops
+  // in the middle of a clause is a demonstration of stopping mid-clause, and
+  // truncation is the one failure this generator already has form for.
+  const clipped = joined.slice(0, EXEMPLAR_MAX_CHARS);
+  const lastStop = Math.max(
+    clipped.lastIndexOf(". "),
+    clipped.lastIndexOf(".\n"),
+    clipped.lastIndexOf("? "),
+    clipped.lastIndexOf("! "),
+  );
+  return lastStop > 0 ? clipped.slice(0, lastStop + 1) : clipped;
+}
+
+// Returns "" when the corpus is unreadable rather than throwing. A missing
+// exemplar makes the prose worse; it should not stop the run, and the gates
+// still hold either way.
+export function loadStyleExemplar(slugs = EXEMPLAR_SLUGS) {
+  const parts = [];
+  for (const slug of slugs) {
+    try {
+      const raw = fs.readFileSync(
+        path.join(ROOT, "content", "articles", `${slug}.mdx`),
+        "utf8",
+      );
+      const body = raw.split(/^---$/m).slice(2).join("---").trim();
+      const excerpt = excerptFrom(body);
+      if (excerpt) parts.push(excerpt);
+    } catch {
+      // Exemplar is a nicety, not a dependency.
+    }
+  }
+  return parts.join("\n\n---\n\n");
+}
+
 // Resolves the mapped cover against public/ and falls back when it is missing,
 // so the generator cannot mint another article whose schema image 404s. Every
 // article on the site currently points at a covers directory that was never
@@ -1129,15 +1200,28 @@ async function generateArticleBody(
     "- Say plainly who each product is WRONG for. A guide where everything suits " +
     "somebody is useless to the person deciding.\n" +
     "- Commit in the Bottom Line: name one product and say who should buy it. " +
-    "Hedging across every option is not balance.\n\n" +
+    "Hedging across every option is not balance.\n" +
+    "- Open the article inside the reader's situation, not on the subject in the " +
+    "abstract. They already have the problem; start where they are standing.\n" +
+    "- Put a real quantity in the first two paragraphs — coverage per gallon, a " +
+    "rating, a square-foot figure — so the reader can size the job before they " +
+    "read the picks.\n" +
+    "- State consequences, not qualities. \"Skip it and any solid stain will flake " +
+    "by next summer\" earns its place; \"proper preparation is important\" does " +
+    "not.\n" +
+    "- Contractions are fine and preferred. Short sentences are fine. A one-line " +
+    "paragraph for the blunt version is fine.\n\n" +
     "Every article must:\n" +
     "1. Be a buying guide, not a how-to install guide\n" +
     "2. Help readers choose between products before they buy\n" +
-    "3. Close by linking the reader to " + calculatorName + " at " + calculatorPath +
-    " — e.g. \"Run your measurements through our free " + calculatorName.toLowerCase() +
-    " to get an exact shopping list before you order.\" Use that exact path. If the " +
-    "topic does not fit that calculator, link " + CALCULATOR_HUB + " instead. Do not " +
-    "invent any other calculator path.\n" +
+    "3. Close by linking the reader to " + calculatorName + " as a MARKDOWN LINK " +
+    "to " + calculatorPath + ". Write it exactly like this, brackets and " +
+    "parentheses included: \"Run your measurements through our free [" +
+    calculatorName.toLowerCase() + "](" + calculatorPath + ") to get an exact " +
+    "shopping list before you order.\" A plain-text mention is a dead cross-link " +
+    "and fails the quality gate. Use that exact path. If the topic does not fit " +
+    "that calculator, link " + CALCULATOR_HUB + " instead. Do not invent any " +
+    "other calculator path.\n" +
     "4. Include honest pros and cons — no fluff\n" +
     "5. Use plain, direct language, the way a knowledgeable person at a trade counter " +
     "would talk\n" +
@@ -1152,6 +1236,20 @@ async function generateArticleBody(
     "Start at H2. The title is rendered from frontmatter as the page's only H1, so " +
     "an H1 in the body would give the page two (AGENTS.md §11).\n\n" +
     "NEVER write installation tutorials.";
+
+  // The rules above are all prohibitions, and a model that obeys every "do not"
+  // produces prose with no tells and no voice — which is what the first three
+  // generated articles were. They cleared every gate and still read like a spec
+  // sheet. Showing the target is the part that was missing.
+  const exemplar = loadStyleExemplar();
+  const systemWithVoice = exemplar
+    ? system +
+      "\n\nHOUSE VOICE — these are real excerpts from BuildGuiders articles. " +
+      "Match their register, sentence rhythm and directness. Do NOT reuse their " +
+      "wording, products or facts; they are a demonstration of how to write, not " +
+      "material to draw on.\n\n" +
+      exemplar
+    : system;
 
   const relatedSlugs = Array.from(existingSlugs)
     .filter(
@@ -1188,7 +1286,7 @@ async function generateArticleBody(
     model: MODEL,
     contents: userPrompt,
     config: {
-      systemInstruction: system,
+      systemInstruction: systemWithVoice,
       temperature: 0.4,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
     },
