@@ -8,7 +8,7 @@
 // that mislabels categories cross-links the wrong calculator, which is invisible
 // until someone reads a published article.
 
-import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount, isFatalApiError, describeOutcome, isCacheFresh } from "./research-and-generate.mjs";
+import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount, isFatalApiError, describeOutcome, isCacheFresh, loadStyleExemplar, parseBriefProducts, extractSources, researchTopic } from "./research-and-generate.mjs";
 
 let fail = 0;
 const eq = (got, want, label) => {
@@ -139,6 +139,119 @@ eq(isCacheFresh(undefined, NOW), false, "missing timestamp");
 console.log("\n— cover falls back rather than emitting a 404 path —");
 eq(getCoverImage("paint"), "/og-default.png", "missing cover falls back");
 eq(getCoverImage("pool"), "/og-default.png", "new category falls back too");
+
+console.log("\n— style exemplar read off the live corpus —");
+const exemplar = loadStyleExemplar();
+eq(exemplar.length > 800, true, `exemplar has substance (${exemplar.length} chars)`);
+eq(/^#/.test(exemplar), false, "starts with prose, not a heading");
+// The exemplar exists to demonstrate finished sentences; one cut mid-clause
+// teaches the opposite, and truncation is this generator's known failure mode.
+for (const part of exemplar.split("\n\n---\n\n"))
+  eq(/[.!?)"]$/.test(part.trim()), true, `part ends on a complete sentence`);
+// Must not smuggle in a banned tell as something to imitate.
+eq(/\*\*[A-Z][^*\n]{2,30}:\*\*/.test(exemplar), false, "carries no labelled-field template");
+eq(/\bI (?:tested|tried|used)\b/i.test(exemplar), false, "claims no first-hand use");
+// Missing files must degrade to "" rather than throwing mid-run.
+eq(loadStyleExemplar(["does-not-exist"]), "", "unreadable corpus yields empty string");
+
+console.log("\n— research brief parsing —");
+const BRIEF = `CONTEXT:
+- Abrasion Class rating decides scratch resistance; AC4 is heavy residential (independent: EPLF standard)
+- Laminate covers about 20 sq ft per carton (manufacturer)
+
+PRODUCT: Mohawk RevWood Plus
+SPECS:
+- AC4 to AC5 depending on collection (manufacturer)
+- All Pet Protection warranty covers all pets for the life of the floor (manufacturer)
+WRONG FOR: Anyone unwilling to apply the perimeter sealant the warranty requires.
+
+PRODUCT: Pergo Outlast+
+SPECS:
+- Rated to hold spills up to 24 hours (manufacturer)
+WRONG FOR: An older dog with joint problems — laminate is harder underfoot than LVP.`;
+eq(parseBriefProducts(BRIEF).length, 2, "two products parsed");
+eq(parseBriefProducts(BRIEF)[0], "Mohawk RevWood Plus", "first product name");
+eq(parseBriefProducts(BRIEF)[1], "Pergo Outlast+", "second product name, plus sign intact");
+// The model sometimes bolds its own labels; the name must survive that.
+eq(parseBriefProducts("PRODUCT: **Behr Premium Plus**")[0], "Behr Premium Plus", "bold markers stripped");
+// An unfilled template placeholder is not a product.
+eq(parseBriefProducts("PRODUCT: <exact product name as sold>").length, 0, "template placeholder ignored");
+eq(parseBriefProducts("").length, 0, "empty brief");
+eq(parseBriefProducts(null).length, 0, "null brief does not throw");
+
+console.log("\n— grounding sources —");
+eq(extractSources({ candidates: [{ groundingMetadata: { groundingChunks: [
+  { web: { uri: "https://x.test/a", title: "Pergo spec sheet" } },
+  { web: { uri: "https://x.test/b", title: "Pergo spec sheet" } },
+] } }] }).length, 1, "duplicate sources collapse");
+eq(extractSources({}).length, 0, "no grounding metadata yields none, not a throw");
+eq(extractSources(null).length, 0, "null response does not throw");
+
+console.log("\n— research refuses to hand back a brief it cannot write from —");
+// These are the paths the old spec-verify step collapsed into one silent null.
+// Each must return null AND be distinguishable in the log, because "the gate
+// never opened" and "the budget was too small" need different fixes.
+const stub = (payload) => ({ models: { generateContent: async () => payload } });
+const quiet = async (fn) => {
+  const [log, warn] = [console.log, console.warn];
+  console.log = console.warn = () => {};
+  try { return await fn(); } finally { console.log = log; console.warn = warn; }
+};
+const ASK = { title: "Best Waterproof Laminate Flooring for Pets", categorySlug: "flooring", productName: "Pergo Outlast+" };
+
+eq(await quiet(() => researchTopic(stub({ text: "", candidates: [{ finishReason: "STOP" }] }), ASK)),
+   null, "empty response");
+eq(await quiet(() => researchTopic(stub({ text: BRIEF, candidates: [{ finishReason: "MAX_TOKENS" }] }), ASK)),
+   null, "truncated brief is rejected even though it parses");
+eq(await quiet(() => researchTopic(stub({ text: "PRODUCT: A\nPRODUCT: B", candidates: [{ finishReason: "STOP" }] }), ASK)),
+   null, "two products but far too thin to write from");
+eq(await quiet(() => researchTopic(stub({ text: "CONTEXT:\n" + "- a sourced fact about coverage and ratings that runs on. ".repeat(12), candidates: [{ finishReason: "STOP" }] }), ASK)),
+   null, "long brief that established no products");
+
+const good = await quiet(() => researchTopic(stub({ text: BRIEF, candidates: [{ finishReason: "STOP" }] }), ASK));
+eq(good === null, false, "a complete brief comes back");
+eq(good.products.length, 2, "and carries its products");
+eq(good.brief.includes("[1]"), false, "citation markers stripped");
+
+// A depleted quota applies to every remaining article, so it must reach the
+// caller and stop the run rather than being swallowed as one skipped topic.
+const fatalClient = { models: { generateContent: async () => { throw new Error("429 RESOURCE_EXHAUSTED"); } } };
+let rethrown = false;
+try { await quiet(() => researchTopic(fatalClient, ASK)); } catch { rethrown = true; }
+eq(rethrown, true, "a fatal API error is rethrown, not swallowed");
+
+const softClient = { models: { generateContent: async () => { throw new Error("socket hang up"); } } };
+eq(await quiet(() => researchTopic(softClient, ASK)), null, "a transient error is one skipped topic");
+
+console.log("\n— the research call is actually a search —");
+// Without the googleSearch tool this whole pass is the model recalling, which is
+// the state the old spec-verify step left every article in. If the tool is ever
+// dropped the articles get quietly worse and nothing else would notice.
+let captured;
+const capturingClient = { models: { generateContent: async (req) => { captured = req; return { text: "", candidates: [{ finishReason: "STOP" }] }; } } };
+await quiet(() => researchTopic(capturingClient, ASK));
+eq(JSON.stringify(captured.config.tools), '[{"googleSearch":{}}]', "googleSearch tool is attached");
+eq(captured.config.temperature, 0, "temperature 0 — this pass reports, it does not write");
+// gemini-2.5-flash spends this budget on thinking before it answers. The old
+// step asked for 350 and would have returned nothing had it ever fired.
+eq(captured.config.maxOutputTokens >= 4000, true, `budget leaves room for thinking (${captured.config.maxOutputTokens})`);
+eq(captured.contents.includes(ASK.productName), true, "the affiliate product is named to the researcher");
+eq(captured.contents.includes(ASK.title), true, "so is the title");
+// It must be allowed to reject the affiliate product: Perma-White is a wall
+// paint, and the cabinets article was wrong to lead with it.
+eq(/not the right product/.test(captured.contents), true, "and it may say the product does not belong");
+
+console.log("\n— a run that researched nothing must not report success —");
+eq(describeOutcome({ created: 0, failed: 0, unresearched: 3, fatal: null }).ok, false,
+   "0 written because research failed on all 3");
+eq(describeOutcome({ created: 0, failed: 0, unresearched: 3, fatal: null }).message.includes("RESEARCH_TIMEOUT_MS"), true,
+   "and the message says where to look");
+eq(describeOutcome({ created: 2, failed: 0, unresearched: 1, fatal: null }).ok, true,
+   "partial research failure stays green");
+eq(describeOutcome({ created: 2, failed: 0, unresearched: 1, fatal: null }).message.includes("1 skipped"), true,
+   "but the skip is reported");
+eq(describeOutcome({ created: 3, failed: 0, fatal: null }).message.includes("skipped"), false,
+   "no skip line when nothing was skipped");
 
 console.log(fail === 0 ? "\nALL PASS" : `\n${fail} FAILURES`);
 process.exit(fail === 0 ? 0 : 1);

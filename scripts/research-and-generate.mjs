@@ -558,78 +558,216 @@ const AFFILIATE_NOTE =
   "Paid link: BuildGuiders may earn a commission at no extra cost to you.";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SPEC VERIFICATION — web-search lookup for brand+product-specific articles
+// RESEARCH — establish the facts, then write from them
 //
-// When the title references a specific brand+product combination, we do a
-// quick search to fetch verified specs BEFORE writing the article. This catches
-// product-level errors (wrong coverage rates, wrong drying times, etc.)
-// that no static validator can catch because they vary per product.
+// This replaces a spec-verification step that never ran. It was gated on
+// HAS_MODEL_RE, a regex looking for a brand and product in the article TITLE —
+// and the titles come from an autocomplete sweep of category queries ("best
+// paint for bathroom walls"), which essentially never name a product. Measured
+// against the real corpus: 0 of 31 titles matched, so the gate had never once
+// opened and every article ever written by this script came out of model recall.
 //
-// Uses the same Gemini model with the Google Search grounding tool switched on.
-// The OpenAI version called a dedicated search model (gpt-4o-search-preview);
-// Gemini does this by attaching a tool to an ordinary model instead, so there is
-// no separate search model to name.
+// Two further faults sat behind it, either of which would have made it useless
+// if the gate had opened:
 //
-// Set SPEC_VERIFY_ENABLED=false to skip (e.g. for offline testing).
-// Hard timeout: 15s — if the search is slow the article is still written, just
-// without the verified context, rather than blocking the run.
+//   - maxOutputTokens was 350. gemini-2.5-flash is a thinking model and its
+//     reasoning comes out of that same allowance — the same bug that truncated
+//     two of the first three articles at 2,500. A 350-token research call
+//     returns nothing.
+//   - Every failure path returned null and the caller wrote the article anyway,
+//     logging nothing. A run with no research looked exactly like a run with a
+//     working research step, which is why this survived unnoticed.
+//
+// The shape now matches the job. Research the topic first, get back a brief of
+// contender products with checkable specs and their sources, then write from the
+// brief and nothing else. The affiliate product is known before this runs, so it
+// is named to the researcher rather than inferred from the title.
+//
+// REQUIRE_RESEARCH=false writes from recall when research fails, which is the
+// old behaviour and off by default: an article of unverified numbers is the
+// thing the honesty standard in AGENTS.md exists to prevent, so the default is
+// to skip the article and say so.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SPEC_VERIFY_MODEL = normalizeModelName(process.env.SPEC_VERIFY_MODEL) || MODEL;
-const SPEC_VERIFY_ENABLED = process.env.SPEC_VERIFY_ENABLED !== "false";
-const SPEC_VERIFY_TIMEOUT_MS = 15_000;
+const RESEARCH_MODEL = normalizeModelName(process.env.RESEARCH_MODEL) || MODEL;
+const RESEARCH_ENABLED = process.env.RESEARCH_ENABLED !== "false";
+const REQUIRE_RESEARCH = process.env.REQUIRE_RESEARCH !== "false";
 
-// Detects specific brand+product names that warrant spec verification
-const HAS_MODEL_RE = /\b(behr\s+\w+|sherwin.williams\s+\w+|benjamin\s+moore\s+\w+|trex\s+\w+|timbertech\s+\w+|fiberon\s+\w+|mapei\s+\w+|quikrete\s+\w+|sakrete\s+\w+|pergo\s+\w+|lifeproof\s+\w+|mohawk\s+\w+|armstrong\s+\w+|cabot\s+\w+|defy\s+extreme|zinsser\s+\w+)\b/i;
+// Search plus thinking is slower than a plain completion, and the old 15s was
+// tight enough to be a coin toss even before the token budget is considered.
+const RESEARCH_TIMEOUT_MS = Number(process.env.RESEARCH_TIMEOUT_MS) || 90_000;
+
+// Generous for the same reason MAX_OUTPUT_TOKENS is 8000: thinking tokens are
+// drawn from this, and a brief cut in half is a brief missing its last two
+// products.
+const RESEARCH_MAX_OUTPUT_TOKENS = Number(process.env.RESEARCH_MAX_OUTPUT_TOKENS) || 4000;
+
+// A brief has to establish enough to write 700-900 words from. Below this it is
+// a fragment, and writing from a fragment is writing from recall with extra
+// steps.
+const MIN_BRIEF_CHARS = 400;
+const MIN_BRIEF_PRODUCTS = 2;
+
+// The brief's format is fixed so the writer can be told to use only what is in
+// it, and so parseBriefProducts can check what came back without another model
+// call.
+function researchPrompt(title, categorySlug, productName) {
+  return (
+    `Research the products a buying guide titled "${title}" would compare. ` +
+    `Category: ${categorySlug}.\n\n` +
+    "Search for current information. Establish 3 to 5 products that are " +
+    "genuinely the contenders for this query — what buyers and independent " +
+    "reviewers actually shortlist, not one brand's range.\n\n" +
+    (productName
+      ? `Include ${productName} among them if it is a legitimate contender. If ` +
+        "it is not the right product for this topic, say so plainly in its entry " +
+        "rather than omitting it.\n\n"
+      : "") +
+    "Return exactly this format and nothing else:\n\n" +
+    "CONTEXT:\n" +
+    "- 3 to 5 facts about how this choice is actually decided: the spec that " +
+    "settles it, the rating scale that matters, typical coverage or quantity " +
+    "per unit so a reader can size the job.\n\n" +
+    "PRODUCT: <exact product name as sold>\n" +
+    "SPECS:\n" +
+    "- <checkable fact> (manufacturer) or (independent: <who>)\n" +
+    "WRONG FOR: <who should not buy this, specifically>\n\n" +
+    "Repeat PRODUCT/SPECS/WRONG FOR for each product.\n\n" +
+    "Rules:\n" +
+    "- Tag every number as (manufacturer) or (independent: <who>). A " +
+    "manufacturer's own marketing figure is usable but must be attributed as " +
+    "theirs, never stated as established fact.\n" +
+    "- Omit any fact you cannot source. An incomplete brief is fine; a " +
+    "confident wrong number is not. Do not fill gaps from memory.\n" +
+    "- No prices — they date, and the article must not carry them.\n" +
+    "- WRONG FOR is required for every product and must name a real limitation. " +
+    "If a product genuinely suits everyone, it is not a product, it is a " +
+    "marketing claim.\n" +
+    "- Prefer a spec with a unit or a scale (AC4, 350 sq ft/gal, 24 hours) over " +
+    "an adjective. Adjectives are not research."
+  );
+}
+
+// Product names the brief actually established. Exported because it decides
+// whether a brief is usable, and because "did research come back with anything"
+// should be answerable without a network call.
+export function parseBriefProducts(brief) {
+  return [
+    ...String(brief ?? "").matchAll(/^\s*PRODUCT:\s*(.+?)\s*$/gim),
+  ]
+    .map((m) => m[1].replace(/^\*+|\*+$/g, "").trim())
+    .filter((name) => name.length > 2 && !/^<.*>$/.test(name));
+}
+
+// Grounding sources, for the run log. The shape of groundingMetadata has moved
+// between SDK versions, so every hop is optional and an unrecognised shape
+// yields an empty list rather than throwing after the research already
+// succeeded.
+export function extractSources(response) {
+  const chunks =
+    response?.candidates?.[0]?.groundingMetadata?.groundingChunks ?? [];
+  const seen = new Set();
+  for (const chunk of chunks) {
+    const uri = chunk?.web?.uri ?? chunk?.retrievedContext?.uri;
+    const title = chunk?.web?.title ?? chunk?.retrievedContext?.title;
+    if (uri || title) seen.add(title || uri);
+  }
+  return [...seen];
+}
 
 /**
- * Fetch verified product specs from the web for a brand+product-specific article.
- * Returns a compact bullet-point string or null if:
- *   - No specific brand+product detected in the title
- *   - Spec verification is disabled
- *   - The search times out or errors
+ * Researches a topic before anything is written.
+ *
+ * Returns { brief, sources } or null. Null means the facts are not established,
+ * which the caller treats as a reason not to write the article rather than a
+ * reason to write it from memory.
  */
-async function fetchVerifiedSpecs(client, title) {
-  if (!SPEC_VERIFY_ENABLED) return null;
-  if (!HAS_MODEL_RE.test(title)) return null;
+export async function researchTopic(client, { title, categorySlug, productName }) {
+  if (!RESEARCH_ENABLED) {
+    console.log("  [research] disabled — RESEARCH_ENABLED=false");
+    return null;
+  }
 
-  const prompt = `You are a home improvement product expert. For the following article title, provide key verified facts about the main product(s) mentioned — including coverage rates, drying times, square footage per unit, coat recommendations, and any critical compatibility notes. Be specific and factual.
-
-Article title: "${title}"
-
-Return a bullet-point list of verified facts only. If you are unsure of a fact, omit it rather than guessing.`;
-
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), RESEARCH_TIMEOUT_MS);
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), SPEC_VERIFY_TIMEOUT_MS);
-
     const response = await client.models.generateContent({
-      model: SPEC_VERIFY_MODEL,
-      contents: prompt,
+      model: RESEARCH_MODEL,
+      contents: researchPrompt(title, categorySlug, productName),
       config: {
         tools: [{ googleSearch: {} }],
-        maxOutputTokens: 350,
         temperature: 0,
+        maxOutputTokens: RESEARCH_MAX_OUTPUT_TOKENS,
         abortSignal: controller.signal,
       },
     });
-    clearTimeout(timer);
 
-    const raw = response.text?.trim() || "";
-    if (!raw || raw.startsWith("NO_MODEL") || raw.length < 30) return null;
+    const finishReason = response.candidates?.[0]?.finishReason;
+    // Citation markers are the search model's own footnote syntax and mean
+    // nothing once the text leaves it.
+    const brief = (response.text ?? "").replace(/\s*\[\^?\d+\]/g, "").trim();
+    const products = parseBriefProducts(brief);
 
-    // Strip citation markers ([1], [^2], etc.) that search models add
-    const cleaned = raw.replace(/\s*\[\^?\d+\]/g, "").trim();
-    console.log(`  [spec-verify] Fetched specs for "${title.substring(0, 60)}"`);
-    return cleaned;
+    // Say which way it came back short. The old code collapsed "too short",
+    // "truncated" and "refused" into one silent null, and that is most of why
+    // this went unnoticed for three runs.
+    if (!brief) {
+      console.warn(
+        `  [research] empty response` +
+          (finishReason ? ` (finishReason: ${finishReason})` : ""),
+      );
+      return null;
+    }
+    if (finishReason && finishReason !== "STOP") {
+      console.warn(
+        `  [research] brief did not finish (finishReason: ${finishReason}). ` +
+          `Raise RESEARCH_MAX_OUTPUT_TOKENS above ${RESEARCH_MAX_OUTPUT_TOKENS}.`,
+      );
+      return null;
+    }
+    if (brief.length < MIN_BRIEF_CHARS) {
+      console.warn(
+        `  [research] brief is ${brief.length} chars, under ${MIN_BRIEF_CHARS} — too thin to write from.`,
+      );
+      return null;
+    }
+    if (products.length < MIN_BRIEF_PRODUCTS) {
+      console.warn(
+        `  [research] brief established ${products.length} product(s), need ${MIN_BRIEF_PRODUCTS}.`,
+      );
+      return null;
+    }
+
+    const sources = extractSources(response);
+    console.log(
+      `  [research] ${products.length} products: ${products.join(", ")}`,
+    );
+    console.log(
+      sources.length > 0
+        ? `  [research] ${sources.length} source(s): ${sources.slice(0, 4).join("; ")}`
+        : "  [research] no grounding sources reported — the search tool may not " +
+          "have been used, so treat the brief as recall.",
+    );
+    return { brief, sources, products };
   } catch (err) {
     if (err.name === "AbortError" || /abort/i.test(err.message || "")) {
-      console.warn(`  [spec-verify] Timed out after ${SPEC_VERIFY_TIMEOUT_MS / 1000}s — continuing without verified specs`);
-    } else {
-      console.warn(`  [spec-verify] Error: ${err.message} — continuing without verified specs`);
+      console.warn(
+        `  [research] timed out after ${RESEARCH_TIMEOUT_MS / 1000}s`,
+      );
+      return null;
     }
+    // A depleted quota has to reach the caller: it applies to every remaining
+    // article and the run should stop, not skip 20 articles one at a time.
+    if (isFatalApiError(err.message)) throw err;
+    console.warn(`  [research] failed: ${err.message}`);
     return null;
+  } finally {
+    clearTimeout(timer);
   }
+}
+
+export function researchIsRequired() {
+  return REQUIRE_RESEARCH;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1010,6 +1148,77 @@ function existsInPublic(webPath) {
   return fs.existsSync(path.join(ROOT, "public", webPath.replace(/^\//, "")));
 }
 
+// ---------------------------------------------------------------------------
+// Style exemplar
+//
+// Every writing rule in the system prompt is a prohibition, and prohibitions
+// only tell the model what to stop doing. It stops, and what is left is prose
+// with no tells and no voice — which is what the first three generated articles
+// were. They passed every gate and still read like a spec sheet apologising.
+//
+// So show it the target instead. These are real paragraphs from the
+// hand-written corpus, read off disk rather than pasted here, so the exemplar
+// cannot drift away from the articles it is supposed to sound like — edit the
+// guides and the exemplar follows.
+//
+// Two excerpts: the opening, which sets how an article enters a subject, and a
+// product section, which is where the generated drafts went flattest.
+const EXEMPLAR_SLUGS = ["best-interior-paint", "best-solid-deck-stain"];
+const EXEMPLAR_MAX_CHARS = 1400;
+
+// First prose paragraphs after the frontmatter, then the first H2 section.
+// Skips headings and list items: the shape being demonstrated is the sentences.
+function excerptFrom(body) {
+  const blocks = body
+    .split(/\n{2,}/)
+    .map((b) => b.trim())
+    .filter(Boolean);
+
+  const opening = blocks.filter((b) => !b.startsWith("#") && !/^[*\-\d]/.test(b)).slice(0, 2);
+
+  const h2 = blocks.findIndex((b) => /^##\s/.test(b));
+  const section =
+    h2 === -1
+      ? []
+      : [blocks[h2], ...blocks.slice(h2 + 1, h2 + 3).filter((b) => !b.startsWith("#"))];
+
+  const joined = [...opening, ...section].join("\n\n");
+  if (joined.length <= EXEMPLAR_MAX_CHARS) return joined;
+
+  // Cut at the last sentence end rather than mid-word. An exemplar that stops
+  // in the middle of a clause is a demonstration of stopping mid-clause, and
+  // truncation is the one failure this generator already has form for.
+  const clipped = joined.slice(0, EXEMPLAR_MAX_CHARS);
+  const lastStop = Math.max(
+    clipped.lastIndexOf(". "),
+    clipped.lastIndexOf(".\n"),
+    clipped.lastIndexOf("? "),
+    clipped.lastIndexOf("! "),
+  );
+  return lastStop > 0 ? clipped.slice(0, lastStop + 1) : clipped;
+}
+
+// Returns "" when the corpus is unreadable rather than throwing. A missing
+// exemplar makes the prose worse; it should not stop the run, and the gates
+// still hold either way.
+export function loadStyleExemplar(slugs = EXEMPLAR_SLUGS) {
+  const parts = [];
+  for (const slug of slugs) {
+    try {
+      const raw = fs.readFileSync(
+        path.join(ROOT, "content", "articles", `${slug}.mdx`),
+        "utf8",
+      );
+      const body = raw.split(/^---$/m).slice(2).join("---").trim();
+      const excerpt = excerptFrom(body);
+      if (excerpt) parts.push(excerpt);
+    } catch {
+      // Exemplar is a nicety, not a dependency.
+    }
+  }
+  return parts.join("\n\n---\n\n");
+}
+
 // Resolves the mapped cover against public/ and falls back when it is missing,
 // so the generator cannot mint another article whose schema image 404s. Every
 // article on the site currently points at a covers directory that was never
@@ -1081,7 +1290,7 @@ async function generateArticleBody(
   categorySlug,
   existingSlugs,
   product,
-  verifiedSpecs = null,
+  research = null,
 ) {
   const calculatorPath = calculatorFor(categorySlug);
   const calculatorName = calculatorLabel(calculatorPath);
@@ -1129,15 +1338,28 @@ async function generateArticleBody(
     "- Say plainly who each product is WRONG for. A guide where everything suits " +
     "somebody is useless to the person deciding.\n" +
     "- Commit in the Bottom Line: name one product and say who should buy it. " +
-    "Hedging across every option is not balance.\n\n" +
+    "Hedging across every option is not balance.\n" +
+    "- Open the article inside the reader's situation, not on the subject in the " +
+    "abstract. They already have the problem; start where they are standing.\n" +
+    "- Put a real quantity in the first two paragraphs — coverage per gallon, a " +
+    "rating, a square-foot figure — so the reader can size the job before they " +
+    "read the picks.\n" +
+    "- State consequences, not qualities. \"Skip it and any solid stain will flake " +
+    "by next summer\" earns its place; \"proper preparation is important\" does " +
+    "not.\n" +
+    "- Contractions are fine and preferred. Short sentences are fine. A one-line " +
+    "paragraph for the blunt version is fine.\n\n" +
     "Every article must:\n" +
     "1. Be a buying guide, not a how-to install guide\n" +
     "2. Help readers choose between products before they buy\n" +
-    "3. Close by linking the reader to " + calculatorName + " at " + calculatorPath +
-    " — e.g. \"Run your measurements through our free " + calculatorName.toLowerCase() +
-    " to get an exact shopping list before you order.\" Use that exact path. If the " +
-    "topic does not fit that calculator, link " + CALCULATOR_HUB + " instead. Do not " +
-    "invent any other calculator path.\n" +
+    "3. Close by linking the reader to " + calculatorName + " as a MARKDOWN LINK " +
+    "to " + calculatorPath + ". Write it exactly like this, brackets and " +
+    "parentheses included: \"Run your measurements through our free [" +
+    calculatorName.toLowerCase() + "](" + calculatorPath + ") to get an exact " +
+    "shopping list before you order.\" A plain-text mention is a dead cross-link " +
+    "and fails the quality gate. Use that exact path. If the topic does not fit " +
+    "that calculator, link " + CALCULATOR_HUB + " instead. Do not invent any " +
+    "other calculator path.\n" +
     "4. Include honest pros and cons — no fluff\n" +
     "5. Use plain, direct language, the way a knowledgeable person at a trade counter " +
     "would talk\n" +
@@ -1152,6 +1374,20 @@ async function generateArticleBody(
     "Start at H2. The title is rendered from frontmatter as the page's only H1, so " +
     "an H1 in the body would give the page two (AGENTS.md §11).\n\n" +
     "NEVER write installation tutorials.";
+
+  // The rules above are all prohibitions, and a model that obeys every "do not"
+  // produces prose with no tells and no voice — which is what the first three
+  // generated articles were. They cleared every gate and still read like a spec
+  // sheet. Showing the target is the part that was missing.
+  const exemplar = loadStyleExemplar();
+  const systemWithVoice = exemplar
+    ? system +
+      "\n\nHOUSE VOICE — these are real excerpts from BuildGuiders articles. " +
+      "Match their register, sentence rhythm and directness. Do NOT reuse their " +
+      "wording, products or facts; they are a demonstration of how to write, not " +
+      "material to draw on.\n\n" +
+      exemplar
+    : system;
 
   const relatedSlugs = Array.from(existingSlugs)
     .filter(
@@ -1168,27 +1404,64 @@ async function generateArticleBody(
           .join("\n")
       : "";
 
-  const userPrompt = verifiedSpecs
-    ? `Write a buying guide article for the following topic. Use these verified product facts as ground truth:\n\n${verifiedSpecs}\n\nTitle: ${title}\nBrand: ${brand || "various"}\nCategory: ${categorySlug}` +
-      "\n\nWrite an MDX article body (NO frontmatter, NO H1 heading — the title is rendered separately from frontmatter). Start directly with the first H2 section.\n\n" +
-      "Rules:\n" +
-      "- Insert exactly one affiliate link: [" + product.name + " (paid link)](" + product.url + ") placed where it helps the reader most.\n" +
-      "- No prices, ratings, or time-sensitive claims.\n" +
-      "- Minimum 700 words of substantive content." +
+  // Two shapes, and the difference is what the model is allowed to know. With a
+  // brief it writes from the brief and may not reach past it; without one it is
+  // writing from recall, which only happens when REQUIRE_RESEARCH is explicitly
+  // switched off.
+  const common =
+    "\n\nWrite an MDX article body (NO frontmatter, NO H1 heading — the title " +
+    "is rendered separately from frontmatter). Start directly with the first H2 " +
+    "section.\n\n" +
+    "Rules:\n" +
+    "- Insert exactly one affiliate link: [" + product.name + " (paid link)](" +
+    product.url + ") placed where it helps the reader most.\n" +
+    "- No prices, ratings, or time-sensitive claims.\n" +
+    "- Minimum 700 words of substantive content.";
+
+  const userPrompt = research
+    ? "Write a buying guide article from the research brief below. The brief is " +
+      "the only source you may use.\n\n" +
+      "=== RESEARCH BRIEF ===\n" + research.brief + "\n=== END BRIEF ===\n\n" +
+      `Title: ${title}\nBrand: ${brand || "various"}\nCategory: ${categorySlug}` +
+      common +
+      "\n- Cover the products the brief establishes, one H2 each. Do NOT introduce " +
+      "a product the brief does not name, and do NOT add a spec, figure or " +
+      "warranty term that is not in it. If the brief is thin on a product, write " +
+      "less about that product — do not fill the gap from memory. Every number in " +
+      "this article has been checked and yours have not.\n" +
+      // The affiliate rule and the brief-only rule can pull against each other:
+      // the researcher is asked whether the product belongs, and is allowed to
+      // say it does not. Resolve it here rather than leaving the model to pick,
+      // because the way it picks is to invent a section — the exact failure this
+      // whole pass exists to stop. Perma-White really is the wrong product for a
+      // cabinets guide, and saying so is better content than pretending
+      // otherwise.\n" +
+      "- The affiliate link above is required even if the brief concludes that " +
+      product.name + " is the wrong product for this topic. In that case do not " +
+      "give it a recommendation section: name it where a reader would otherwise " +
+      "reach for it, say plainly what it is actually for and why it does not suit " +
+      "this job, and put the link there. Never write a product up on specs the " +
+      "brief does not carry just to place the link.\n" +
+      "- The brief tags each fact (manufacturer) or (independent: who). Carry that " +
+      "distinction into the prose: attribute a manufacturer's figure to the " +
+      "manufacturer (\"Pergo rates it for 24 hours\"), and state an independent " +
+      "one plainly. Never print the tags themselves.\n" +
+      "- Use each product's WRONG FOR line. That judgement is the most useful " +
+      "sentence in the section and the easiest one to soften into uselessness.\n" +
+      "- Use the CONTEXT facts in the opening section so the reader can size the " +
+      "job before the picks start." +
       relatedLinksHint
     : `Write a buying guide article.\n\nTitle: ${title}\nBrand: ${brand || "various"}\nCategory: ${categorySlug}` +
-      "\n\nWrite an MDX article body (NO frontmatter, NO H1 heading — the title is rendered separately from frontmatter). Start directly with the first H2 section.\n\n" +
-      "Rules:\n" +
-      "- Insert exactly one affiliate link: [" + product.name + " (paid link)](" + product.url + ") placed where it helps the reader most.\n" +
-      "- No prices, ratings, or time-sensitive claims.\n" +
-      "- Minimum 700 words of substantive content." +
+      common +
+      "\n- You have no research brief for this topic. Write only what you are " +
+      "confident is true, and omit a number rather than estimating it." +
       relatedLinksHint;
 
   const response = await client.models.generateContent({
     model: MODEL,
     contents: userPrompt,
     config: {
-      systemInstruction: system,
+      systemInstruction: systemWithVoice,
       temperature: 0.4,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
     },
@@ -1308,7 +1581,7 @@ function saveTopicCache(scored) {
 // whatever landed.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function describeOutcome({ created, failed, fatal }) {
+export function describeOutcome({ created, failed, unresearched = 0, fatal }) {
   if (created === 0 && failed > 0) {
     return {
       ok: false,
@@ -1319,7 +1592,28 @@ export function describeOutcome({ created, failed, fatal }) {
           : "Every article failed; the errors are above."),
     };
   }
-  return { ok: true, message: `Wrote ${created} article(s), ${failed} failed.` };
+  // Skipping for want of research is the correct behaviour on one topic and a
+  // broken research step on all of them. Either way it must not read as a clean
+  // run: a workflow that quietly writes nothing every week is the failure this
+  // function was extracted to prevent in the first place.
+  if (created === 0 && unresearched > 0) {
+    return {
+      ok: false,
+      message:
+        `Nothing was written: research came back unusable for all ${unresearched} ` +
+        "topic(s), so none were written from unverified numbers. The [research] " +
+        "lines above say how each one came back short — an empty response or a " +
+        "finishReason other than STOP points at the token budget, a timeout at " +
+        "RESEARCH_TIMEOUT_MS.",
+    };
+  }
+  return {
+    ok: true,
+    message:
+      `Wrote ${created} article(s), ${failed} failed` +
+      (unresearched > 0 ? `, ${unresearched} skipped for want of research` : "") +
+      ".",
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1334,6 +1628,7 @@ export function describeOutcome({ created, failed, fatal }) {
 export async function generateBatch(client, ranked, existingSlugs) {
   let created = 0;
   let failed = 0;
+  let unresearched = 0;
   let fatal = null;
 
   for (const [slug, { title, brand, categorySlug, coverImage }] of ranked) {
@@ -1345,7 +1640,26 @@ export async function generateBatch(client, ranked, existingSlugs) {
     try {
       console.log("Generating: " + title);
       const product = pickProductForTopic(slug, categorySlug);
-      const verifiedSpecs = await fetchVerifiedSpecs(client, title);
+
+      // Research first. The product is picked above so the researcher can be
+      // told which one the article has to place, rather than guessing from the
+      // title — which is what the old gate tried to do and never managed.
+      const research = await researchTopic(client, {
+        title,
+        categorySlug,
+        productName: product.name,
+      });
+
+      if (!research && researchIsRequired()) {
+        unresearched++;
+        console.log(
+          "Skipping: " + slug + " — the facts are not established, and an " +
+            "article of unverified numbers is worse than no article. Set " +
+            "REQUIRE_RESEARCH=false to write it from recall anyway.\n",
+        );
+        continue;
+      }
+
       const body = await generateArticleBody(
         client,
         title,
@@ -1353,7 +1667,7 @@ export async function generateBatch(client, ranked, existingSlugs) {
         categorySlug,
         existingSlugs,
         product,
-        verifiedSpecs,
+        research,
       );
       const fm = buildFrontmatter(slug, title, brand, categorySlug, coverImage, product);
       fs.writeFileSync(filePath, fm + body + "\n", "utf8");
@@ -1375,7 +1689,7 @@ export async function generateBatch(client, ranked, existingSlugs) {
     }
   }
 
-  return { created, failed, fatal };
+  return { created, failed, unresearched, fatal };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1515,22 +1829,21 @@ async function main() {
   if (!fs.existsSync(ARTICLES_DIR))
     fs.mkdirSync(ARTICLES_DIR, { recursive: true });
 
-  const { created, failed, fatal } = await generateBatch(
+  const { created, failed, unresearched, fatal } = await generateBatch(
     client,
     ranked,
     existingSlugs,
   );
 
-  console.log(
-    `\nWrote ${created} article(s), ${failed} failed.`,
-  );
-
-  const outcome = describeOutcome({ created, failed, fatal });
+  // One tally, from describeOutcome, rather than a raw count here and a verdict
+  // below that could disagree with it.
+  const outcome = describeOutcome({ created, failed, unresearched, fatal });
   if (!outcome.ok) {
     console.error("\n" + outcome.message);
     process.exit(1);
   }
 
+  console.log("\n" + outcome.message);
   console.log("Research and generation complete.");
 }
 

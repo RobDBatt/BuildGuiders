@@ -17,6 +17,14 @@
 # than the script's own 20: the point of the first runs is that somebody reads
 # every article, and twenty is more than anyone reads carefully.
 #
+# Each article is researched before it is written: a search-grounded pass
+# establishes the contender products and their specs, and the article is written
+# from that brief. If research comes back unusable the article is SKIPPED rather
+# than written from model recall, so a run can legitimately produce fewer
+# articles than requested — or none, which fails the run. Set the REQUIRE_RESEARCH
+# repository variable to "false" to fall back to the old write-from-recall
+# behaviour.
+#
 # Requires GEMINI_API_KEY in repository secrets:
 #   Settings -> Secrets and variables -> Actions -> New repository secret
 #
@@ -92,6 +100,17 @@ jobs:
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
           MAX_NEW_ARTICLES: ${{ inputs.count }}
           TOPIC_CACHE: ${{ inputs.refresh_topics == true && 'off' || '' }}
+          # Research knobs, all optional. Every one is safe unset — the script
+          # falls back to its default, and REQUIRE_RESEARCH stays on, so an
+          # unset variable can never turn research off by accident.
+          #   REQUIRE_RESEARCH=false        write from recall when research fails
+          #   RESEARCH_ENABLED=false        skip research entirely
+          #   RESEARCH_MAX_OUTPUT_TOKENS    raise if briefs come back truncated
+          #   RESEARCH_TIMEOUT_MS           raise if research times out
+          REQUIRE_RESEARCH: ${{ vars.REQUIRE_RESEARCH }}
+          RESEARCH_ENABLED: ${{ vars.RESEARCH_ENABLED }}
+          RESEARCH_MAX_OUTPUT_TOKENS: ${{ vars.RESEARCH_MAX_OUTPUT_TOKENS }}
+          RESEARCH_TIMEOUT_MS: ${{ vars.RESEARCH_TIMEOUT_MS }}
         run: |
           echo "Generating up to ${MAX_NEW_ARTICLES:-20} article(s)."
           npm run generate
@@ -110,8 +129,10 @@ jobs:
           if [ "$COUNT" -eq 0 ]; then
             # Deliberately does not say why. This step can see that no file was
             # written; it cannot see whether that is because every candidate
-            # topic already existed or because the API refused every call. The
-            # generate step above fails the run in the second case.
+            # topic already existed, because the API refused every call, or
+            # because research came back unusable and the articles were skipped
+            # rather than written from unverified numbers. The generate step
+            # above fails the run in the last two cases and says which.
             echo "No new articles were written. See the generate step for what it attempted."
           else
             echo "$COUNT new article(s):"
