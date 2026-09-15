@@ -1326,15 +1326,9 @@ async function generateArticleBody(
     "intact, it was decoration.\n" +
     "- Write \"is\" and \"has\". Not \"serves as\", \"functions as\", \"boasts\", " +
     "\"features\", \"provides\".\n" +
-    "- Do not close a sentence with a comma and an -ing clause restating what " +
-    "the sentence already said. The words this shows up as are: making, " +
-    "ensuring, providing, offering, allowing, helping, requiring, creating, " +
-    "delivering, giving. \"The core resists water, making it suitable for " +
-    "bathrooms\" should be \"The core resists water.\" — the clause is deleted, " +
-    "not rewritten, because the sentence was finished before it started. " +
-    "This is measured: every hand-written article on the site scores ZERO of " +
-    "these, and an article is REJECTED at 3 per 1,000 words. Your budget for " +
-    "the whole article is at most one, and zero is the target.\n" +
+    "- Do not close a sentence with a floating -ing clause restating significance " +
+    "(\"...making it ideal for bathrooms\", \"...ensuring lasting durability\"). " +
+    "Stop at the fact.\n" +
     "- A checkable detail beats an adjective. \"AC4 rating\" beats \"highly " +
     "durable\"; \"three-sided cap\" beats \"excellent protection\". Where you have " +
     "no real figure, write the plain sentence instead of reaching for a " +
