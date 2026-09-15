@@ -18,6 +18,10 @@ const MIN_WORDS = 300;
 const MAX_TITLE_CHARS = 60;
 const MAX_DESCRIPTION_CHARS = 160;
 const AFFILIATE_TAG = 'buildguiders-20';
+// Trailing participial clauses per 1,000 words. All 27 hand-written articles
+// score exactly 0; the three generated under the rewritten prompt scored 3.6,
+// 8.1 and 10.3. Three leaves real headroom over a corpus sitting at zero.
+const MAX_SIGNIFICANCE_CLAUSES_PER_1K = 3;
 
 const files = process.argv.slice(2).filter(Boolean);
 
@@ -139,6 +143,38 @@ for (const file of files) {
     note(
       file,
       `ends mid-sentence: "...${lastLine.slice(-60)}". The response was cut off.`,
+    );
+  }
+
+  // Trailing participial clauses that restate significance — "...resists
+  // scuffing, making it suitable for high-traffic areas". The measured
+  // structural tell: LLM prose carries them at 2-5x human rate, and the fix is
+  // deletion, because the sentence was finished before the clause started.
+  //
+  // Rewriting the prompt to forbid these did nothing — 22 occurrences before,
+  // 24 after. What gets a check behind it holds; what is merely asked for
+  // drifts. That is the whole reason this is a gate and not another bullet in
+  // the prompt.
+  //
+  // Rate-based rather than absolute, and requires at least two, so one
+  // legitimate use in a short article is not a failure.
+  const significanceClauses = [
+    ...body.matchAll(
+      /,\s+(making|ensuring|providing|offering|allowing|helping|requiring|creating|delivering|giving)\s+/gi,
+    ),
+  ];
+  const clausesPer1k = words > 0 ? (significanceClauses.length * 1000) / words : 0;
+  if (
+    significanceClauses.length >= 2 &&
+    clausesPer1k > MAX_SIGNIFICANCE_CLAUSES_PER_1K
+  ) {
+    const sample = significanceClauses[0][0].trim();
+    note(
+      file,
+      `has ${significanceClauses.length} trailing "${sample}"-style clauses ` +
+        `(${clausesPer1k.toFixed(1)} per 1k words, max ` +
+        `${MAX_SIGNIFICANCE_CLAUSES_PER_1K}). They restate significance the ` +
+        'sentence already earned — delete them rather than rewriting.',
     );
   }
 

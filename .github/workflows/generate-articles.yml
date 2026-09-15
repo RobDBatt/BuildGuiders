@@ -34,6 +34,11 @@ on:
         description: 'Articles to generate (1-50). Keep it small — every one has to be read.'
         required: false
         default: '3'
+      refresh_topics:
+        description: 'Re-run the full autocomplete sweep instead of using cached topics (~6 min slower).'
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -67,11 +72,26 @@ jobs:
 
       - run: npm ci
 
+      # The autocomplete sweep is 2,175 seed pairs at 150ms — about five and a
+      # half minutes before a word is written, re-run every time to pick three
+      # topics. Keyed on the script itself so editing the seed lists forces a
+      # fresh sweep; the run id in the key makes every run save an updated cache
+      # rather than only the first. The script still ages the cache out after a
+      # week on its own.
+      - name: Restore the topic cache
+        uses: actions/cache@v4
+        with:
+          path: .topic-cache.json
+          key: topic-cache-${{ hashFiles('scripts/research-and-generate.mjs') }}-${{ github.run_id }}
+          restore-keys: |
+            topic-cache-${{ hashFiles('scripts/research-and-generate.mjs') }}-
+
       - name: Generate articles
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
           MAX_NEW_ARTICLES: ${{ inputs.count }}
+          TOPIC_CACHE: ${{ inputs.refresh_topics == true && 'off' || '' }}
         run: |
           echo "Generating up to ${MAX_NEW_ARTICLES:-20} article(s)."
           npm run generate
