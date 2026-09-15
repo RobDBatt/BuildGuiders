@@ -8,6 +8,15 @@ const aUrl = (asin: string) => `https://www.amazon.com/dp/${asin}?tag=${AMAZON_T
 const hdUrl = (q: string) => `https://www.homedepot.com/s/${encodeURIComponent(q)}`;
 
 const SHEET_SQ_FT = 32; // 4x8 sheet
+
+// Screw length follows board thickness: the screw has to bite at least 5/8"
+// into the framing. Hardcoding one length contradicted the supporting content,
+// which is the sort of thing that costs a reader.
+const SCREW_LENGTH: Record<string, string> = {
+  "3/8": '1-1/4"',
+  "1/2": '1-1/4"',
+  "5/8": '1-5/8"',
+};
 const DOOR_AREA = 20;
 const WINDOW_AREA = 15;
 
@@ -69,7 +78,7 @@ export default function DrywallCalculator() {
 
   const shoppingItems = [
     { qty: result.sheets, name: `${thickness}" Drywall Sheets (4×8)`, note: `${result.sheets} sheets — includes 10% waste for cuts`, tip: "Tip: Order delivery for large quantities. Carrying drywall through doorways is how backs get hurt.", amazon: aUrl("B07BFHQT4Z"), hd: hdUrl(`${thickness} drywall sheet 4x8`) },
-    { qty: result.screwBoxes, name: "Drywall Screws (1-5/8\", 1 lb box)", note: `${result.screwBoxes} boxes — coarse thread for wood studs, fine thread for metal`, amazon: aUrl("B07BGPBF5Z"), hd: hdUrl("drywall screws 1-5/8") },
+    { qty: result.screwBoxes, name: `Drywall Screws (${SCREW_LENGTH[thickness]}, 1 lb box)`, note: `${result.screwBoxes} boxes — ${SCREW_LENGTH[thickness]} for ${thickness}" board, coarse thread for wood studs and fine thread for metal`, amazon: aUrl("B07BGPBF5Z"), hd: hdUrl(`drywall screws ${SCREW_LENGTH[thickness]}`) },
     { qty: result.mudBuckets, name: "Joint Compound — All-Purpose (3.5 gal bucket)", note: `${result.mudBuckets} buckets — for taping, topping, and final coats`, tip: "Tip: Apply 3 thin coats, not 1 thick one. Sand lightly between coats.", amazon: aUrl("B003KQCLW4"), hd: hdUrl("joint compound all purpose 3.5 gallon") },
     { qty: result.tapeBags, name: "Paper Drywall Tape (75 ft roll)", note: `${result.tapeBags} rolls — paper tape is stronger than mesh for seams`, tip: "Tip: Embed tape in wet mud, then scrape flat — no bubbles.", amazon: aUrl("B000BPCB4E"), hd: hdUrl("paper drywall tape") },
     { qty: result.cornerBead, name: "Metal Corner Bead (8 ft)", note: "Protects every outside corner — required for a clean finish", amazon: aUrl("B001BCB1QA"), hd: hdUrl("metal corner bead 8 ft") },
@@ -324,8 +333,10 @@ export default function DrywallCalculator() {
               <li>
                 <span className="font-semibold text-slate-700">Screws:</span> one box per five sheets. The
                 spec is every 16 inches along each framing member on walls and every 12 inches on ceilings —
-                about 32 screws in a 4 × 8 wall sheet. Use 1-1/4 inch coarse thread in wood, fine thread in
-                steel studs, and set them just below the paper without breaking it.
+                about 32 screws in a 4 × 8 wall sheet. Length follows the board, because the screw needs to
+                bite at least 5/8 inch into the framing: 1-1/4 inch for 3/8 and 1/2 inch board, 1-5/8 inch
+                for 5/8. The shopping list above switches with the thickness you pick. Coarse thread in
+                wood, fine thread in steel studs, and set them just below the paper without breaking it.
               </li>
             </ul>
           </section>
