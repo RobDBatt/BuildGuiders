@@ -1429,6 +1429,19 @@ async function generateArticleBody(
       "warranty term that is not in it. If the brief is thin on a product, write " +
       "less about that product — do not fill the gap from memory. Every number in " +
       "this article has been checked and yours have not.\n" +
+      // The affiliate rule and the brief-only rule can pull against each other:
+      // the researcher is asked whether the product belongs, and is allowed to
+      // say it does not. Resolve it here rather than leaving the model to pick,
+      // because the way it picks is to invent a section — the exact failure this
+      // whole pass exists to stop. Perma-White really is the wrong product for a
+      // cabinets guide, and saying so is better content than pretending
+      // otherwise.\n" +
+      "- The affiliate link above is required even if the brief concludes that " +
+      product.name + " is the wrong product for this topic. In that case do not " +
+      "give it a recommendation section: name it where a reader would otherwise " +
+      "reach for it, say plainly what it is actually for and why it does not suit " +
+      "this job, and put the link there. Never write a product up on specs the " +
+      "brief does not carry just to place the link.\n" +
       "- The brief tags each fact (manufacturer) or (independent: who). Carry that " +
       "distinction into the prose: attribute a manufacturer's figure to the " +
       "manufacturer (\"Pergo rates it for 24 hours\"), and state an independent " +
