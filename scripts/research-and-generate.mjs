@@ -1237,6 +1237,67 @@ export function isFatalApiError(message) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// TOPIC CACHE
+//
+// The autocomplete sweep is 2,175 seed pairs at 150ms, so roughly five and a
+// half minutes of deliberate delay before a single word is written — and it
+// re-researches the whole catalogue on every run to pick three topics. Cached,
+// one sweep feeds many runs: later runs take the next unused candidates.
+//
+// The cache stores candidates, never articles. Slugs that exist by the time it
+// is read are filtered out at ranking, so a stale cache can go out of date but
+// cannot cause a duplicate.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const TOPIC_CACHE_PATH = path.join(ROOT, ".topic-cache.json");
+const TOPIC_CACHE_MAX_AGE_HOURS =
+  Number(process.env.TOPIC_CACHE_MAX_AGE_HOURS) || 168; // one week
+const TOPIC_CACHE_ENABLED = process.env.TOPIC_CACHE !== "off";
+
+export function isCacheFresh(writtenAt, now = Date.now(), maxAgeHours = TOPIC_CACHE_MAX_AGE_HOURS) {
+  if (!writtenAt) return false;
+  const age = now - new Date(writtenAt).getTime();
+  if (!Number.isFinite(age) || age < 0) return false;
+  return age < maxAgeHours * 3600 * 1000;
+}
+
+function loadTopicCache() {
+  if (!TOPIC_CACHE_ENABLED) return null;
+  if (!fs.existsSync(TOPIC_CACHE_PATH)) return null;
+  try {
+    const cache = JSON.parse(fs.readFileSync(TOPIC_CACHE_PATH, "utf8"));
+    if (!Array.isArray(cache.candidates) || cache.candidates.length === 0) return null;
+    if (!isCacheFresh(cache.writtenAt)) {
+      console.log("Topic cache is older than " + TOPIC_CACHE_MAX_AGE_HOURS + "h — re-researching.");
+      return null;
+    }
+    return cache;
+  } catch (err) {
+    // A corrupt cache must never stop a run; the sweep is the fallback.
+    console.warn("Topic cache unreadable (" + err.message + ") — re-researching.");
+    return null;
+  }
+}
+
+function saveTopicCache(scored) {
+  if (!TOPIC_CACHE_ENABLED) return;
+  try {
+    fs.writeFileSync(
+      TOPIC_CACHE_PATH,
+      JSON.stringify(
+        { writtenAt: new Date().toISOString(), candidates: [...scored.entries()] },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+    console.log("Cached " + scored.size + " candidate topics for later runs.");
+  } catch (err) {
+    console.warn("Could not write the topic cache (" + err.message + ") — continuing.");
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RUN OUTCOME
 //
 // A run that wrote nothing because the API refused every call is a failure, not
@@ -1344,13 +1405,22 @@ async function main() {
   console.log(
     "Found " + existingSlugs.size + " existing articles — skipping those.\n",
   );
-  console.log("Researching topics via Google Autocomplete...\n");
+  const cached = loadTopicCache();
+  const scored = new Map(cached ? cached.candidates : []);
 
-  const scored = new Map();
+  if (cached) {
+    console.log(
+      "Using " + scored.size + " cached candidate topics from " +
+        cached.writtenAt + " (TOPIC_CACHE=off to force a fresh sweep).\n",
+    );
+  } else {
+    console.log("Researching topics via Google Autocomplete...\n");
+  }
+
   let filteredOffTopic = 0;
   let filteredFuzzyDupe = 0;
 
-  for (const category of CATEGORIES) {
+  for (const category of cached ? [] : CATEGORIES) {
     for (const intent of INTENTS) {
       const suggestions = await getAutocompleteSuggestions(
         category + " " + intent,
@@ -1408,15 +1478,22 @@ async function main() {
     }
   }
 
-  console.log(
-    "Filtered: " +
-      filteredOffTopic +
-      " off-topic, " +
-      filteredFuzzyDupe +
-      " fuzzy duplicates\n",
-  );
+  if (!cached) {
+    console.log(
+      "Filtered: " +
+        filteredOffTopic +
+        " off-topic, " +
+        filteredFuzzyDupe +
+        " fuzzy duplicates\n",
+    );
+    saveTopicCache(scored);
+  }
 
+  // Filtered here rather than trusting the cache: candidates written since the
+  // sweep must drop out, or a cached run would regenerate an article that
+  // already exists.
   const ranked = Array.from(scored.entries())
+    .filter(([slug]) => !existingSlugs.has(slug))
     .sort((a, b) => b[1].score - a[1].score)
     .slice(0, MAX_NEW_ARTICLES);
 

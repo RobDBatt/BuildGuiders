@@ -8,7 +8,7 @@
 // that mislabels categories cross-links the wrong calculator, which is invisible
 // until someone reads a published article.
 
-import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount, isFatalApiError, describeOutcome } from "./research-and-generate.mjs";
+import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount, isFatalApiError, describeOutcome, isCacheFresh } from "./research-and-generate.mjs";
 
 let fail = 0;
 const eq = (got, want, label) => {
@@ -126,6 +126,15 @@ eq(describeOutcome({ created: 2, failed: 1, fatal: null }).ok, true, "partial su
 eq(describeOutcome({ created: 0, failed: 0, fatal: null }).ok, true, "nothing attempted is not a failure");
 eq(describeOutcome({ created: 0, failed: 20, fatal: "429 RESOURCE_EXHAUSTED" }).message.includes("429"), true,
    "the message names the API error");
+
+console.log("\n— topic cache freshness —");
+const NOW = Date.parse("2026-09-15T12:00:00Z");
+eq(isCacheFresh("2026-09-15T11:00:00Z", NOW), true, "an hour old");
+eq(isCacheFresh("2026-09-09T13:00:00Z", NOW), true, "just under a week");
+eq(isCacheFresh("2026-09-08T11:00:00Z", NOW), false, "just over a week");
+eq(isCacheFresh("2026-09-20T00:00:00Z", NOW), false, "future timestamp is not fresh");
+eq(isCacheFresh("not-a-date", NOW), false, "garbage timestamp");
+eq(isCacheFresh(undefined, NOW), false, "missing timestamp");
 
 console.log("\n— cover falls back rather than emitting a 404 path —");
 eq(getCoverImage("paint"), "/og-default.png", "missing cover falls back");
