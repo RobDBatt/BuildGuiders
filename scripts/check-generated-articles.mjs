@@ -11,8 +11,14 @@
 // This replaces five gates the retired workflow called that never existed on this
 // branch, two of which (power-cycle times, viewing distance) validated television
 // specs and have nothing to say about decking.
+//
+// articleProblems() is exported so the generator can run these same checks on a
+// draft and retry once before the article reaches this gate. One implementation,
+// imported in both places: a second copy of the rules would drift from this one,
+// and the drifting copy would be the one deciding whether to retry.
 
 import { readFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 
 const MIN_WORDS = 300;
 const MAX_TITLE_CHARS = 60;
@@ -22,13 +28,6 @@ const AFFILIATE_TAG = 'buildguiders-20';
 // score exactly 0; the three generated under the rewritten prompt scored 3.6,
 // 8.1 and 10.3. Three leaves real headroom over a corpus sitting at zero.
 const MAX_SIGNIFICANCE_CLAUSES_PER_1K = 3;
-
-const files = process.argv.slice(2).filter(Boolean);
-
-if (files.length === 0) {
-  console.log('check-generated-articles: no files given, nothing to check.');
-  process.exit(0);
-}
 
 // Counts what a reader sees, not bytes: "&amp;" is one character on screen and
 // five in the file, and an em dash is one character and three bytes (AGENTS.md §9).
@@ -52,22 +51,23 @@ function frontmatterValue(fm, key) {
     .trim();
 }
 
-const problems = [];
-const note = (file, msg) => problems.push(`  ${file}\n    ${msg}`);
+/**
+ * Every problem with one article, as plain messages.
+ *
+ * Takes the file's contents rather than its path so the generator can check a
+ * draft it holds in memory, before deciding whether to write it at all.
+ *
+ * @param {string} raw full .mdx contents, frontmatter included
+ * @returns {string[]} empty when the article passes
+ */
+export function articleProblems(raw) {
+  const problems = [];
+  const note = (msg) => problems.push(msg);
 
-for (const file of files) {
-  let raw;
-  try {
-    raw = readFileSync(file, 'utf8');
-  } catch {
-    note(file, 'could not be read.');
-    continue;
-  }
-
-  const parts = raw.split(/^---$/m);
+  const parts = String(raw ?? '').split(/^---$/m);
   if (parts.length < 3) {
-    note(file, 'has no parsable frontmatter block.');
-    continue;
+    note('has no parsable frontmatter block.');
+    return problems;
   }
   const fm = parts[1];
   const body = parts.slice(2).join('---');
@@ -75,9 +75,9 @@ for (const file of files) {
   // §9 — Google truncates past these, so anything beyond is never shown.
   const title = frontmatterValue(fm, 'title');
   if (!title) {
-    note(file, 'has no title.');
+    note('has no title.');
   } else if (visibleLength(title) > MAX_TITLE_CHARS) {
-    note(file, `title is ${visibleLength(title)} chars (max ${MAX_TITLE_CHARS}): "${title}"`);
+    note(`title is ${visibleLength(title)} chars (max ${MAX_TITLE_CHARS}): "${title}"`);
   }
 
   // description may be a folded block (">-"), so take the following line too.
@@ -86,18 +86,15 @@ for (const file of files) {
     description = (fm.match(/^description:\s*>-\s*\n\s*(.+)$/m)?.[1] ?? '').trim();
   }
   if (!description) {
-    note(file, 'has no description.');
+    note('has no description.');
   } else if (visibleLength(description) > MAX_DESCRIPTION_CHARS) {
-    note(
-      file,
-      `description is ${visibleLength(description)} chars (max ${MAX_DESCRIPTION_CHARS}).`,
-    );
+    note(`description is ${visibleLength(description)} chars (max ${MAX_DESCRIPTION_CHARS}).`);
   }
 
   // §11 — the template renders the frontmatter title as the page's H1, so a body
   // H1 gives the page two.
   if (/^# /m.test(body)) {
-    note(file, 'has a body-level H1. The template already renders one from the title.');
+    note('has a body-level H1. The template already renders one from the title.');
   }
 
   // §4 — Amazon is the only live affiliate network; no cross-tagging.
@@ -106,18 +103,18 @@ for (const file of files) {
   );
   for (const link of amazonLinks) {
     if (!link.includes(`tag=${AFFILIATE_TAG}`)) {
-      note(file, `Amazon link without tag=${AFFILIATE_TAG}: ${link}`);
+      note(`Amazon link without tag=${AFFILIATE_TAG}: ${link}`);
     }
   }
   const foreignTag = body.match(/tag=(?!buildguiders-20)([a-z0-9]+-20)/);
   if (foreignTag) {
-    note(file, `carries another site's affiliate tag: ${foreignTag[1]}`);
+    note(`carries another site's affiliate tag: ${foreignTag[1]}`);
   }
 
   // Thin content ranks for nothing.
   const words = body.trim().split(/\s+/).filter(Boolean).length;
   if (words < MIN_WORDS) {
-    note(file, `body is ${words} words (minimum ${MIN_WORDS}).`);
+    note(`body is ${words} words (minimum ${MIN_WORDS}).`);
   }
 
   // Truncation. A model that hits its output cap stops mid-sentence, and the
@@ -127,7 +124,6 @@ for (const file of files) {
   // with the last sentence still cut, or the cut can land before it.
   if (!/^##\s+Bottom Line\s*$/m.test(body)) {
     note(
-      file,
       'has no "## Bottom Line" section. Every article is prompted to end with ' +
         'one, so its absence means the response was cut short.',
     );
@@ -140,10 +136,7 @@ for (const file of files) {
     .pop();
   // Prose ends in a full stop; a related-guides list item ends in a link's ")".
   if (lastLine && !/[.!?)"'`\]]$/.test(lastLine)) {
-    note(
-      file,
-      `ends mid-sentence: "...${lastLine.slice(-60)}". The response was cut off.`,
-    );
+    note(`ends mid-sentence: "...${lastLine.slice(-60)}". The response was cut off.`);
   }
 
   // Trailing participial clauses that restate significance — "...resists
@@ -152,9 +145,12 @@ for (const file of files) {
   // deletion, because the sentence was finished before the clause started.
   //
   // Rewriting the prompt to forbid these did nothing — 22 occurrences before,
-  // 24 after. What gets a check behind it holds; what is merely asked for
-  // drifts. That is the whole reason this is a gate and not another bullet in
-  // the prompt.
+  // 24 after. Naming the ten trigger words in the prompt and stating the budget
+  // did worse: run 34916423797 scored 3.5 per 1k, and the same topic under the
+  // reworded rule (34917181241) scored 6.5, using "offering" seven times.
+  // Listing the words appears to prime them. What gets a check behind it holds;
+  // what is merely asked for drifts, and asking harder drifts further. That is
+  // the whole reason this is a gate and not another bullet in the prompt.
   //
   // Rate-based rather than absolute, and requires at least two, so one
   // legitimate use in a short article is not a failure.
@@ -164,13 +160,9 @@ for (const file of files) {
     ),
   ];
   const clausesPer1k = words > 0 ? (significanceClauses.length * 1000) / words : 0;
-  if (
-    significanceClauses.length >= 2 &&
-    clausesPer1k > MAX_SIGNIFICANCE_CLAUSES_PER_1K
-  ) {
+  if (significanceClauses.length >= 2 && clausesPer1k > MAX_SIGNIFICANCE_CLAUSES_PER_1K) {
     const sample = significanceClauses[0][0].trim();
     note(
-      file,
       `has ${significanceClauses.length} trailing "${sample}"-style clauses ` +
         `(${clausesPer1k.toFixed(1)} per 1k words, max ` +
         `${MAX_SIGNIFICANCE_CLAUSES_PER_1K}). They restate significance the ` +
@@ -191,7 +183,6 @@ for (const file of files) {
   );
   if (fieldLabels.length >= 2) {
     note(
-      file,
       `uses a labelled-field template ${fieldLabels.length} times ` +
         `(${[...new Set(fieldLabels)].slice(0, 3).join(' ')}). Write it as prose.`,
     );
@@ -210,7 +201,6 @@ for (const file of files) {
   // itself breaks. Naming one without linking it is the actual defect.
   if (/\bcalculator\b/i.test(body) && !/\]\(\/[a-z-]+-calculator\)/.test(body)) {
     note(
-      file,
       'mentions a calculator but never links one. Write it as a markdown link ' +
         'to the route (e.g. "[paint calculator](/paint-calculator)") — as plain ' +
         'text the cross-link does nothing.',
@@ -234,24 +224,59 @@ for (const file of files) {
     const hit = body.match(re);
     if (hit) {
       note(
-        file,
         `claims first-hand experience: "${hit[0]}". Nobody on the team tests these ` +
           'products; that phrasing is both untrue and a reviews-systems ranking risk.',
       );
     }
   }
+
+  return problems;
 }
 
-if (problems.length > 0) {
-  console.error(
-    `check-generated-articles: ${problems.length} problem${
-      problems.length === 1 ? '' : 's'
-    } across ${files.length} file${files.length === 1 ? '' : 's'}\n\n` +
-      `${problems.join('\n')}\n`,
+// ─────────────────────────────────────────────────────────────────────────────
+// CLI
+// ─────────────────────────────────────────────────────────────────────────────
+
+function main(files) {
+  if (files.length === 0) {
+    console.log('check-generated-articles: no files given, nothing to check.');
+    return 0;
+  }
+
+  const problems = [];
+  for (const file of files) {
+    let raw;
+    try {
+      raw = readFileSync(file, 'utf8');
+    } catch {
+      problems.push(`  ${file}\n    could not be read.`);
+      continue;
+    }
+    for (const msg of articleProblems(raw)) {
+      problems.push(`  ${file}\n    ${msg}`);
+    }
+  }
+
+  if (problems.length > 0) {
+    console.error(
+      `check-generated-articles: ${problems.length} problem${
+        problems.length === 1 ? '' : 's'
+      } across ${files.length} file${files.length === 1 ? '' : 's'}\n\n` +
+        `${problems.join('\n')}\n`,
+    );
+    return 1;
+  }
+
+  console.log(
+    `check-generated-articles: ${files.length} file${files.length === 1 ? '' : 's'} OK`,
   );
-  process.exit(1);
+  return 0;
 }
 
-console.log(
-  `check-generated-articles: ${files.length} file${files.length === 1 ? '' : 's'} OK`,
-);
+// Importing this module must not run the gate or exit the process.
+const invokedDirectly =
+  process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url;
+
+if (invokedDirectly) {
+  process.exit(main(process.argv.slice(2).filter(Boolean)));
+}
