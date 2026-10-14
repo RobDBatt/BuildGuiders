@@ -13,6 +13,10 @@
 import fs from "fs";
 import path from "path";
 import { pathToFileURL } from "url";
+// The same checks the workflow gate runs, imported rather than reimplemented:
+// a second copy would drift, and the drifting copy would be the one deciding
+// whether a draft needs another pass.
+import { articleProblems } from "./check-generated-articles.mjs";
 
 const ROOT = process.cwd();
 const ARTICLES_DIR = path.join(ROOT, "content", "articles");
@@ -1283,7 +1287,9 @@ function buildFrontmatter(slug, title, brand, categorySlug, coverImage, product)
 // ARTICLE BODY GENERATION
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function generateArticleBody(
+// Exported for tests: the retry hands the gate's complaints back to the model,
+// and that hand-off is the part that can silently stop working.
+export async function generateArticleBody(
   client,
   title,
   brand,
@@ -1291,6 +1297,7 @@ async function generateArticleBody(
   existingSlugs,
   product,
   research = null,
+  fixes = null,
 ) {
   const calculatorPath = calculatorFor(categorySlug);
   const calculatorName = calculatorLabel(calculatorPath);
@@ -1457,9 +1464,31 @@ async function generateArticleBody(
       "confident is true, and omit a number rather than estimating it." +
       relatedLinksHint;
 
+  // The second pass. Not "avoid this in general" — which this repo has now
+  // measured as useless twice, once doing nothing and once making the output
+  // worse — but "here is what you wrote and what is wrong with it". A specific
+  // defect in text the model can see is a different task from a rule about text
+  // it has not written yet.
+  //
+  // The defects are quoted verbatim from the gate, so the instruction cannot
+  // drift from what is actually enforced.
+  const withFixes =
+    fixes && fixes.length > 0
+      ? userPrompt +
+        "\n\nYour previous draft of this article was REJECTED by the quality " +
+        "check. The problems, verbatim:\n\n" +
+        fixes.map((f) => "- " + f).join("\n") +
+        "\n\nWrite the article again, fixing exactly these. Keep everything that " +
+        "was not flagged — same products, same facts, same structure, same " +
+        "length. Where the problem is a trailing clause restating significance, " +
+        "DELETE the clause and end the sentence at the fact; do not rewrite the " +
+        "sentence around it. Do not introduce new products or new numbers while " +
+        "fixing."
+      : userPrompt;
+
   const response = await client.models.generateContent({
     model: MODEL,
-    contents: userPrompt,
+    contents: withFixes,
     config: {
       systemInstruction: systemWithVoice,
       temperature: 0.4,
@@ -1581,7 +1610,13 @@ function saveTopicCache(scored) {
 // whatever landed.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function describeOutcome({ created, failed, unresearched = 0, fatal }) {
+export function describeOutcome({
+  created,
+  failed,
+  unresearched = 0,
+  rejected = 0,
+  fatal,
+}) {
   if (created === 0 && failed > 0) {
     return {
       ok: false,
@@ -1607,11 +1642,24 @@ export function describeOutcome({ created, failed, unresearched = 0, fatal }) {
         "RESEARCH_TIMEOUT_MS.",
     };
   }
+  // Every draft rejected on quality is a working pipeline producing unusable
+  // prose, which needs the same visibility as a broken one. It must not read as
+  // a clean run just because nothing errored.
+  if (created === 0 && rejected > 0) {
+    return {
+      ok: false,
+      message:
+        `Nothing was written: all ${rejected} draft(s) still failed the quality ` +
+        "checks after a retry. The [check] lines above list what was wrong with " +
+        "each. Research and generation are working — this is the writing.",
+    };
+  }
   return {
     ok: true,
     message:
       `Wrote ${created} article(s), ${failed} failed` +
       (unresearched > 0 ? `, ${unresearched} skipped for want of research` : "") +
+      (rejected > 0 ? `, ${rejected} rejected on quality after a retry` : "") +
       ".",
   };
 }
@@ -1629,6 +1677,7 @@ export async function generateBatch(client, ranked, existingSlugs) {
   let created = 0;
   let failed = 0;
   let unresearched = 0;
+  let rejected = 0;
   let fatal = null;
 
   for (const [slug, { title, brand, categorySlug, coverImage }] of ranked) {
@@ -1660,7 +1709,11 @@ export async function generateBatch(client, ranked, existingSlugs) {
         continue;
       }
 
-      const body = await generateArticleBody(
+      // Frontmatter first, because the checks run over the whole file — title
+      // and description length are frontmatter rules.
+      const fm = buildFrontmatter(slug, title, brand, categorySlug, coverImage, product);
+
+      let body = await generateArticleBody(
         client,
         title,
         brand,
@@ -1669,7 +1722,51 @@ export async function generateBatch(client, ranked, existingSlugs) {
         product,
         research,
       );
-      const fm = buildFrontmatter(slug, title, brand, categorySlug, coverImage, product);
+      let problems = articleProblems(fm + body + "\n");
+
+      // One retry, with the gate's own complaint handed back. Runs 34916423797
+      // and 34917181241 each produced a usable article rejected for a handful of
+      // deletable clauses, and both were thrown away — a research call and a
+      // generation call each. One more call is cheaper than that.
+      if (problems.length > 0) {
+        console.log(`  [check] draft rejected, ${problems.length} problem(s):`);
+        for (const p of problems) console.log("    - " + p);
+        console.log("  [check] regenerating once with those fed back.");
+
+        const second = await generateArticleBody(
+          client,
+          title,
+          brand,
+          categorySlug,
+          existingSlugs,
+          product,
+          research,
+          problems,
+        );
+        const secondProblems = articleProblems(fm + second + "\n");
+
+        // Keep the better draft rather than assuming the retry improved things.
+        // It does not always: the same measurement that killed the prompt fix
+        // showed a reworded instruction making the output worse, so a retry that
+        // regresses must not be the one that ships.
+        if (secondProblems.length < problems.length) {
+          body = second;
+          problems = secondProblems;
+        }
+      }
+
+      // Still failing after the retry: drop this article and carry on. The
+      // workflow gate runs over every new file at once, so one bad article would
+      // otherwise fail the gate and discard the good ones in the same batch.
+      if (problems.length > 0) {
+        rejected++;
+        console.log(
+          "Rejected: " + slug + " — " + problems.length + " problem(s) after a " +
+            "retry, so it is not written. The batch continues; the articles that " +
+            "pass still ship.\n",
+        );
+        continue;
+      }
       fs.writeFileSync(filePath, fm + body + "\n", "utf8");
       existingSlugs.add(slug); // prevent dupes within this run
       created++;
@@ -1689,7 +1786,7 @@ export async function generateBatch(client, ranked, existingSlugs) {
     }
   }
 
-  return { created, failed, unresearched, fatal };
+  return { created, failed, unresearched, rejected, fatal };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1829,7 +1926,7 @@ async function main() {
   if (!fs.existsSync(ARTICLES_DIR))
     fs.mkdirSync(ARTICLES_DIR, { recursive: true });
 
-  const { created, failed, unresearched, fatal } = await generateBatch(
+  const { created, failed, unresearched, rejected, fatal } = await generateBatch(
     client,
     ranked,
     existingSlugs,
@@ -1837,7 +1934,7 @@ async function main() {
 
   // One tally, from describeOutcome, rather than a raw count here and a verdict
   // below that could disagree with it.
-  const outcome = describeOutcome({ created, failed, unresearched, fatal });
+  const outcome = describeOutcome({ created, failed, unresearched, rejected, fatal });
   if (!outcome.ok) {
     console.error("\n" + outcome.message);
     process.exit(1);

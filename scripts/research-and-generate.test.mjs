@@ -8,7 +8,9 @@
 // that mislabels categories cross-links the wrong calculator, which is invisible
 // until someone reads a published article.
 
-import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount, isFatalApiError, describeOutcome, isCacheFresh, loadStyleExemplar, parseBriefProducts, extractSources, researchTopic } from "./research-and-generate.mjs";
+import { readFileSync } from "node:fs";
+import { articleProblems } from "./check-generated-articles.mjs";
+import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount, isFatalApiError, describeOutcome, isCacheFresh, loadStyleExemplar, parseBriefProducts, extractSources, researchTopic, generateArticleBody } from "./research-and-generate.mjs";
 
 let fail = 0;
 const eq = (got, want, label) => {
@@ -252,6 +254,64 @@ eq(describeOutcome({ created: 2, failed: 0, unresearched: 1, fatal: null }).mess
    "but the skip is reported");
 eq(describeOutcome({ created: 3, failed: 0, fatal: null }).message.includes("skipped"), false,
    "no skip line when nothing was skipped");
+
+console.log("\n— the generator and the gate run ONE set of rules —");
+// The retry decision and the gate verdict must come from the same code. Two
+// copies would drift, and the drifting copy would be the one deciding whether a
+// draft needs another pass.
+const GOOD = readFileSync("content/articles/best-waterproof-laminate-flooring-for-pets.mdx", "utf8");
+eq(articleProblems(GOOD).length, 0, "a live article has no problems");
+eq(articleProblems(GOOD + "\n, making it ideal, ensuring value, providing grip, offering more, allowing use.").length > 0,
+   true, "planted clauses are seen");
+eq(articleProblems("no frontmatter here")[0], "has no parsable frontmatter block.",
+   "unparsable input is a problem, not a throw");
+eq(articleProblems("").length, 1, "empty string does not throw");
+eq(articleProblems(null).length, 1, "null does not throw");
+// The messages the retry feeds back are the gate's own wording.
+const clauseMsg = articleProblems(GOOD.replace("## What to look for",
+  "## What to look for\n\nIt seals, making it good. It locks, ensuring fit. It grips, providing hold. It wears, offering life. It sits, allowing use.\n")).join(" ");
+eq(/delete them rather than rewriting/.test(clauseMsg), true,
+   "and they say to delete rather than rewrite");
+
+console.log("\n— a run that wrote nothing because every draft was rejected —");
+eq(describeOutcome({ created: 0, failed: 0, rejected: 3, fatal: null }).ok, false,
+   "all 3 drafts rejected is not a clean run");
+eq(describeOutcome({ created: 0, failed: 0, rejected: 3, fatal: null }).message.includes("after a retry"), true,
+   "and the message says a retry was already spent");
+eq(describeOutcome({ created: 2, failed: 0, rejected: 1, fatal: null }).ok, true,
+   "one rejection among three stays green — the good ones ship");
+eq(describeOutcome({ created: 2, failed: 0, rejected: 1, fatal: null }).message.includes("1 rejected on quality"), true,
+   "but the rejection is reported");
+eq(describeOutcome({ created: 3, failed: 0, fatal: null }).message.includes("rejected"), false,
+   "no rejection line when nothing was rejected");
+eq(describeOutcome({ created: 0, failed: 0, unresearched: 1, rejected: 1, fatal: null }).ok, false,
+   "nothing written, one of each, still a failure");
+
+console.log("\n— the retry hands the real complaints back —");
+let seen = [];
+const writerStub = { models: { generateContent: async (req) => { seen.push(req.contents); return { text: "## Bottom Line\nFine.", candidates: [{ finishReason: "STOP" }] }; } } };
+const ARGS = ["Best Paint for Bathroom Ceiling", "various", "paint", new Set(), { name: "Zinsser Perma-White", url: "https://www.amazon.com/s?k=x&tag=buildguiders-20" }];
+
+seen = [];
+await generateArticleBody(writerStub, ...ARGS, { brief: "CONTEXT:\n- x", sources: [], products: ["A", "B"] });
+eq(/REJECTED by the quality check/.test(seen[0]), false, "a first draft carries no rejection text");
+
+seen = [];
+const COMPLAINTS = [
+  'has 7 trailing ", offering"-style clauses (6.5 per 1k words, max 3). They restate significance the sentence already earned — delete them rather than rewriting.',
+  'mentions a calculator but never links one.',
+];
+await generateArticleBody(writerStub, ...ARGS, { brief: "CONTEXT:\n- x", sources: [], products: ["A", "B"] }, COMPLAINTS);
+eq(seen[0].includes(COMPLAINTS[0]), true, "the clause complaint is passed verbatim");
+eq(seen[0].includes(COMPLAINTS[1]), true, "so is the calculator complaint");
+eq(/DELETE the clause and end the sentence at the fact/.test(seen[0]), true,
+   "and the fix is specified as deletion, not rewriting");
+eq(/Do not introduce new products or new numbers/.test(seen[0]), true,
+   "a fix pass must not smuggle in unresearched facts");
+// An empty list must not trigger the retry wording.
+seen = [];
+await generateArticleBody(writerStub, ...ARGS, null, []);
+eq(/REJECTED by the quality check/.test(seen[0]), false, "an empty problem list is not a retry");
 
 console.log(fail === 0 ? "\nALL PASS" : `\n${fail} FAILURES`);
 process.exit(fail === 0 ? 0 : 1);
