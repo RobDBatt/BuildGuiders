@@ -6,7 +6,10 @@ const GREEN = "#1B4332";
 const aUrl = (asin: string) => `https://www.amazon.com/dp/${asin}?tag=${AMAZON_TAG}`;
 const hdUrl = (q: string) => `https://www.homedepot.com/s/${encodeURIComponent(q)}`;
 
+const BAG_LB = 80;
 const BAG_CUFT = 0.6; // 80lb bag = 0.6 cu ft
+// Fixed slab (ft, ft, inches) for the worked example under the H1.
+const EXAMPLE_SLAB = { length: 10, width: 10, depthIn: 4 };
 
 type ProjectType = "slab" | "footing" | "postholes";
 
@@ -27,6 +30,8 @@ function calcPostHoles(diameter: number, depth: number, count: number) {
   const bags = Math.ceil(cuFt / BAG_CUFT);
   return { cuFt, cuYards, bags };
 }
+
+const SLAB_EXAMPLE = calcSlab(EXAMPLE_SLAB.length, EXAMPLE_SLAB.width, EXAMPLE_SLAB.depthIn);
 
 export default function ConcreteCalculator() {
   const [type, setType] = useState<ProjectType>("slab");
@@ -92,6 +97,9 @@ export default function ConcreteCalculator() {
             <div className="w-12 h-12 bg-amber-50 border-2 border-amber-200 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">🏗️</div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Concrete Calculator</h1>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                An {BAG_LB} lb bag of concrete mix yields about {BAG_CUFT} cu ft, so a {EXAMPLE_SLAB.length} × {EXAMPLE_SLAB.width} ft slab {EXAMPLE_SLAB.depthIn} inches thick needs about {SLAB_EXAMPLE.bags} bags ({(Math.round(SLAB_EXAMPLE.cuYards * 10) / 10)} cubic yards).
+              </p>
               <p className="text-slate-500 mt-1">Bags or cubic yards for slabs, footings, or post holes — plus all your tools.</p>
             </div>
           </div>

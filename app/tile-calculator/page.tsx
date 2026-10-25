@@ -33,6 +33,9 @@ const TILE_EXAMPLES: [string, string, string][] = [
   ['4" × 4"', "0.111 sq ft", "991"],
 ];
 
+const DEFAULT_WASTE_PCT = 10;
+const DEFAULT_GROUT_LINE = 3;
+
 function calc(areas: Area[], tileSizeId: string, waste: number, groutLine: number) {
   const tileSize = TILE_SIZES.find(t => t.id === tileSizeId)!;
   const totalSqFt = areas.reduce((sum, a) => sum + (parseFloat(a.length) || 0) * (parseFloat(a.width) || 0), 0);
@@ -46,11 +49,15 @@ function calc(areas: Area[], tileSizeId: string, waste: number, groutLine: numbe
   return { totalSqFt: Math.round(totalSqFt), withWaste: Math.round(withWaste), tileCount, groutBags, adhesiveBags, tileSize };
 }
 
+const EXAMPLE_TILE = TILE_SIZES[0];
+const TILE_EXAMPLE = calc(INITIAL_AREAS, EXAMPLE_TILE.id, DEFAULT_WASTE_PCT, DEFAULT_GROUT_LINE);
+const EXAMPLE_AREA = INITIAL_AREAS[0];
+
 export default function TileCalculator() {
   const [areas, setAreas] = useState<Area[]>(INITIAL_AREAS);
   const [tileSizeId, setTileSizeId] = useState("12x12");
-  const [waste, setWaste] = useState(10);
-  const [groutLine, setGroutLine] = useState(3);
+  const [waste, setWaste] = useState(DEFAULT_WASTE_PCT);
+  const [groutLine, setGroutLine] = useState(DEFAULT_GROUT_LINE);
   const [surface, setSurface] = useState<"floor" | "wall">("floor");
   const result = useMemo(() => calc(areas, tileSizeId, waste, groutLine), [areas, tileSizeId, waste, groutLine]);
   const hasInput = areas.some(a => parseFloat(a.length) > 0 && parseFloat(a.width) > 0);
@@ -84,6 +91,9 @@ export default function TileCalculator() {
             <div className="w-12 h-12 bg-amber-50 border-2 border-amber-200 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">🔲</div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Tile Calculator</h1>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                Tile needs about {DEFAULT_WASTE_PCT}% extra for cuts and breakage, so a {EXAMPLE_AREA.length} × {EXAMPLE_AREA.width} ft area ({TILE_EXAMPLE.totalSqFt} sq ft) of {EXAMPLE_TILE.label} tile takes about {TILE_EXAMPLE.tileCount} tiles.
+              </p>
               <p className="text-slate-500 mt-1">Tile count, mortar, grout, and every tool — for floor or wall.</p>
             </div>
           </div>

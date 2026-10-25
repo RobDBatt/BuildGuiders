@@ -15,6 +15,10 @@ const MATERIALS = [
   { id: "sand", label: "Play Sand / Paver Sand", bagCuFt: 0.5, cuFtPerYard: 27 },
 ];
 
+// The depth most beds are mulched to, and the bed used for the worked example under the H1.
+const STANDARD_DEPTH_IN = 3;
+const EXAMPLE_BED = { length: "20", width: "4" };
+
 interface Bed { id: string; length: string; width: string; }
 const INITIAL_BEDS: Bed[] = [{ id: "bed-0", length: "20", width: "4" }];
 let nextBedId = 1;
@@ -31,9 +35,13 @@ function calc(beds: Bed[], depth: number, matId: string) {
   return { totalSqFt: Math.round(totalSqFt), totalCuFt: Math.round(totalCuFt * 10) / 10, cubicYards: Math.round(cubicYards * 10) / 10, bags, fabricRolls, mat };
 }
 
+const MULCH = MATERIALS[0];
+const MULCH_EXAMPLE = calc([{ id: "example", ...EXAMPLE_BED }], STANDARD_DEPTH_IN, MULCH.id);
+const MULCH_SQFT_PER_YARD = Math.round(MULCH.cuFtPerYard / (STANDARD_DEPTH_IN / 12));
+
 export default function MulchCalculator() {
   const [beds, setBeds] = useState<Bed[]>(INITIAL_BEDS);
-  const [depth, setDepth] = useState(3);
+  const [depth, setDepth] = useState(STANDARD_DEPTH_IN);
   const [matId, setMatId] = useState("mulch");
   const [delivery, setDelivery] = useState(false);
   const result = useMemo(() => calc(beds, depth, matId), [beds, depth, matId]);
@@ -72,6 +80,9 @@ export default function MulchCalculator() {
                   across two products diluted it. Topsoil, compost, gravel and
                   sand still carry their secondary terms in the subhead. */}
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Mulch Calculator</h1>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                One cubic yard of mulch covers about {MULCH_SQFT_PER_YARD} sq ft at the standard {STANDARD_DEPTH_IN}-inch depth, so a {EXAMPLE_BED.length} × {EXAMPLE_BED.width} ft bed ({MULCH_EXAMPLE.totalSqFt} sq ft) needs about {MULCH_EXAMPLE.cubicYards} cubic yards, or {MULCH_EXAMPLE.bags} bags of {MULCH.bagCuFt} cu ft.
+              </p>
               <p className="text-slate-500 mt-1">
                 Cubic yards and the exact bag count for any bed shape and depth. Also handles topsoil, compost, gravel,
                 and paver sand.

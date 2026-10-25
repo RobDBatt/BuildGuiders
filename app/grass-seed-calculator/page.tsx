@@ -30,8 +30,13 @@ const SEED_EXAMPLES: [string, string, string][] = [
   ["15,000 sq ft", "75 lb · 11 bags", "45 lb · 7 bags"],
 ];
 
+// Every rate in SEED_TYPES is pounds per this many square feet.
+const PER_SQFT = 1000;
+// Fixed lawn size for the worked example under the H1.
+const EXAMPLE_SQFT = 5000;
+
 function calc(sqft: number, rate: number) {
-  const lbs       = (sqft / 1000) * rate;
+  const lbs       = (sqft / PER_SQFT) * rate;
   const bags7     = Math.ceil(lbs / 7);           // 7-lb bags (common Scotts / Pennington size)
   const fertBags  = Math.max(1, Math.ceil(sqft / 5000)); // starter fert covers 5,000 sq ft per bag
   const strawBags = Math.ceil(sqft / 250);         // seed accelerator mulch, ~250 sq ft per bag
@@ -116,6 +121,9 @@ export default function GrassSeedCalculator() {
             <div className="w-12 h-12 bg-green-50 border-2 border-green-200 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">🌱</div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Grass Seed Calculator</h1>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                A new lawn takes about {SEED_TYPES[0].rate} lb of seed per {PER_SQFT.toLocaleString("en-US")} sq ft (overseeding {SEED_TYPES[1].rate} lb, bare patches {SEED_TYPES[2].rate} lb), so a {EXAMPLE_SQFT.toLocaleString("en-US")} sq ft lawn needs about {calc(EXAMPLE_SQFT, SEED_TYPES[0].rate).lbs} lb.
+              </p>
               <p className="text-slate-500 mt-1">Pounds of seed, starter fertilizer, and supplies — for new lawns, overseeding, or bare patch repair.</p>
             </div>
           </div>

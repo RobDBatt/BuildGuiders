@@ -10,6 +10,7 @@ const COMPOST_BAG_CUFT = 1.0;  // standard compost bag
 const PERLITE_BAG_CUFT = 0.25; // 8-qt perlite bag
 
 const DEPTHS = [6, 8, 10, 12]; // inches
+const DEFAULT_DEPTH_IN = 8;
 
 const MIX_TYPES = [
   {
@@ -52,9 +53,12 @@ function calc(beds: Bed[], depthIn: number) {
   };
 }
 
+const EXAMPLE_BED = INITIAL_BEDS[0];
+const BED_EXAMPLE = calc(INITIAL_BEDS, DEFAULT_DEPTH_IN);
+
 export default function RaisedGardenBedCalculator() {
   const [beds,      setBeds]      = useState<Bed[]>(INITIAL_BEDS);
-  const [depth,     setDepth]     = useState(8);
+  const [depth,     setDepth]     = useState(DEFAULT_DEPTH_IN);
   const [mixType,   setMixType]   = useState("premix");
   const hasInput = beds.some(b => parseFloat(b.length) > 0 && parseFloat(b.width) > 0);
   const result   = useMemo(() => calc(beds, depth), [beds, depth]);
@@ -144,6 +148,9 @@ export default function RaisedGardenBedCalculator() {
             <div className="w-12 h-12 bg-green-50 border-2 border-green-200 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">🥕</div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Raised Garden Bed Soil Calculator</h1>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                A raised bed takes length × width × depth in cubic feet of soil, and premix comes in {PREMIX_BAG_CUFT} cu ft bags, so an {EXAMPLE_BED.length} × {EXAMPLE_BED.width} ft bed filled {DEFAULT_DEPTH_IN} inches deep needs about {BED_EXAMPLE.totalCuFt} cu ft, or {BED_EXAMPLE.premixBags} bags.
+              </p>
               <p className="text-slate-500 mt-1">Bags of soil, compost, and amendments — for any bed size or depth.</p>
             </div>
           </div>

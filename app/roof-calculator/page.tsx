@@ -60,6 +60,10 @@ function calcRoof(l: number, w: number, rise: number, style: RoofStyle) {
   };
 }
 
+// Fixed roof for the worked example under the H1.
+const EXAMPLE_ROOF = { style: "gable" as RoofStyle, length: 40, width: 28, rise: 6 };
+const ROOF_EXAMPLE = calcRoof(EXAMPLE_ROOF.length, EXAMPLE_ROOF.width, EXAMPLE_ROOF.rise, EXAMPLE_ROOF.style);
+
 export default function RoofCalculator() {
   const [style, setStyle] = useState<RoofStyle>("gable");
   const [length, setLength] = useState("40");
@@ -158,6 +162,9 @@ export default function RoofCalculator() {
             <div className="w-12 h-12 bg-amber-50 border-2 border-amber-200 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">🏠</div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Roof Calculator</h1>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                A roofing square is {SQUARE_SQFT} sq ft and takes {BUNDLES_PER_SQUARE} bundles of shingles, so a {EXAMPLE_ROOF.length} × {EXAMPLE_ROOF.width} ft {EXAMPLE_ROOF.style} roof at {EXAMPLE_ROOF.rise}/12 pitch needs about {Math.ceil(ROOF_EXAMPLE.squares)} squares ({ROOF_EXAMPLE.bundles} bundles), including {Math.round(ROOF_EXAMPLE.waste * 100)}% waste.
+              </p>
               <p className="text-slate-500 mt-1">Roof area, squares, and shingle bundles from your footprint and pitch — plus the rest of the materials.</p>
             </div>
           </div>
