@@ -73,6 +73,12 @@ function ShoppingList({ boxes, matId, totalSqFt }: { boxes: number; matId: strin
   );
 }
 
+const LVP = MATERIAL_TYPES.find(m => m.id === "lvp")!;
+const ENGINEERED = MATERIAL_TYPES.find(m => m.id === "engineered")!;
+const CARPET = MATERIAL_TYPES.find(m => m.id === "carpet")!;
+const FLOORING_EXAMPLE = calc(INITIAL_AREAS, LVP.id, 0);
+const EXAMPLE_AREA = INITIAL_AREAS[0];
+
 export default function FlooringCalculator() {
   const [areas, setAreas] = useState<Area[]>(INITIAL_AREAS);
   const [matId, setMatId] = useState("lvp");
@@ -98,6 +104,9 @@ export default function FlooringCalculator() {
             <div className="w-12 h-12 bg-amber-50 border-2 border-amber-200 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">🪵</div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Flooring Calculator</h1>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                Flooring needs about {Math.round(LVP.waste * 100)}% extra for cuts and waste ({Math.round(ENGINEERED.waste * 100)}% for engineered wood, {Math.round(CARPET.waste * 100)}% for carpet), so a {EXAMPLE_AREA.length} × {EXAMPLE_AREA.width} ft room of {LVP.label} ({FLOORING_EXAMPLE.totalSqFt} sq ft) takes about {FLOORING_EXAMPLE.boxes} boxes of {LVP.boxSqFt} sq ft.
+              </p>
               <p className="text-slate-500 mt-1">Boxes needed with waste factor, plus everything you'll need to install it.</p>
             </div>
           </div>

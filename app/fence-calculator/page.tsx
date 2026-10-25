@@ -13,6 +13,10 @@ const FENCE_STYLES = [
   { id: "rail", label: "3-Rail Split Rail", panelW: 8, name: "8 ft Split Rail Sections" },
 ];
 
+const DEFAULT_POST_SPACING_FT = 8;
+// Fixed run for the worked example under the H1: straight, panel style, no gates.
+const EXAMPLE_FENCE_FT = 100;
+
 function calc(linearFt: number, postSpacing: number, styleId: string, gateCount: number) {
   const style = FENCE_STYLES.find(s => s.id === styleId)!;
   const posts = Math.ceil(linearFt / postSpacing) + 1;
@@ -23,9 +27,12 @@ function calc(linearFt: number, postSpacing: number, styleId: string, gateCount:
   return { posts, panels, rails, concreteBags, postCaps, style };
 }
 
+const PANEL_STYLE = FENCE_STYLES[0];
+const FENCE_EXAMPLE = calc(EXAMPLE_FENCE_FT, DEFAULT_POST_SPACING_FT, PANEL_STYLE.id, 0);
+
 export default function FenceCalculator() {
   const [linearFt, setLinearFt] = useState("100");
-  const [postSpacing, setPostSpacing] = useState(8);
+  const [postSpacing, setPostSpacing] = useState(DEFAULT_POST_SPACING_FT);
   const [styleId, setStyleId] = useState("panel");
   const [gateCount, setGateCount] = useState(0);
   const [fenceHeight, setFenceHeight] = useState(6);
@@ -68,6 +75,9 @@ export default function FenceCalculator() {
             <div className="w-12 h-12 bg-amber-50 border-2 border-amber-200 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">🪟</div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Fence Calculator</h1>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                A fence needs one post every {DEFAULT_POST_SPACING_FT} ft plus one at the end, and one {PANEL_STYLE.panelW}-ft panel per span, so {EXAMPLE_FENCE_FT} ft of straight fence takes about {FENCE_EXAMPLE.posts} posts and {FENCE_EXAMPLE.panels} panels.
+              </p>
               <p className="text-slate-500 mt-1">Posts, panels, concrete, post caps, and gate hardware for any fence run.</p>
             </div>
           </div>

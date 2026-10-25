@@ -7,7 +7,10 @@ const GREEN = "#1B4332";
 const aUrl = (asin: string) => `https://www.amazon.com/dp/${asin}?tag=${AMAZON_TAG}`;
 const hdUrl = (q: string) => `https://www.homedepot.com/s/${encodeURIComponent(q)}`;
 
-const SHEET_SQ_FT = 32; // 4x8 sheet
+const SHEET_WIDTH_FT = 4;
+const SHEET_HEIGHT_FT = 8;
+const SHEET_SQ_FT = SHEET_WIDTH_FT * SHEET_HEIGHT_FT; // 4x8 sheet
+const WASTE_PCT = 10;
 
 // Screw length follows board thickness: the screw has to bite at least 5/8"
 // into the framing. Hardcoding one length contradicted the supporting content,
@@ -60,7 +63,7 @@ function calc(rooms: Room[], includeCeiling: boolean, thickness: string) {
   const totalSqFt = wallSqFt + ceilingSqFt;
   // 10% waste. Multiply before dividing and round off the float dust before
   // ceil(): a 320 sq ft total gives 11.000000000000002 and buys a 12th sheet.
-  const sheets = Math.ceil(Number(((totalSqFt * 110) / 100 / SHEET_SQ_FT).toFixed(6)));
+  const sheets = Math.ceil(Number(((totalSqFt * (100 + WASTE_PCT)) / 100 / SHEET_SQ_FT).toFixed(6)));
   const screwBoxes = Math.ceil(sheets / 5); // 1 box per 5 sheets
   const mudBuckets = Math.ceil(totalSqFt / 400); // 1 bucket per 400 sqft
   // Each sheet has ~16 ft of net seams; a 75-ft roll covers ~4-5 sheets
@@ -68,6 +71,10 @@ function calc(rooms: Room[], includeCeiling: boolean, thickness: string) {
   const cornerBead = Math.ceil(rooms.reduce((sum, r) => sum + (parseFloat(r.height) || 8), 0) * 4 / rooms.length / 8); // rough estimate
   return { totalSqFt: Math.round(totalSqFt), wallSqFt: Math.round(wallSqFt), ceilingSqFt: Math.round(ceilingSqFt), sheets, screwBoxes, mudBuckets, tapeBags, cornerBead };
 }
+
+// Worked example under the H1: the starting room, walls and ceiling, 1/2" board.
+const EXAMPLE_ROOM = INITIAL_ROOMS[0];
+const DRYWALL_EXAMPLE = calc(INITIAL_ROOMS, true, "1/2");
 
 export default function DrywallCalculator() {
   const [rooms, setRooms] = useState<Room[]>(INITIAL_ROOMS);
@@ -106,6 +113,9 @@ export default function DrywallCalculator() {
             <div className="w-12 h-12 bg-amber-50 border-2 border-amber-200 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">🧱</div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Drywall Calculator</h1>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                A {SHEET_WIDTH_FT}×{SHEET_HEIGHT_FT} drywall sheet covers {SHEET_SQ_FT} sq ft, so a {EXAMPLE_ROOM.length} × {EXAMPLE_ROOM.width} ft room with {EXAMPLE_ROOM.height}-ft walls and a ceiling ({DRYWALL_EXAMPLE.totalSqFt} sq ft) takes about {DRYWALL_EXAMPLE.sheets} sheets, including {WASTE_PCT}% waste.
+              </p>
               <p className="text-slate-500 mt-1">Sheet count, compound, tape, screws — the full mudding kit.</p>
             </div>
           </div>

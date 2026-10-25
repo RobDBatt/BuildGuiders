@@ -31,6 +31,7 @@ const PAINT_COVERAGE = 400;
 const PRIMER_COVERAGE = 300;
 const DOOR_AREA = 20;
 const WINDOW_AREA = 15;
+const DEFAULT_COATS = 2;
 
 const HD_BASE = "https://www.homedepot.com/s/";
 
@@ -99,10 +100,14 @@ const INITIAL_ROOMS: Room[] = [{ id: "room-0", length: "12", width: "12", height
 let nextRoomId = 1;
 const newRoom = (): Room => ({ id: `room-${nextRoomId++}`, length: "", width: "", height: "", doors: "1", windows: "1" });
 
+// Worked example under the H1: the starting room, walls only, no primer.
+const EXAMPLE_ROOM = INITIAL_ROOMS[0];
+const EXAMPLE_PAINT = calcPaint(INITIAL_ROOMS, DEFAULT_COATS, false, true);
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 export default function PaintCalculatorPage() {
   const [rooms, setRooms] = useState<Room[]>(INITIAL_ROOMS);
-  const [coats, setCoats] = useState(2);
+  const [coats, setCoats] = useState(DEFAULT_COATS);
   const [includePrimer, setIncludePrimer] = useState(true);
   const [wallsOnly, setWallsOnly] = useState(false);
   const [surfaceType, setSurfaceType] = useState<"smooth" | "textured">("smooth");
@@ -149,6 +154,9 @@ export default function PaintCalculatorPage() {
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 leading-tight tracking-tight">Paint Calculator</h1>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                One gallon of paint covers about {PAINT_COVERAGE} sq ft of wall per coat, so a {EXAMPLE_ROOM.length} × {EXAMPLE_ROOM.width} ft room with {EXAMPLE_ROOM.height}-ft walls and {EXAMPLE_ROOM.doors} door and {EXAMPLE_ROOM.windows} window needs about {EXAMPLE_PAINT.paintGallons} gallons for {DEFAULT_COATS} coats.
+              </p>
               <p className="text-slate-500 mt-1 text-base">Enter your room dimensions and get an exact shopping list — one trip, not four.</p>
               <div className="flex flex-wrap items-center gap-3 mt-3">
                 {["No signup", "Waste factor included", "Full shopping list"].map(label => (

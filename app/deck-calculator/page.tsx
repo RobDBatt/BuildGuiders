@@ -6,6 +6,13 @@ const GREEN = "#1B4332";
 const aUrl = (asin: string) => `https://www.amazon.com/dp/${asin}?tag=${AMAZON_TAG}`;
 const hdUrl = (q: string) => `https://www.homedepot.com/s/${encodeURIComponent(q)}`;
 
+// Framing and waste assumptions, shared by the calculation and the sentence under the H1.
+const JOIST_SPACING_FT = 1.333; // true 16" on center
+const BOARD_LENGTH_FT = 8;
+const DECKING_WASTE = 1.10; // +10% for cuts
+// Fixed deck for the worked example under the H1.
+const EXAMPLE_DECK = { deckL: 16, deckW: 12, boardWidth: 5.5 };
+
 // ── Calculation engine ────────────────────────────────────────────────────────
 function calcDeck({
   deckL, deckW, boardWidth, postSpacing, boardType, ledgerAttached,
@@ -20,10 +27,10 @@ function calcDeck({
 
   // ── Decking boards ──────────────────────────────────────────────────────────
   const totalBoardRows = Math.ceil(deckW / boardWidthFt);
-  const deckingBoards = Math.ceil(totalBoardRows * (deckL / 8) * 1.10); // +10% waste
+  const deckingBoards = Math.ceil(totalBoardRows * (deckL / BOARD_LENGTH_FT) * DECKING_WASTE);
 
   // ── Joists (true 16" OC = 1.333 ft) ────────────────────────────────────────
-  const joists = Math.ceil(deckL / 1.333) + (ledgerAttached ? 1 : 2);
+  const joists = Math.ceil(deckL / JOIST_SPACING_FT) + (ledgerAttached ? 1 : 2);
 
   // ── Beam (doubled 2×10, spanning deck length at outer post row) ────────────
   // One beam at far end; for decks >12 ft wide, add intermediate beam
@@ -159,6 +166,11 @@ function Toggle({ label, sub, checked, onChange }: { label: string; sub?: string
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
+const DECK_EXAMPLE = calcDeck({
+  ...EXAMPLE_DECK, postSpacing: 8, boardType: "pressure-treated", ledgerAttached: true,
+  deckHeight: 3, includeStairs: false, stairWidth: 36, includeRailing: false,
+});
+
 export default function DeckCalculator() {
   const [deckL, setDeckL] = useState("16");
   const [deckW, setDeckW] = useState("12");
@@ -205,6 +217,9 @@ export default function DeckCalculator() {
             <div className="w-12 h-12 bg-amber-50 border-2 border-amber-200 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">🪚</div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Deck Calculator</h1>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                Joists run about every {Math.round(JOIST_SPACING_FT * 12)} inches on center and decking needs {Math.round((DECKING_WASTE - 1) * 100)}% extra for cuts, so a {EXAMPLE_DECK.deckL} × {EXAMPLE_DECK.deckW} ft house-attached deck with {EXAMPLE_DECK.boardWidth}-inch boards takes about {DECK_EXAMPLE.deckingBoards} {BOARD_LENGTH_FT}-ft decking boards, {DECK_EXAMPLE.joists} joists and {DECK_EXAMPLE.posts} posts.
+              </p>
               <p className="text-slate-500 mt-1">Boards, beam, joists, posts, stairs, spindles — the complete material list for a code-compliant deck.</p>
             </div>
           </div>

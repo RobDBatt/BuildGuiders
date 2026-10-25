@@ -38,6 +38,9 @@ const WOOD_CONDITIONS = [
   { id: "freshly-cleaned", label: "Clean & Prepped", sub: "Already cleaned and brightened", needsPrep: false, newWood: false },
 ];
 
+// Fixed deck for the worked example under the H1: floor only, on weathered wood.
+const EXAMPLE_STAIN = { deckL: 16, deckW: 12, coats: 2, stainTypeId: "semi-transparent", conditionId: "weathered" };
+
 // ── Calculation engine ────────────────────────────────────────────────────────
 function calcStain({
   deckL, deckW, coats, stainTypeId, conditionId,
@@ -149,6 +152,11 @@ function Toggle({ label, sub, checked, onChange }: { label: string; sub?: string
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
+const STAIN_EXAMPLE = calcStain({
+  ...EXAMPLE_STAIN, includeRailing: false, railingLinearFt: 0, railStyle: "open",
+  includeSteps: false, stepCount: 0, stepWidth: 36,
+});
+
 export default function DeckStainCalculator() {
   const [deckL, setDeckL] = useState("16");
   const [deckW, setDeckW] = useState("12");
@@ -196,6 +204,9 @@ export default function DeckStainCalculator() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Deck Stain Calculator</h1>
+                <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                  A gallon of {STAIN_EXAMPLE.stainType.label.toLowerCase()} stain covers about {STAIN_EXAMPLE.stainType.oldWoodCoverage} sq ft of weathered or previously stained wood per coat ({STAIN_EXAMPLE.stainType.newWoodCoverage} sq ft on new wood), so a {EXAMPLE_STAIN.deckL} × {EXAMPLE_STAIN.deckW} ft deck floor ({STAIN_EXAMPLE.floorSqFt} sq ft) needs about {STAIN_EXAMPLE.totalGallons} gallons for {EXAMPLE_STAIN.coats} coats.
+                </p>
                 <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ backgroundColor: "#dbeafe", color: "#1e40af" }}>Maintenance</span>
               </div>
               <p className="text-slate-500">How many gallons you actually need — including railings. The part everyone under-buys.</p>

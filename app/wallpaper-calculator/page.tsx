@@ -31,6 +31,11 @@ function calc(length: number, width: number, height: number, doors: number, wind
   return { perimeter: Math.round(perimeter), grossArea: Math.round(grossArea), netArea: Math.round(netArea), rolls, pasteBags };
 }
 
+// Fixed room for the worked example under the H1: solid (no-repeat) paper.
+const EXAMPLE_WALL = { length: 12, width: 12, height: 9, doors: 1, windows: 2 };
+const SOLID = REPEAT_TYPES[0];
+const WALLPAPER_EXAMPLE = calc(EXAMPLE_WALL.length, EXAMPLE_WALL.width, EXAMPLE_WALL.height, EXAMPLE_WALL.doors, EXAMPLE_WALL.windows, SOLID.waste);
+
 export default function WallpaperCalculator() {
   const [length,     setLength]     = useState("12");
   const [width,      setWidth]      = useState("12");
@@ -125,6 +130,9 @@ export default function WallpaperCalculator() {
             <div className="w-12 h-12 bg-purple-50 border-2 border-purple-200 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">🌸</div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Wallpaper Calculator</h1>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                A standard single roll covers about {SQFT_PER_ROLL} sq ft after trimming, and solid paper needs {Math.round(SOLID.waste * 100)}% extra for waste ({Math.round(REPEAT_TYPES[1].waste * 100)}–{Math.round(REPEAT_TYPES[2].waste * 100)}% for patterns), so a {EXAMPLE_WALL.length} × {EXAMPLE_WALL.width} ft room with {EXAMPLE_WALL.height}-ft walls, {EXAMPLE_WALL.doors} door and {EXAMPLE_WALL.windows} windows needs about {WALLPAPER_EXAMPLE.rolls} rolls.
+              </p>
               <p className="text-slate-500 mt-1">Rolls, paste, and tools — for peel-and-stick, pre-pasted, or traditional wallpaper.</p>
             </div>
           </div>
