@@ -844,15 +844,136 @@ export function inferCategoryFromTopic(slug, title) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FUZZY SLUG DEDUPLICATION — Jaccard similarity on word sets
+// FUZZY SLUG DEDUPLICATION — Jaccard similarity on CONTENT word sets
+//
+// Run 38490177537 shipped two articles on one query in the same batch:
+// best-paint-for-bathroom-ceiling-to-prevent-mold and
+// best-paint-for-bathrooms-to-prevent-mold. They shared three of five products
+// and both led with Perma-White.
+//
+// The old comparison scored that pair at 0.667 against a 0.85 threshold, for two
+// reasons that both understate similarity:
+//
+//   - Every word counted, so "best", "for" and "to" sat in the union of every
+//     comparison, diluting the score of the words that carry the topic. Those
+//     three appear in most slugs on the site.
+//   - No stemming, so "bathroom" and "bathrooms" were unrelated words.
+//
+// Comparing content words only, and singularising, scores the same pair at 0.800.
+//
+// The threshold is measured, not picked. Across all 31 published slugs
+// (465 pairs), 0.80 flags the shipped duplicate and NOTHING else. The nearest
+// legitimate pair is best-paint-for-interior-walls vs
+// best-white-paint-interior-walls at 0.750, so there is only 0.05 of headroom —
+// dropping the threshold to 0.75 starts rejecting real topics, and 0.50 rejects
+// 18 pairs the site already publishes on purpose. The regression test pins both
+// ends.
+//
+// What this does NOT do: it is a lexical filter, so it only catches near-identical
+// phrasings. The merged ceiling article scores 0.500 against the pre-existing
+// best-paint-for-bathroom-walls-and-ceiling and is NOT caught, because the two
+// slugs genuinely share few words. Topics that overlap in meaning while using
+// different words need a semantic check, which this is not.
 // ─────────────────────────────────────────────────────────────────────────────
 
-function slugsAreSimilar(slugA, slugB, threshold = 0.85) {
-  const wordsA = new Set(slugA.split("-"));
-  const wordsB = new Set(slugB.split("-"));
-  const intersection = new Set([...wordsA].filter((w) => wordsB.has(w)));
-  const union = new Set([...wordsA, ...wordsB]);
-  return union.size > 0 && intersection.size / union.size >= threshold;
+// Words that appear across the corpus regardless of subject. They say nothing
+// about what an article is about, so they are excluded from both sides of the
+// ratio rather than padding the union.
+const SLUG_STOPWORDS = new Set([
+  "best", "top", "good", "better",
+  "the", "a", "an", "for", "to", "of", "in", "on", "at",
+  "and", "or", "with", "without", "vs",
+  "is", "it", "my", "your", "you",
+  "how", "what", "why", "when", "which", "do", "does",
+  "no", "not",
+  "guide", "review", "reviews",
+  "2024", "2025", "2026", "2027",
+]);
+
+// Naive singularisation, which is all this needs: it exists so "bathroom" and
+// "bathrooms" compare equal. Guarded against "gloss"/"glass" (ss) and the Latin
+// plurals that show up in materials ("us"), and skipped on short words where
+// stripping a letter changes the word.
+function singularise(word) {
+  if (word.length <= 3) return word;
+  if (word.endsWith("ss") || word.endsWith("us")) return word;
+  return word.endsWith("s") ? word.slice(0, -1) : word;
+}
+
+export function slugContentWords(slug) {
+  return new Set(
+    String(slug ?? "")
+      .split("-")
+      .map((w) => w.toLowerCase())
+      .filter((w) => w && !SLUG_STOPWORDS.has(w))
+      .map(singularise),
+  );
+}
+
+export function slugSimilarity(slugA, slugB) {
+  const a = slugContentWords(slugA);
+  const b = slugContentWords(slugB);
+  // A slug of nothing but stopwords is not similar to anything; scoring it 1.0
+  // against every other empty one would reject candidates at random.
+  if (a.size === 0 || b.size === 0) return 0;
+  const intersection = [...a].filter((w) => b.has(w)).length;
+  const union = new Set([...a, ...b]).size;
+  return intersection / union;
+}
+
+export const SLUG_SIMILARITY_THRESHOLD = 0.8;
+
+export function slugsAreSimilar(
+  slugA,
+  slugB,
+  threshold = SLUG_SIMILARITY_THRESHOLD,
+) {
+  return slugSimilarity(slugA, slugB) >= threshold;
+}
+
+/**
+ * Picks which candidate topics to write, rejecting near-duplicates.
+ *
+ * Extracted from main() for the same reason generateBatch was: inline, it sat
+ * behind an eight-minute network sweep that no test could reach, which is how
+ * the duplicate pair in run 38490177537 got all the way to production.
+ *
+ * Greedy over score order, so when two candidates are near-duplicates of each
+ * other the higher-scoring one is kept.
+ *
+ * @param {Map<string, object>} scored candidate slug -> { score, ... }
+ * @param {Set<string>} existingSlugs slugs already published
+ * @param {number} limit how many to return
+ * @param {(msg: string) => void} log where the per-drop explanation goes
+ */
+export function selectTopics(scored, existingSlugs, limit, log = console.log) {
+  const published = [...existingSlugs];
+  const ranked = [];
+  let droppedAsDuplicate = 0;
+
+  for (const entry of Array.from(scored.entries())
+    .filter(([slug]) => !existingSlugs.has(slug))
+    .sort((a, b) => b[1].score - a[1].score)) {
+    if (ranked.length >= limit) break;
+
+    const [slug] = entry;
+    const clashesWith =
+      published.find((other) => slugsAreSimilar(slug, other)) ??
+      ranked.find(([picked]) => slugsAreSimilar(slug, picked))?.[0];
+
+    if (clashesWith) {
+      droppedAsDuplicate++;
+      log(
+        `  dropping "${slug}" — ${slugSimilarity(slug, clashesWith).toFixed(2)} ` +
+          `similar to "${clashesWith}". Two pages on one query compete with ` +
+          "each other.",
+      );
+      continue;
+    }
+    ranked.push(entry);
+  }
+
+  return { ranked, droppedAsDuplicate };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1903,10 +2024,29 @@ async function main() {
   // Filtered here rather than trusting the cache: candidates written since the
   // sweep must drop out, or a cached run would regenerate an article that
   // already exists.
-  const ranked = Array.from(scored.entries())
-    .filter(([slug]) => !existingSlugs.has(slug))
-    .sort((a, b) => b[1].score - a[1].score)
-    .slice(0, MAX_NEW_ARTICLES);
+  //
+  // The similarity check runs HERE as well as during the sweep, which is the gap
+  // that let run 38490177537 ship two articles on one query. The sweep's checks
+  // are baked into the cache, so on a cached run — the normal case, since the
+  // sweep costs eight minutes — the only thing standing between a candidate and
+  // an article was an EXACT slug match. An article published after the sweep was
+  // never compared against at all.
+  //
+  // Selection is greedy over the score order: each candidate is checked against
+  // everything already published and against everything already picked for this
+  // batch, so the highest-scoring member of a near-duplicate pair wins and the
+  // rest drop.
+  const { ranked, droppedAsDuplicate } = selectTopics(
+    scored,
+    existingSlugs,
+    MAX_NEW_ARTICLES,
+  );
+
+  if (droppedAsDuplicate > 0) {
+    console.log(
+      `Dropped ${droppedAsDuplicate} near-duplicate candidate(s) at selection.\n`,
+    );
+  }
 
   if (ranked.length === 0) {
     console.log(

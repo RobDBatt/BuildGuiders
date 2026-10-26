@@ -8,9 +8,9 @@
 // that mislabels categories cross-links the wrong calculator, which is invisible
 // until someone reads a published article.
 
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { articleProblems } from "./check-generated-articles.mjs";
-import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount, isFatalApiError, describeOutcome, isCacheFresh, loadStyleExemplar, parseBriefProducts, extractSources, researchTopic, generateArticleBody } from "./research-and-generate.mjs";
+import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount, isFatalApiError, describeOutcome, isCacheFresh, loadStyleExemplar, parseBriefProducts, extractSources, researchTopic, generateArticleBody, slugSimilarity, slugsAreSimilar, slugContentWords, SLUG_SIMILARITY_THRESHOLD, selectTopics } from "./research-and-generate.mjs";
 
 let fail = 0;
 const eq = (got, want, label) => {
@@ -312,6 +312,107 @@ eq(/Do not introduce new products or new numbers/.test(seen[0]), true,
 seen = [];
 await generateArticleBody(writerStub, ...ARGS, null, []);
 eq(/REJECTED by the quality check/.test(seen[0]), false, "an empty problem list is not a retry");
+
+console.log("\n— slug similarity: content words, not every word —");
+eq([...slugContentWords("best-paint-for-bathrooms-to-prevent-mold-2026")].join(","),
+   "paint,bathroom,prevent,mold", "stopwords, the year and the plural are gone");
+eq([...slugContentWords("best-high-gloss-finish")].join(","), "high,gloss,finish",
+   "\"gloss\" is not singularised to \"glos\"");
+eq(slugSimilarity("best-for-the", "top-of-my"), 0,
+   "all-stopword slugs score 0, not 1 — they must not match each other");
+eq(slugSimilarity(null, "best-paint"), 0, "null does not throw");
+
+console.log("\n— the pair that actually shipped as a duplicate —");
+const SHIPPED_DUPE = ["best-paint-for-bathroom-ceiling-to-prevent-mold", "best-paint-for-bathrooms-to-prevent-mold"];
+eq(slugSimilarity(...SHIPPED_DUPE).toFixed(3), "0.800", "scores 0.800 on content words");
+eq(slugsAreSimilar(...SHIPPED_DUPE), true, "and is caught at the live threshold");
+// The old comparison scored this 0.667 against 0.85 and let it through. If
+// someone reverts to counting every word, this is the assertion that fails.
+const everyWord = (a, b) => {
+  const A = new Set(a.split("-")), B = new Set(b.split("-"));
+  return [...A].filter((w) => B.has(w)).length / new Set([...A, ...B]).size;
+};
+eq(everyWord(...SHIPPED_DUPE) < SLUG_SIMILARITY_THRESHOLD, true,
+   "counting every word would still miss it — the normalisation is the fix, not the threshold");
+
+console.log("\n— the threshold must not reject topics the site publishes on purpose —");
+// Measured over all 465 pairs of the 31 published slugs: at 0.80 exactly zero
+// are flagged. The nearest is 0.750, so there is 0.05 of headroom and no more —
+// 0.75 rejects a real pair and 0.50 rejects 18 of them.
+const publishedSlugs = readdirSync("content/articles")
+  .filter((f) => /\.mdx?$/.test(f))
+  .map((f) => f.replace(/\.mdx?$/, ""));
+eq(publishedSlugs.length >= 31, true, `corpus present (${publishedSlugs.length} slugs)`);
+let falsePositives = [];
+for (let i = 0; i < publishedSlugs.length; i++)
+  for (let k = i + 1; k < publishedSlugs.length; k++)
+    if (slugsAreSimilar(publishedSlugs[i], publishedSlugs[k]))
+      falsePositives.push(`${publishedSlugs[i]} / ${publishedSlugs[k]}`);
+eq(falsePositives.length, 0,
+   `no published pair is flagged${falsePositives.length ? ": " + falsePositives[0] : ""}`);
+eq(slugsAreSimilar("best-paint-for-interior-walls", "best-white-paint-interior-walls"), false,
+   "the 0.750 pair stays allowed — this fails if the threshold is lowered");
+
+console.log("\n— and it is honest about what it cannot catch —");
+// The merged ceiling article vs the pre-existing walls-and-ceiling page. A
+// lexical filter cannot see that these compete; recorded so nobody reads the
+// filter as solving semantic overlap.
+eq(slugsAreSimilar("best-paint-for-bathroom-ceiling-to-prevent-mold",
+                   "best-paint-for-bathroom-walls-and-ceiling"), false,
+   "semantic overlap at 0.500 is NOT caught, by design");
+
+console.log("\n— selection drops near-duplicates, and keeps the better one —");
+const quietLog = () => {};
+const cand = (pairs) => new Map(pairs.map(([slug, score]) => [slug, { score }]));
+
+// The exact failure from run 38490177537: both candidates in one batch.
+const bathrooms = cand([
+  ["best-paint-for-bathroom-ceiling-to-prevent-mold", 30],
+  ["best-paint-for-bathrooms-to-prevent-mold", 28],
+]);
+let out = selectTopics(bathrooms, new Set(), 2, quietLog);
+eq(out.ranked.length, 1, "only one of the pair is selected");
+eq(out.ranked[0][0], "best-paint-for-bathroom-ceiling-to-prevent-mold",
+   "and it is the higher-scoring one");
+eq(out.droppedAsDuplicate, 1, "the drop is counted");
+
+// Score order decides which survives, not map order.
+out = selectTopics(cand([
+  ["best-paint-for-bathroom-ceiling-to-prevent-mold", 10],
+  ["best-paint-for-bathrooms-to-prevent-mold", 99],
+]), new Set(), 2, quietLog);
+eq(out.ranked[0][0], "best-paint-for-bathrooms-to-prevent-mold",
+   "the higher score wins regardless of insertion order");
+
+// The gap this closes: a cached run only ever matched published slugs exactly,
+// so an article published after the sweep was never compared against.
+out = selectTopics(
+  cand([["best-paint-for-bathrooms-to-prevent-mold", 30]]),
+  new Set(["best-paint-for-bathroom-ceiling-to-prevent-mold"]),
+  5,
+  quietLog,
+);
+eq(out.ranked.length, 0, "a candidate too close to a PUBLISHED slug is dropped");
+eq(out.droppedAsDuplicate, 1, "and counted");
+
+// Exact matches still drop, and are not counted as fuzzy drops.
+out = selectTopics(cand([["best-interior-paint", 30]]), new Set(["best-interior-paint"]), 5, quietLog);
+eq(out.ranked.length, 0, "an exact existing slug is still excluded");
+eq(out.droppedAsDuplicate, 0, "an exact match is not reported as a near-duplicate");
+
+// Distinct topics are untouched, and the limit is respected.
+const distinct = cand([["best-deck-stain-and-sealer", 30], ["best-concrete-mix", 29], ["best-mulch-for-flower-beds", 28]]);
+eq(selectTopics(distinct, new Set(), 5, quietLog).ranked.length, 3, "three distinct topics all survive");
+eq(selectTopics(distinct, new Set(), 2, quietLog).ranked.length, 2, "the limit caps the batch");
+eq(selectTopics(new Map(), new Set(), 5, quietLog).ranked.length, 0, "no candidates is not an error");
+
+// The log says which slug it clashed with, so a surprising drop is diagnosable.
+let logged = [];
+selectTopics(bathrooms, new Set(), 2, (m) => logged.push(m));
+eq(/dropping "best-paint-for-bathrooms-to-prevent-mold"/.test(logged.join(" ")), true,
+   "the dropped slug is named");
+eq(/similar to "best-paint-for-bathroom-ceiling-to-prevent-mold"/.test(logged.join(" ")), true,
+   "so is what it clashed with");
 
 console.log(fail === 0 ? "\nALL PASS" : `\n${fail} FAILURES`);
 process.exit(fail === 0 ? 0 : 1);
