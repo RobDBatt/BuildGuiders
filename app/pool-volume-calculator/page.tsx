@@ -399,13 +399,13 @@ export default function PoolVolumeCalculator() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Pool Volume Calculator</h1>
-                <p className="text-slate-800 font-medium mt-2 max-w-2xl">
-                  A pool holds about {GALLONS_PER_CUBIC_FOOT} gallons per cubic foot of water, so a {EXAMPLE_POOL.length} × {EXAMPLE_POOL.width} ft rectangular pool sloping from {EXAMPLE_POOL.shallow} to {EXAMPLE_POOL.deep} ft deep ({POOL_EXAMPLE?.avgDepth} ft on average) holds about {POOL_EXAMPLE?.gallons.toLocaleString("en-US")} gallons.
-                </p>
                 <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ backgroundColor: "#dbeafe", color: "#1e40af" }}>
                   Pool &amp; Water
                 </span>
               </div>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                A pool holds about {GALLONS_PER_CUBIC_FOOT} gallons per cubic foot of water, so a {EXAMPLE_POOL.length} × {EXAMPLE_POOL.width} ft rectangular pool sloping from {EXAMPLE_POOL.shallow} to {EXAMPLE_POOL.deep} ft deep ({POOL_EXAMPLE?.avgDepth} ft on average) holds about {POOL_EXAMPLE?.gallons.toLocaleString("en-US")} gallons.
+              </p>
               <p className="text-slate-500">
                 How many gallons your pool actually holds — sloped floors included, plus the supplies to keep it clear.
               </p>
