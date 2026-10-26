@@ -181,9 +181,16 @@ jobs:
             echo "one H1, affiliate tag, word count, no fabricated first-hand experience)"
             echo "and a full \`npm run build\`."
             echo
-            echo "**These have not been read by a person.** The gates catch rule breaches,"
-            echo "not whether an article is any good or its facts are right. Read them"
-            echo "before merging."
+            echo "Every figure in a product section was checked against that article's"
+            echo "research brief before it was written to disk, and any claim of"
+            echo "independent testing was checked against the brief's own sourcing."
+            echo "A draft that failed got one retry and was dropped if it failed again."
+            echo
+            echo "**What that does NOT prove.** The check is containment: the article"
+            echo "claims no more than the research established. It does not verify the"
+            echo "research against the source documents, so a figure the research pass"
+            echo "itself got wrong is inherited silently. Spot-check the numbers that"
+            echo "would cost a reader money — warranty terms especially."
           } > /tmp/pr-body.md
 
           gh pr create \
