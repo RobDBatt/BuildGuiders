@@ -11,6 +11,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { articleProblems } from "./check-generated-articles.mjs";
 import { unsupportedClaims, specClaims, productSections } from "./check-claims.mjs";
+import { attributionProblems } from "./check-attribution.mjs";
 import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount, isFatalApiError, describeOutcome, isCacheFresh, loadStyleExemplar, parseBriefProducts, extractSources, researchTopic, generateArticleBody, slugSimilarity, slugsAreSimilar, slugContentWords, SLUG_SIMILARITY_THRESHOLD, selectTopics } from "./research-and-generate.mjs";
 
 let fail = 0;
@@ -496,6 +497,28 @@ eq(specClaims("a 5-by-8 bathroom has 40 square feet of ceiling").size, 0,
 eq(specClaims("in 2026 the best paint").size, 0, "a year is not a spec");
 eq(specClaims("[Perma-White](https://x.test/s?k=5+gallon&tag=buildguiders-20)").size, 0,
    "numbers inside a link target are not claims");
+
+console.log("\n— every claim names who asserts it (AGENTS.md) —");
+const attr = (body) => attributionProblems(`---\ntitle: x\n---\n\n${body}`);
+// The real instance, from a hand-written guide that carried it for months.
+eq(attr("In year-long independent testing on real PT decks it held color better.").length, 1,
+   "the unowned \"independent testing\" claim is caught");
+eq(attr("Studies show it cures faster.").length, 1, "\"studies show\" is caught");
+eq(attr("Experts agree on this one.").length, 1, "\"experts agree\" is caught");
+// Owned claims pass — that is the point of the rule, not silence about sources.
+eq(attr("Consumer Reports' independent testing put it first.").length, 0,
+   "a named source makes the appeal legitimate");
+eq(attr("Its Class 1 rating comes from the ISO 11998 test on Zinsser's data sheet.").length, 0,
+   "naming the standard is fine");
+// Denying independence must not read as claiming it.
+eq(attr("The rating is the manufacturer reporting it, not an independent lab.").length, 0,
+   "a negated claim is not a claim");
+eq(attr("That figure is not independently verified.").length, 0, "nor is this one");
+// Ordinary hedging is allowed; the rule is about borrowed authority, not vagueness.
+eq(attr("Most people will not notice. The cheap ones tend to fade faster.").length, 0,
+   "hedging is not an attribution failure");
+eq(attributionProblems("no frontmatter").length, 0, "unparsable input does not throw");
+eq(attributionProblems(null).length, 0, "null does not throw");
 
 console.log(fail === 0 ? "\nALL PASS" : `\n${fail} FAILURES`);
 process.exit(fail === 0 ? 0 : 1);

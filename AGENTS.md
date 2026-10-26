@@ -31,6 +31,53 @@ team), never a fabricated individual expert. Link it to the /about methodology.
 manufacturer/retailer data; never invent star ratings, "we measured" figures, or
 test results.
 
+**Every claim names who asserts it, or says the figure is not published.** If a
+claim cannot be traced to somebody who makes it, it is not a fact and must not be
+written as one. There are exactly three legal forms for any figure:
+
+1. Attributed to the manufacturer — "Rust-Oleum guarantees the film for five
+   years", "Pergo rates it to hold spills for up to 24 hours".
+2. Attributed to a named independent source — "Consumer Reports measured…".
+   Not "independent testing shows", not "studies suggest", not "some reviewers".
+3. Stated as unavailable — "Behr publishes no cure-before-washing figure for this
+   paint."
+
+**Form 3 is a finding, not a failure.** Looking for a number and reporting that it
+does not exist is more useful to a reader than any number you could supply
+instead, and it is the one move that cannot be faked. Write it when it is true.
+
+A manufacturer's own standardised test result is still the manufacturer's.
+Reporting an ISO or EN class from a maker's data sheet is fine; calling it
+"independent testing" is not.
+
+**Warranty terms are the highest-risk class of claim on the site**, because a
+reader acts on them. Never summarise a warranty as broader than its text. Name
+the exclusions — they are the part that decides whether the cover is worth
+anything.
+
+The three failures that produced this rule, all of them live on BuildGuiders
+before anyone checked a source: a Behr cure time of "4 weeks before washing",
+which Behr does not publish anywhere; a Zinsser ISO 11998 Class 1 rating credited
+to "independent testing" when it comes from Zinsser's own European data sheet;
+and Mohawk's pet warranty described as covering "all pets, all accidents" when
+Mohawk's own FAQ limits it to household spills and excludes flooding, leaking
+pipes and appliance leaks. All three read as confident, well-formed sentences.
+None of them survived thirty seconds of checking.
+
+Two checks hold part of this up. `scripts/check-attribution.mjs` runs over every
+published article in `npm run build` and fails on an appeal to unnamed authority
+— "independent testing", "studies show", "experts agree" — unless the sentence
+names a source. `scripts/check-claims.mjs` runs on generated drafts, where a
+figure in a product section must appear in that article's research brief and an
+independence claim requires the brief to carry an independent source.
+
+Neither covers the rule. The first catches a phrasing, not a missing source: an
+unattributed bare assertion passes it. The second compares the article to the
+research, **not the research to the world**, so a figure the research itself got
+wrong is inherited silently. Attribution is what makes a claim checkable by the
+reader, and that judgement is editorial — the gates only stop the two shapes that
+are greppable.
+
 **Disclosure:** every guide shows an affiliate disclosure above the affiliate
 links; /about carries the full FTC disclosure and the research methodology.
 
