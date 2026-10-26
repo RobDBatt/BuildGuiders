@@ -10,6 +10,7 @@
 
 import { readFileSync, readdirSync } from "node:fs";
 import { articleProblems } from "./check-generated-articles.mjs";
+import { unsupportedClaims, specClaims, productSections } from "./check-claims.mjs";
 import { capTitle, inferCategoryFromTopic, loadCalculators, loadCategoryCalculators, validateCalculatorMap, calculatorFor, getCoverImage, resolveArticleCount, isFatalApiError, describeOutcome, isCacheFresh, loadStyleExemplar, parseBriefProducts, extractSources, researchTopic, generateArticleBody, slugSimilarity, slugsAreSimilar, slugContentWords, SLUG_SIMILARITY_THRESHOLD, selectTopics } from "./research-and-generate.mjs";
 
 let fail = 0;
@@ -210,9 +211,24 @@ eq(await quiet(() => researchTopic(stub({ text: "PRODUCT: A\nPRODUCT: B", candid
 eq(await quiet(() => researchTopic(stub({ text: "CONTEXT:\n" + "- a sourced fact about coverage and ratings that runs on. ".repeat(12), candidates: [{ finishReason: "STOP" }] }), ASK)),
    null, "long brief that established no products");
 
-const good = await quiet(() => researchTopic(stub({ text: BRIEF, candidates: [{ finishReason: "STOP" }] }), ASK));
-eq(good === null, false, "a complete brief comes back");
+// A brief with no grounding sources is the model recalling in the shape of a
+// brief. Accepting it was the quietest hole in the pass: the article then reads
+// as sourced because its facts are tagged (manufacturer), while nothing was
+// looked up.
+eq(await quiet(() => researchTopic(stub({ text: BRIEF, candidates: [{ finishReason: "STOP" }] }), ASK)),
+   null, "a brief with NO grounding sources is refused — that is recall, not research");
+
+const GROUNDED = {
+  text: BRIEF,
+  candidates: [{
+    finishReason: "STOP",
+    groundingMetadata: { groundingChunks: [{ web: { uri: "https://x.test/a", title: "Pergo spec sheet" } }] },
+  }],
+};
+const good = await quiet(() => researchTopic(stub(GROUNDED), ASK));
+eq(good === null, false, "a complete, grounded brief comes back");
 eq(good.products.length, 2, "and carries its products");
+eq(good.sources.length, 1, "and its sources");
 eq(good.brief.includes("[1]"), false, "citation markers stripped");
 
 // A depleted quota applies to every remaining article, so it must reach the
@@ -413,6 +429,73 @@ eq(/dropping "best-paint-for-bathrooms-to-prevent-mold"/.test(logged.join(" ")),
    "the dropped slug is named");
 eq(/similar to "best-paint-for-bathroom-ceiling-to-prevent-mold"/.test(logged.join(" ")), true,
    "so is what it clashed with");
+
+console.log("\n— claims are checked against the brief that was researched —");
+// Shaped like the real brief from run 38490177537, carrying the figures that
+// were actually researched and NOT the two that were fabricated.
+const CLAIM_BRIEF = `CONTEXT:
+- Coverage is 250 to 400 square feet per gallon depending on porosity (manufacturer)
+
+PRODUCT: Zinsser Perma-White Mold & Mildew-Proof Interior Paint
+SPECS:
+- Film guaranteed against mold and mildew for 5 years (manufacturer)
+- 30 minutes to touch, 2 hours to recoat, 7 to 10 days to full cure (manufacturer)
+- Class 1 wet scrub rating under ISO 11998, per Zinsser's European data sheet (manufacturer)
+WRONG FOR: Anyone who wants a deep colour.
+
+PRODUCT: BEHR PREMIUM PLUS Interior Ceiling Flat Paint & Primer
+SPECS:
+- 250 to 400 square feet per gallon (manufacturer)
+- 1 hour to touch, 2 hours to recoat (manufacturer)
+WRONG FOR: A bathroom that needs scrubbing.`;
+const CLAIM_RESEARCH = {
+  brief: CLAIM_BRIEF,
+  products: ["Zinsser Perma-White Mold & Mildew-Proof Interior Paint", "BEHR PREMIUM PLUS Interior Ceiling Flat Paint & Primer"],
+};
+const claimsIn = (body) => unsupportedClaims(body, CLAIM_RESEARCH);
+
+// Defect 1, verbatim from production: a number with no source anywhere.
+eq(claimsIn('## BEHR Premium Plus Interior Ceiling\n\nIt requires a full cure time of 4 weeks before washing.\n').length,
+   1, "the fabricated \"4 weeks\" is caught");
+// Defect 2, verbatim: a manufacturer figure relabelled as independent.
+eq(/claims independent testing/.test(claimsIn('## Zinsser Perma-White\n\nIndependent testing gives it a Class 1 Wet Scrub Rating (ISO 11998).\n')[0] ?? ""),
+   true, "the misattributed ISO rating is caught");
+// Unit sensitivity: the brief has 2 hours, so 2 weeks must not ride on it.
+eq(claimsIn('## Zinsser Perma-White\n\nWait 2 weeks before washing.\n').length, 1,
+   "\"2 weeks\" is not supported by \"2 hours\" in the brief");
+eq(claimsIn('## Zinsser Perma-White\n\nRecoat after 2 hours.\n').length, 0,
+   "but \"2 hours\" is, because the brief says so");
+// Researched figures pass, including spelled-out and reworded ranges.
+eq(claimsIn('## Zinsser Perma-White\n\nGuaranteed for five years. 30 minutes to touch, and 7 to 10 days to cure.\n').length,
+   0, "\"five years\" matches \"5 years\"; a reworded range still matches");
+
+console.log("\n— and it must not fire on honest writing —");
+// A NEGATED independence claim is the most honest sentence available about a
+// manufacturer figure. Flagging it would push the writer away from it.
+eq(claimsIn('## Zinsser Perma-White\n\nThe rating is the manufacturer reporting it, not an independent lab.\n').length,
+   0, "denying independence is not claiming it");
+// A figure disclaimed as another product's is sourced, just not from the brief.
+eq(claimsIn("## BEHR Premium Plus Interior Ceiling\n\nBehr publishes no cure figure. Their flat wall paint says two weeks, but that is a different product.\n").length,
+   0, "a figure marked as a different product's is allowed");
+// Prose outside product sections carries numbers that are not product claims.
+eq(claimsIn('Steam sits there for an hour. A 5-by-8 bathroom has 40 square feet of ceiling.\n\n## What to skip\n\nAnything under 3 years old.\n').length,
+   0, "intro and What-to-skip prose is not checked");
+eq(productSections('## What to Look for\n\nx\n\n## What to Skip\n\ny\n', CLAIM_RESEARCH.products).length,
+   0, "generic headings are not product sections");
+// No brief means no containment check to run, not a crash.
+eq(unsupportedClaims("## Zinsser Perma-White\n\n99 weeks.\n", null).length, 0, "no research, no check");
+eq(unsupportedClaims("", CLAIM_RESEARCH).length, 0, "empty body does not throw");
+
+console.log("\n— spec extraction keys on value AND unit —");
+eq([...specClaims("recoat in 2 hours").keys()][0], "2 hour", "singularised unit");
+eq([...specClaims("5 to 7 days").keys()].join(","), "5 day,7 day", "both ends of a range");
+eq([...specClaims("250 to 400 square feet per gallon").keys()].join(","), "250 sqft/gal,400 sqft/gal",
+   "coverage is a rate");
+eq(specClaims("a 5-by-8 bathroom has 40 square feet of ceiling").size, 0,
+   "bare square footage is a room, not a coverage spec");
+eq(specClaims("in 2026 the best paint").size, 0, "a year is not a spec");
+eq(specClaims("[Perma-White](https://x.test/s?k=5+gallon&tag=buildguiders-20)").size, 0,
+   "numbers inside a link target are not claims");
 
 console.log(fail === 0 ? "\nALL PASS" : `\n${fail} FAILURES`);
 process.exit(fail === 0 ? 0 : 1);

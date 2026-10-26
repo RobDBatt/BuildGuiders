@@ -17,6 +17,10 @@ import { pathToFileURL } from "url";
 // a second copy would drift, and the drifting copy would be the one deciding
 // whether a draft needs another pass.
 import { articleProblems } from "./check-generated-articles.mjs";
+// Containment against the research brief: the article may not claim more than
+// the research established. Catches the two defects that reached production and
+// were only found by reading manufacturer documentation by hand.
+import { unsupportedClaims } from "./check-claims.mjs";
 
 const ROOT = process.cwd();
 const ARTICLES_DIR = path.join(ROOT, "content", "articles");
@@ -746,11 +750,22 @@ export async function researchTopic(client, { title, categorySlug, productName }
     console.log(
       `  [research] ${products.length} products: ${products.join(", ")}`,
     );
+
+    // A brief with no grounding sources is not research — it is the model
+    // recalling, wearing the shape of a brief. That was accepted before and
+    // written from, which defeats the whole point of the pass: the article then
+    // reads as sourced because its facts are tagged (manufacturer), while
+    // nothing was ever looked up. Refuse it like any other unusable brief.
+    if (sources.length === 0) {
+      console.warn(
+        "  [research] no grounding sources reported, so the search tool was not " +
+          "used and the brief is recall rather than research. Refusing it.",
+      );
+      return null;
+    }
+
     console.log(
-      sources.length > 0
-        ? `  [research] ${sources.length} source(s): ${sources.slice(0, 4).join("; ")}`
-        : "  [research] no grounding sources reported — the search tool may not " +
-          "have been used, so treat the brief as recall.",
+      `  [research] ${sources.length} source(s): ${sources.slice(0, 4).join("; ")}`,
     );
     return { brief, sources, products };
   } catch (err) {
@@ -1843,7 +1858,12 @@ export async function generateBatch(client, ranked, existingSlugs) {
         product,
         research,
       );
-      let problems = articleProblems(fm + body + "\n");
+      const checkAll = (draft) => [
+        ...articleProblems(fm + draft + "\n"),
+        ...unsupportedClaims(draft, research),
+      ];
+
+      let problems = checkAll(body);
 
       // One retry, with the gate's own complaint handed back. Runs 34916423797
       // and 34917181241 each produced a usable article rejected for a handful of
@@ -1864,7 +1884,7 @@ export async function generateBatch(client, ranked, existingSlugs) {
           research,
           problems,
         );
-        const secondProblems = articleProblems(fm + second + "\n");
+        const secondProblems = checkAll(second);
 
         // Keep the better draft rather than assuming the retry improved things.
         // It does not always: the same measurement that killed the prompt fix
