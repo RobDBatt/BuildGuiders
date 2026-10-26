@@ -519,6 +519,12 @@ eq(attr("Most people will not notice. The cheap ones tend to fade faster.").leng
    "hedging is not an attribution failure");
 eq(attributionProblems("no frontmatter").length, 0, "unparsable input does not throw");
 eq(attributionProblems(null).length, 0, "null does not throw");
+// The allowlist carries the outlets the portfolio actually cites, because
+// GadgetGuiders coverage leans on measurement. Pinned here so the three copies
+// of the script staying identical is checkable from one repo.
+for (const outlet of ["RTINGS", "TechRadar", "Tom's Guide", "Project Farm"])
+  eq(attr(`${outlet} measured a real-world peak of 3,337 nits in independent testing.`).length, 0,
+     `"${outlet}" is a named source`);
 
 console.log(fail === 0 ? "\nALL PASS" : `\n${fail} FAILURES`);
 process.exit(fail === 0 ? 0 : 1);
