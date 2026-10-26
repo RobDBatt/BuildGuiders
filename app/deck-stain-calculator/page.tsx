@@ -204,11 +204,11 @@ export default function DeckStainCalculator() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Deck Stain Calculator</h1>
-                <p className="text-slate-800 font-medium mt-2 max-w-2xl">
-                  A gallon of {STAIN_EXAMPLE.stainType.label.toLowerCase()} stain covers about {STAIN_EXAMPLE.stainType.oldWoodCoverage} sq ft of weathered or previously stained wood per coat ({STAIN_EXAMPLE.stainType.newWoodCoverage} sq ft on new wood), so a {EXAMPLE_STAIN.deckL} × {EXAMPLE_STAIN.deckW} ft deck floor ({STAIN_EXAMPLE.floorSqFt} sq ft) needs about {STAIN_EXAMPLE.totalGallons} gallons for {EXAMPLE_STAIN.coats} coats.
-                </p>
                 <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ backgroundColor: "#dbeafe", color: "#1e40af" }}>Maintenance</span>
               </div>
+              <p className="text-slate-800 font-medium mt-2 max-w-2xl">
+                A gallon of {STAIN_EXAMPLE.stainType.label.toLowerCase()} stain covers about {STAIN_EXAMPLE.stainType.oldWoodCoverage} sq ft of weathered or previously stained wood per coat ({STAIN_EXAMPLE.stainType.newWoodCoverage} sq ft on new wood), so a {EXAMPLE_STAIN.deckL} × {EXAMPLE_STAIN.deckW} ft deck floor ({STAIN_EXAMPLE.floorSqFt} sq ft) needs about {STAIN_EXAMPLE.totalGallons} gallons for {EXAMPLE_STAIN.coats} coats.
+              </p>
               <p className="text-slate-500">How many gallons you actually need — including railings. The part everyone under-buys.</p>
             </div>
           </div>
