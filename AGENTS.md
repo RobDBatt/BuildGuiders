@@ -157,17 +157,45 @@ production and confirmed live (view-source the homepage for the tag). Clicking
 verify while the change is still on a feature branch fails against the old
 production HTML. Order: merge → Vercel deploy → confirm live → verify.
 
-## 6. GSC ↔ Ahrefs: "no data" usually means "not indexed," not "disconnected"
+## 6. Reading GSC: "no data" usually means "not indexed," not "broken"
 
-- Use a GSC **Domain property** (`sc-domain:example.com`) — it covers www, apex,
-  http, https at once. Point the Ahrefs GSC integration at that exact property.
-- Before concluding the integration is broken, check GSC **Performance**
-  (not Pages). A young site with a handful of impressions and everything in
-  "Crawled – currently not indexed" legitimately returns empty in Ahrefs —
-  there's nothing to report, the pipe is fine. Reconnecting won't help; only
-  getting pages indexed and earning authority will.
-- A sibling site pulling data with the same tool/date range is your control that
-  the connection and query are fine.
+**Ahrefs API access is gone.** The premium plan lapsed, and every Ahrefs API v3
+endpoint now returns `{"error": "Insufficient plan"}` — including
+`subscription-info-limits-and-usage` and `public-domain-rating-free`, which
+Ahrefs documents as free and not consuming units. That is the tell: when the
+free endpoints fail too, the API subscription is missing, not the request. Don't
+work through endpoint families looking for one that still answers, and don't
+reconnect anything. This section used to say to point the Ahrefs GSC integration
+at a Domain property, which is how an hour went into discovering the above.
+
+So GSC gets read in GSC. Two routes:
+
+- **The browser.** Claude in Chrome reads it with the existing sign-in, which
+  needs a session on the machine Chrome is running on — the desktop app, or
+  `claude remote-control` in a terminal. A cloud session cannot reach the
+  browser at all, and should say so rather than estimating.
+- **The GSC API**, if it ever gets connected. That is first-party data rather
+  than GSC read through a third party, which is the better arrangement anyway.
+
+What has not changed, and is still the thing most likely to waste an afternoon:
+
+- Use a **Domain property** (`sc-domain:example.com`). It covers www, apex, http
+  and https at once, so the canonical-host decision in §1 can't hide half the
+  data from you.
+- Check **Performance**, not Pages. A young site with a handful of impressions
+  and everything sitting in "Crawled – currently not indexed" is reporting
+  correctly — there is genuinely nothing to show. Only getting pages indexed and
+  earning authority changes that.
+- Compare one site against a sibling over the same date range before concluding
+  the data is wrong. If GearGuiders shows numbers and BuildGuiders does not, the
+  difference is the site, not the tooling.
+
+**Never substitute an estimate for the figure.** Web search can tell you whether
+a page surfaces for its target query from one location, which is a useful
+indexation smoke test and is not a ranking report — it says "not visible yet",
+never a position. Clicks, impressions, CTR and average position exist only in
+GSC. Inventing them breaks the attribution rule in the editorial standard above,
+and a made-up traffic number is the kind of claim that gets acted on.
 
 ## 7. The page's value must be in the server-rendered HTML
 
