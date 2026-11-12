@@ -11,6 +11,9 @@ import type { NextRequest } from 'next/server';
 const RENAMED_GUIDE_SLUGS: Record<string, string> = {
   // Slug said 2025, title said 2026, and the title was the correct one.
   'best-exterior-house-paint-2025': 'best-exterior-house-paint-2026',
+  // Merged Nov 2026: the two pages split the same bathroom-paint queries, and
+  // the ceiling-mold guide was the one ranking. Walls content now lives there.
+  'best-paint-for-bathroom-walls-and-ceiling': 'best-paint-for-bathroom-ceiling-to-prevent-mold',
 };
 
 export function middleware(request: NextRequest) {
