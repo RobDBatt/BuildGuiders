@@ -76,7 +76,9 @@ export default function DeckStainProblemsPage() {
         .tile { display:block; background:#fff; border:2px solid ${INK}; border-radius:6px; padding:14px 16px; font-weight:700; text-decoration:none; color:${INK}; }
         .tile:hover { background:#F0FDF4; text-decoration:none; }
         section { scroll-margin-top: 16px; }
-        ul.checks, ol.fixes { padding-left: 20px; display:flex; flex-direction:column; gap:12px; font-size:16px; line-height:1.65; color:#44403C; }
+        ul.checks, ol.fixes { padding-left: 22px; display:flex; flex-direction:column; gap:12px; font-size:16px; line-height:1.65; color:#44403C; }
+        ul.checks, ul.sources { list-style: disc; }
+        ol.fixes { list-style: decimal; }
       `}</style>
 
       <header style={{ background: GREEN }}>
@@ -164,7 +166,7 @@ export default function DeckStainProblemsPage() {
 
         <section style={{ marginTop: 40 }}>
           <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 900, marginBottom: 12 }}>Sources</h2>
-          <ul style={{ paddingLeft: 20, fontSize: 15, lineHeight: 1.7, color: "#44403C" }}>
+          <ul className="sources" style={{ paddingLeft: 20, fontSize: 15, lineHeight: 1.7, color: "#44403C" }}>
             {[...sources.values()].map((s) => (
               <li key={s.url}>
                 <a href={s.url}>{s.name}</a>
