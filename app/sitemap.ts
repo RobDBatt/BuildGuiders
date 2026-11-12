@@ -23,6 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/concrete-calculator", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/fence-calculator", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/deck-stain-calculator", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/deck-stain-problems", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/grass-seed-calculator", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/wallpaper-calculator", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/raised-garden-bed-calculator", priority: 0.8, changeFrequency: "monthly" as const },

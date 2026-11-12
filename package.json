@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/check-redirects.mjs && node scripts/check-calculator-links.mjs && node scripts/check-internal-links.mjs && node scripts/check-attribution.mjs && next build",
+    "build": "node scripts/check-redirects.mjs && node scripts/check-calculator-links.mjs && node scripts/check-internal-links.mjs && node scripts/check-attribution.mjs && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-diagnoser-sources.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "generate": "node scripts/research-and-generate.mjs",
